@@ -1,0 +1,2107 @@
+/* ==========================================================================
+   BLITZ.GG CLONE — DRACULA DARK MODE THEME
+   Paleta Oficial Dracula:
+   Bg Deep: #191a21 | Bg Main: #21222c | Card: #282a36 | CurrentLine: #44475a
+   Comment: #6272a4 | Fg: #f8f8f2 | Purple: #bd93f9 | Pink: #ff79c6
+   Cyan: #8be9fd | Green: #50fa7b | Orange: #ffb86c | Red: #ff5555 | Yellow: #f1fa8c
+   ========================================================================== */
+
+:root {
+  --dracula-bg-deep: #191a21;
+  --dracula-bg: #21222c;
+  --dracula-card: #282a36;
+  --dracula-elevated: #313442;
+  --dracula-line: #44475a;
+  --dracula-comment: #6272a4;
+  --dracula-fg: #f8f8f2;
+  --dracula-purple: #bd93f9;
+  --dracula-pink: #ff79c6;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-red: #ff5555;
+  --dracula-yellow: #f1fa8c;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--dracula-bg-deep);
+  color: var(--dracula-fg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Utilitários de Cor Dracula */
+.text-green { color: var(--dracula-green) !important; }
+.text-purple { color: var(--dracula-purple) !important; }
+.text-pink { color: var(--dracula-pink) !important; }
+.text-cyan { color: var(--dracula-cyan) !important; }
+.text-orange { color: var(--dracula-orange) !important; }
+.text-red { color: var(--dracula-red) !important; }
+.mt-18 { margin-top: 18px; }
+.mb-18 { margin-bottom: 18px; }
+.hidden { display: none !important; }
+
+/* Estrutura Principal estilo Blitz Desktop App */
+.blitz-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   SIDEBAR ESQUERDA (BLITZ NAVIGATION)
+   ========================================================================== */
+.blitz-sidebar {
+  width: 245px;
+  background-color: var(--dracula-bg);
+  border-right: 1px solid var(--dracula-line);
+  display: flex;
+  flex-direction: column;
+  padding: 18px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  flex-shrink: 0;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 20px;
+  border-bottom: 1px solid rgba(68, 71, 90, 0.5);
+  margin-bottom: 16px;
+}
+
+.blitz-bolt {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--dracula-purple), var(--dracula-pink));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 16px rgba(189, 147, 249, 0.4);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: var(--dracula-fg);
+}
+
+.brand-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--dracula-purple);
+}
+
+.sidebar-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--dracula-comment);
+  padding: 0 10px;
+  margin-bottom: 8px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 24px;
+}
+
+.side-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  color: #b8bfe0;
+  border: none;
+  border-radius: 8px;
+  padding: 11px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.side-link:hover {
+  background-color: rgba(68, 71, 90, 0.45);
+  color: var(--dracula-fg);
+}
+
+.side-link.active {
+  background: linear-gradient(90deg, rgba(189, 147, 249, 0.22), rgba(255, 121, 198, 0.08));
+  color: var(--dracula-purple);
+  border-left: 3px solid var(--dracula-purple);
+}
+
+.side-icon {
+  font-size: 16px;
+}
+
+.live-mini-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--dracula-line);
+  color: var(--dracula-fg);
+}
+
+.live-mini-badge.on {
+  background: rgba(80, 250, 123, 0.2);
+  color: var(--dracula-green);
+  border: 1px solid var(--dracula-green);
+}
+
+/* Switches de Auto-Import na Sidebar */
+.sidebar-toggles {
+  border-top: 1px solid rgba(68, 71, 90, 0.5);
+  padding-top: 16px;
+  margin-bottom: auto;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.toggle-row input {
+  display: none;
+}
+
+.toggle-slider {
+  width: 34px;
+  height: 18px;
+  background-color: var(--dracula-line);
+  border-radius: 999px;
+  position: relative;
+  transition: 0.2s;
+}
+
+.toggle-slider::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: var(--dracula-fg);
+  border-radius: 50%;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: 0.2s;
+}
+
+.toggle-row input:checked + .toggle-slider {
+  background-color: var(--dracula-purple);
+}
+
+.toggle-row input:checked + .toggle-slider::after {
+  transform: translateX(16px);
+  background: #191a21;
+}
+
+/* Status do Cliente LoL no Rodapé da Sidebar */
+.sidebar-footer {
+  padding-top: 12px;
+  border-top: 1px solid rgba(68, 71, 90, 0.5);
+}
+
+.client-status-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+}
+
+.client-status-box .status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: var(--dracula-comment);
+  flex-shrink: 0;
+}
+
+.client-status-box.connected {
+  border-color: rgba(80, 250, 123, 0.5);
+}
+
+.client-status-box.connected .status-dot {
+  background-color: var(--dracula-green);
+  box-shadow: 0 0 8px var(--dracula-green);
+}
+
+.status-meta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.status-meta strong {
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-meta span {
+  font-size: 11px;
+  color: var(--dracula-comment);
+}
+
+/* ==========================================================================
+   TOPBAR & ÁREA CENTRAL
+   ========================================================================== */
+.blitz-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.blitz-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
+  background-color: var(--dracula-bg);
+  border-bottom: 1px solid var(--dracula-line);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.topbar-search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 480px;
+  min-width: 240px;
+}
+
+.topbar-search-wrapper .search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--dracula-comment);
+}
+
+#globalChampSearch {
+  width: 100%;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 9px 14px 9px 36px;
+  color: var(--dracula-fg);
+  font-size: 13px;
+  outline: none;
+  transition: border 0.2s;
+}
+
+#globalChampSearch:focus {
+  border-color: var(--dracula-purple);
+}
+
+.search-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-purple);
+  border-radius: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  z-index: 150;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+}
+
+.search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.search-item:hover {
+  background-color: var(--dracula-elevated);
+}
+
+.search-item img {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.patch-pill {
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  color: var(--dracula-comment);
+}
+
+.patch-pill strong {
+  color: var(--dracula-cyan);
+}
+
+.sim-bar {
+  display: flex;
+  align-items: center;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.dracula-select {
+  background: transparent;
+  color: var(--dracula-fg);
+  border: none;
+  padding: 6px 8px;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.dracula-select option, .dracula-select-lg option {
+  background-color: var(--dracula-card);
+  color: var(--dracula-fg);
+}
+
+/* Botões Dracula */
+.btn-dracula {
+  border: none;
+  border-radius: 7px;
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--dracula-fg);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-sim-toggle {
+  background: transparent;
+  color: var(--dracula-cyan);
+}
+
+.btn-sim-toggle.active {
+  background-color: var(--dracula-green);
+  color: #191a21;
+}
+
+.btn-purple {
+  background-color: rgba(189, 147, 249, 0.18);
+  border: 1px solid var(--dracula-purple);
+  color: var(--dracula-purple);
+}
+
+.btn-purple:hover {
+  background-color: var(--dracula-purple);
+  color: #191a21;
+}
+
+.btn-import-blitz {
+  background: linear-gradient(135deg, var(--dracula-purple), var(--dracula-pink));
+  color: #191a21;
+  font-weight: 700;
+  padding: 10px 16px;
+  font-size: 13px;
+  box-shadow: 0 4px 14px rgba(189, 147, 249, 0.3);
+}
+
+.btn-import-blitz:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+}
+
+.btn-outline:hover {
+  border-color: var(--dracula-purple);
+}
+
+.btn-icon {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  padding: 8px 10px;
+}
+
+/* Conteúdo Principal */
+.blitz-content {
+  padding: 22px 24px 60px;
+  max-width: 1420px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.card-dracula {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-head h2 {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.card-sub {
+  font-size: 12px;
+  color: var(--dracula-comment);
+}
+
+.badge-dracula {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 6px;
+}
+
+.badge-dracula.purple {
+  background: rgba(189, 147, 249, 0.16);
+  color: var(--dracula-purple);
+  border: 1px solid rgba(189, 147, 249, 0.4);
+}
+
+.badge-dracula.cyan {
+  background: rgba(139, 233, 253, 0.14);
+  color: var(--dracula-cyan);
+  border: 1px solid rgba(139, 233, 253, 0.35);
+}
+
+/* ==========================================================================
+   ABA 1: BLITZ CHAMPION HEADER & PRO BUILD
+   ========================================================================== */
+.champ-header-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 18px;
+  background: linear-gradient(90deg, rgba(189, 147, 249, 0.12), var(--dracula-card) 55%);
+}
+
+.champ-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.champ-avatar-wrap {
+  position: relative;
+}
+
+.champ-avatar-wrap img {
+  width: 82px;
+  height: 82px;
+  border-radius: 16px;
+  border: 2px solid var(--dracula-purple);
+}
+
+.tier-pill {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  background: linear-gradient(135deg, var(--dracula-pink), var(--dracula-purple));
+  color: #191a21;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.champ-title-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.champ-title-line h1 {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.role-badge {
+  background: var(--dracula-elevated);
+  color: var(--dracula-cyan);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.dmg-badge {
+  background: rgba(255, 184, 108, 0.15);
+  color: var(--dracula-orange);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.champ-lore-title {
+  font-size: 12px;
+  color: var(--dracula-comment);
+  margin: 2px 0 10px;
+}
+
+.blitz-stat-strip {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.strip-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.strip-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--dracula-comment);
+}
+
+.strip-item strong {
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.champ-banner-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.matchup-selectors {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sel-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sel-box label {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--dracula-comment);
+}
+
+.dracula-select-lg {
+  background-color: var(--dracula-elevated);
+  color: var(--dracula-fg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.vs-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--dracula-pink);
+  margin-top: 14px;
+}
+
+.export-toast {
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-weight: 600;
+}
+
+.export-toast.success {
+  background: rgba(80, 250, 123, 0.15);
+  border: 1px solid var(--dracula-green);
+  color: var(--dracula-green);
+}
+
+.export-toast.error {
+  background: rgba(255, 85, 85, 0.15);
+  border: 1px solid var(--dracula-red);
+  color: var(--dracula-red);
+}
+
+/* Grid Principal Pro Build */
+.blitz-build-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 18px;
+}
+
+.build-col-left, .build-col-right {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Visualizador de Runas Estilo Blitz */
+.rune-tree-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 14px;
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 9px;
+  margin-bottom: 10px;
+}
+
+.rune-node {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--dracula-elevated);
+  border: 1px solid rgba(189, 147, 249, 0.35);
+  padding: 7px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.rune-node.keystone {
+  background: linear-gradient(135deg, rgba(189, 147, 249, 0.25), rgba(255, 121, 198, 0.2));
+  border-color: var(--dracula-pink);
+  color: var(--dracula-fg);
+}
+
+.rune-desc-note {
+  font-size: 12px;
+  color: var(--dracula-comment);
+  margin-bottom: 14px;
+}
+
+.spells-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid rgba(68, 71, 90, 0.5);
+}
+
+.spells-label {
+  font-size: 12px;
+  color: var(--dracula-comment);
+}
+
+.spells-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.spell-pill {
+  background-color: var(--dracula-elevated);
+  border: 1px solid var(--dracula-line);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dracula-yellow);
+}
+
+/* Matriz de Habilidades 1-18 Estilo Blitz */
+.skill-matrix {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 6px;
+}
+
+.skill-cell {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 6px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.skill-cell.R {
+  border-color: var(--dracula-pink);
+  background: rgba(255, 121, 198, 0.16);
+}
+
+.skill-cell .lvl-num {
+  display: block;
+  font-size: 10px;
+  color: var(--dracula-comment);
+}
+
+.skill-cell .key-letter {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dracula-cyan);
+}
+
+.skill-cell.R .key-letter {
+  color: var(--dracula-pink);
+}
+
+/* Matchups */
+.matchup-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.matchup-col-title {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.matchup-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.matchup-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--dracula-elevated);
+  border: 1px solid var(--dracula-line);
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.matchup-pill:hover {
+  border-color: var(--dracula-purple);
+}
+
+.matchup-pill img {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+/* Build Items Timeline */
+.build-stage-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--dracula-comment);
+  margin-bottom: 10px;
+}
+
+.blitz-items-timeline, .blitz-situational-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blitz-item-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 9px;
+  padding: 10px 12px;
+}
+
+.blitz-item-card img {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid var(--dracula-purple);
+}
+
+.blitz-item-meta {
+  flex: 1;
+}
+
+.blitz-item-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dracula-fg);
+  margin-bottom: 2px;
+}
+
+.blitz-item-note {
+  font-size: 12px;
+  color: #b8bfe0;
+}
+
+/* Fases do Jogo */
+.phase-cards-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.phase-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-left: 4px solid var(--dracula-purple);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.phase-row.mid { border-left-color: var(--dracula-cyan); }
+.phase-row.late { border-left-color: var(--dracula-pink); }
+
+.phase-badge {
+  min-width: 110px;
+  font-size: 10px;
+  color: var(--dracula-comment);
+}
+
+.phase-badge strong {
+  color: var(--dracula-fg);
+  font-size: 11px;
+}
+
+.phase-row p {
+  font-size: 12.5px;
+  color: #dbeafe;
+}
+
+/* ==========================================================================
+   ABA 2: PARTIDA AO VIVO (BLITZ LIVE BENCHMARKS & SCOUT)
+   ========================================================================== */
+.dracula-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, rgba(189, 147, 249, 0.16), rgba(139, 233, 253, 0.1));
+  border: 1px solid var(--dracula-purple);
+  margin-bottom: 18px;
+}
+
+.dracula-banner h3 {
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.dracula-banner p {
+  font-size: 12.5px;
+  color: #cbd5e1;
+}
+
+.live-benchmarks-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.live-me-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.live-me-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  border: 2px solid var(--dracula-purple);
+}
+
+.live-clock-pill {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: right;
+}
+
+.live-clock-pill span {
+  display: block;
+  font-size: 9px;
+  color: var(--dracula-comment);
+}
+
+.live-clock-pill strong {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  color: var(--dracula-cyan);
+}
+
+.benchmark-meters {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.meter-card {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 9px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.meter-card.urgent-gold {
+  border-color: var(--dracula-orange);
+  background: rgba(255, 184, 108, 0.14);
+}
+
+.meter-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dracula-comment);
+}
+
+.meter-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  margin: 4px 0;
+}
+
+.meter-sub {
+  font-size: 11px;
+  color: var(--dracula-comment);
+}
+
+/* Objetivos */
+.objectives-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.obj-box {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obj-box.urgent {
+  border-color: var(--dracula-red);
+  background: rgba(255, 85, 85, 0.14);
+}
+
+.obj-emoji { font-size: 22px; }
+.obj-title { font-size: 11px; color: var(--dracula-comment); }
+.obj-clock { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--dracula-yellow); }
+
+.active-alerts-header {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--dracula-comment);
+  margin-bottom: 8px;
+}
+
+.live-alerts-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.live-alert-item {
+  background-color: var(--dracula-bg);
+  border-left: 3px solid var(--dracula-purple);
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.live-alert-item.URGENT {
+  border-left-color: var(--dracula-orange);
+}
+
+/* Placar 5v5 */
+.blitz-teams-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.blitz-player-table {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: var(--dracula-bg);
+  border: 1px solid rgba(68, 71, 90, 0.6);
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.player-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 145px;
+}
+
+.player-row-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.player-row-name { font-weight: 700; }
+.player-row-sub { font-size: 11px; color: var(--dracula-comment); }
+.player-row-kda { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+.player-row-items { display: flex; gap: 3px; }
+.mini-item-icon { width: 23px; height: 23px; border-radius: 4px; }
+
+.threat-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.threat-tag.fed {
+  background: rgba(255, 85, 85, 0.2);
+  color: var(--dracula-red);
+  border: 1px solid var(--dracula-red);
+}
+
+.threat-tag.vuln {
+  background: rgba(80, 250, 123, 0.16);
+  color: var(--dracula-green);
+}
+
+/* ==========================================================================
+   ABA 3: TIER LIST
+   ========================================================================== */
+.tierlist-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.dracula-input {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 9px 14px;
+  color: var(--dracula-fg);
+  font-size: 13px;
+  outline: none;
+}
+
+.dracula-input:focus {
+  border-color: var(--dracula-purple);
+}
+
+.role-filter-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  background-color: var(--dracula-bg);
+  color: var(--dracula-comment);
+  border: 1px solid var(--dracula-line);
+  border-radius: 7px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  background-color: var(--dracula-purple);
+  color: #191a21;
+  border-color: var(--dracula-purple);
+}
+
+.blitz-champions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.champ-card {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.champ-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--dracula-purple);
+}
+
+.champ-card img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--dracula-purple);
+  margin-bottom: 6px;
+}
+
+.champ-card-name { font-weight: 700; font-size: 13px; }
+.champ-card-role { font-size: 11px; color: var(--dracula-comment); margin-bottom: 6px; }
+
+/* ==========================================================================
+   ABA 4: ASSISTENTE IA (SILENCIOSO)
+   ========================================================================== */
+.quick-prompts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.chip-dracula {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-purple);
+  color: var(--dracula-purple);
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.chip-dracula:hover {
+  background-color: var(--dracula-purple);
+  color: #191a21;
+}
+
+.dracula-chat-box {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 14px;
+  max-height: 360px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+.chat-bubble.user {
+  align-self: flex-end;
+  background-color: rgba(189, 147, 249, 0.2);
+  border: 1px solid var(--dracula-purple);
+}
+
+.chat-bubble.assistant {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+}
+
+.bubble-author {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--dracula-pink);
+  margin-bottom: 4px;
+}
+
+.chat-form-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-form-row input { flex: 1; }
+
+/* ==========================================================================
+   SISTEMA DE POPUPS TÁTICOS EM TEMPO REAL (ESTILO OVERLAY BLITZ)
+   ========================================================================== */
+.tactical-popup-container {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  width: 365px;
+  max-width: calc(100vw - 32px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.tactical-popup {
+  pointer-events: auto;
+  background: rgba(40, 42, 54, 0.97);
+  border: 1px solid var(--dracula-purple);
+  border-left: 5px solid var(--dracula-purple);
+  border-radius: 10px;
+  padding: 13px 15px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65);
+  animation: slideInPopup 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tactical-popup.URGENT {
+  border-color: var(--dracula-orange);
+  border-left-color: var(--dracula-orange);
+}
+
+.tactical-popup.BUILD {
+  border-color: var(--dracula-red);
+  border-left-color: var(--dracula-red);
+}
+
+@keyframes slideInPopup {
+  from { opacity: 0; transform: translateX(40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.popup-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.popup-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(189, 147, 249, 0.2);
+  color: var(--dracula-purple);
+}
+
+.tactical-popup.URGENT .popup-badge {
+  background: rgba(255, 184, 108, 0.2);
+  color: var(--dracula-orange);
+}
+
+.popup-close {
+  background: transparent;
+  border: none;
+  color: var(--dracula-comment);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.popup-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--dracula-fg);
+  margin-bottom: 3px;
+}
+
+.popup-msg {
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.45;
+}
+
+.popup-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--dracula-purple), var(--dracula-pink));
+  width: 100%;
+  animation: shrinkBar 7s linear forwards;
+}
+
+@keyframes shrinkBar {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+/* Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.modal-dracula {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-purple);
+  border-radius: 12px;
+  max-width: 480px;
+  width: 100%;
+  padding: 20px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  color: var(--dracula-comment);
+  cursor: pointer;
+}
+
+.modal-desc {
+  font-size: 12.5px;
+  color: #cbd5e1;
+  margin-bottom: 14px;
+}
+
+.modal-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.full-w { width: 100%; }
+.modal-hint { display: block; font-size: 11px; color: var(--dracula-cyan); margin-top: 6px; }
+.save-banner { margin-top: 10px; font-size: 12px; color: var(--dracula-green); }
+.modal-footer { display: flex; justify-content: flex-end; margin-top: 14px; }
+
+@media (max-width: 980px) {
+  .blitz-sidebar { display: none; }
+  .blitz-build-grid, .live-benchmarks-grid, .blitz-teams-grid { grid-template-columns: 1fr; }
+}
+
+
+/* ==========================================================================
+   NOVAS IMPLEMENTAÇÕES:
+   1. PAINEL PÓS-BANIMENTOS & TOP 6 SUGESTÕES DO META ATUAL
+   2. SELETOR DAS 3 OPÇÕES DE BUILD (MAIOR WR | ALTERNATIVA | ANTI-TIME INIMIGO)
+   ========================================================================== */
+
+.step-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(189, 147, 249, 0.2);
+  color: var(--dracula-purple);
+  border: 1px solid rgba(189, 147, 249, 0.45);
+  margin-bottom: 4px;
+}
+
+.draft-recommender-card {
+  background: linear-gradient(180deg, rgba(49, 52, 66, 0.7) 0%, var(--dracula-card) 100%);
+  border: 1px solid rgba(189, 147, 249, 0.45);
+}
+
+.draft-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.draft-role-tabs {
+  display: flex;
+  gap: 6px;
+  background-color: var(--dracula-bg-deep);
+  padding: 4px;
+  border-radius: 9px;
+  border: 1px solid var(--dracula-line);
+}
+
+.role-tab {
+  background: transparent;
+  color: var(--dracula-comment);
+  border: none;
+  border-radius: 6px;
+  padding: 7px 13px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.role-tab:hover {
+  color: var(--dracula-fg);
+}
+
+.role-tab.active {
+  background: linear-gradient(135deg, var(--dracula-purple), var(--dracula-pink));
+  color: #191a21;
+}
+
+/* Contexto do Draft: Banimentos + 5 Inimigos */
+.draft-context-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.draft-box {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 9px;
+  padding: 12px 14px;
+}
+
+.draft-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.dracula-select-sm {
+  background-color: var(--dracula-card);
+  color: var(--dracula-fg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.banned-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 32px;
+  align-items: center;
+}
+
+.ban-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 85, 85, 0.14);
+  border: 1px solid rgba(255, 85, 85, 0.45);
+  color: #fecaca;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.ban-chip img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  filter: grayscale(40%);
+}
+
+.ban-chip button {
+  background: transparent;
+  border: none;
+  color: var(--dracula-red);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.comp-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.preset-btn {
+  background-color: var(--dracula-card);
+  color: var(--dracula-cyan);
+  border: 1px solid rgba(139, 233, 253, 0.3);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preset-btn:hover {
+  background-color: var(--dracula-cyan);
+  color: #191a21;
+}
+
+.enemy-slots-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.enemy-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--dracula-card);
+  border: 1px solid rgba(255, 121, 198, 0.35);
+  border-radius: 8px;
+  padding: 6px;
+}
+
+.enemy-slot img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--dracula-pink);
+  margin-bottom: 4px;
+}
+
+.enemy-slot select {
+  width: 100%;
+  background: var(--dracula-bg);
+  color: var(--dracula-fg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 5px;
+  font-size: 10.5px;
+  padding: 2px 3px;
+}
+
+.comp-summary-bar {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--dracula-yellow);
+  background: rgba(241, 250, 140, 0.08);
+  border: 1px solid rgba(241, 250, 140, 0.25);
+  border-radius: 6px;
+  padding: 5px 10px;
+}
+
+/* Grid dos 6 Campeões Recomendados no Meta */
+.meta-six-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.meta-pick-card {
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.meta-pick-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--dracula-purple);
+  background-color: var(--dracula-elevated);
+}
+
+.meta-pick-card.selected {
+  border: 2px solid var(--dracula-green);
+  background: linear-gradient(180deg, rgba(80, 250, 123, 0.14), var(--dracula-bg));
+  box-shadow: 0 0 18px rgba(80, 250, 123, 0.2);
+}
+
+.meta-pick-card.counter-highlight {
+  border-color: var(--dracula-pink);
+}
+
+.meta-pick-avatar-wrap {
+  position: relative;
+  margin-bottom: 6px;
+}
+
+.meta-pick-avatar-wrap img {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid var(--dracula-purple);
+}
+
+.meta-pick-tier {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, var(--dracula-purple), var(--dracula-pink));
+  color: #191a21;
+  font-weight: 800;
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.meta-pick-name {
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--dracula-fg);
+}
+
+.meta-pick-wr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dracula-green);
+  margin: 2px 0 6px;
+}
+
+.meta-pick-reason {
+  font-size: 10.5px;
+  color: #cbd5e1;
+  line-height: 1.35;
+  margin-top: auto;
+}
+
+/* ==========================================================================
+   SELETOR DAS 3 OPÇÕES DE BUILD (ABAS DE ALTO DESTAQUE)
+   ========================================================================== */
+.three-builds-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.build-option-tab {
+  background-color: var(--dracula-card);
+  border: 1.5px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  color: var(--dracula-fg);
+}
+
+.build-option-tab:hover {
+  background-color: var(--dracula-elevated);
+  border-color: var(--dracula-purple);
+}
+
+.build-option-tab.active[data-build-idx="0"] {
+  border-color: var(--dracula-green);
+  background: linear-gradient(135deg, rgba(80, 250, 123, 0.14), var(--dracula-card));
+  box-shadow: 0 6px 20px rgba(80, 250, 123, 0.15);
+}
+
+.build-option-tab.active[data-build-idx="1"] {
+  border-color: var(--dracula-cyan);
+  background: linear-gradient(135deg, rgba(139, 233, 253, 0.15), var(--dracula-card));
+  box-shadow: 0 6px 20px rgba(139, 233, 253, 0.15);
+}
+
+.build-option-tab.active[data-build-idx="2"] {
+  border-color: var(--dracula-pink);
+  background: linear-gradient(135deg, rgba(255, 121, 198, 0.16), var(--dracula-card));
+  box-shadow: 0 6px 20px rgba(255, 121, 198, 0.18);
+}
+
+.b-tab-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.b-tab-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.b-tab-badge.green {
+  background: rgba(80, 250, 123, 0.18);
+  color: var(--dracula-green);
+}
+
+.b-tab-badge.cyan {
+  background: rgba(139, 233, 253, 0.18);
+  color: var(--dracula-cyan);
+}
+
+.b-tab-badge.pink {
+  background: rgba(255, 121, 198, 0.2);
+  color: var(--dracula-pink);
+}
+
+.b-tab-title {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 3px;
+}
+
+.b-tab-sub {
+  font-size: 11.5px;
+  color: var(--dracula-comment);
+}
+
+.badge-dracula.green {
+  background: rgba(80, 250, 123, 0.16);
+  color: var(--dracula-green);
+  border: 1px solid rgba(80, 250, 123, 0.4);
+}
+
+@media (max-width: 1180px) {
+  .meta-six-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .draft-context-grid, .three-builds-selector {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   DETECÇÃO AUTOMÁTICA DE ROTA + DIVISÃO 3 COUNTERS + 3 META ATUAL
+   ========================================================================== */
+
+.auto-lane-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.auto-lane-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(80, 250, 123, 0.14);
+  color: var(--dracula-green);
+  border: 1px solid rgba(80, 250, 123, 0.45);
+}
+
+.split-six-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.split-three-box {
+  background-color: var(--dracula-bg-deep);
+  border: 1px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.split-three-box.counter-group-box {
+  border-color: rgba(255, 121, 198, 0.4);
+  background: linear-gradient(180deg, rgba(255, 121, 198, 0.06), var(--dracula-bg-deep));
+}
+
+.split-three-box.meta-group-box {
+  border-color: rgba(189, 147, 249, 0.4);
+  background: linear-gradient(180deg, rgba(189, 147, 249, 0.06), var(--dracula-bg-deep));
+}
+
+.split-box-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.split-title {
+  font-size: 12.5px;
+  font-weight: 800;
+}
+
+.split-sub {
+  font-size: 10.5px;
+  color: var(--dracula-comment);
+}
+
+.meta-three-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.enemy-slot.active-lane-slot {
+  border: 2px solid var(--dracula-pink);
+  background: rgba(255, 121, 198, 0.12);
+  box-shadow: 0 0 12px rgba(255, 121, 198, 0.25);
+}
+
+.slot-role-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--dracula-comment);
+  margin-bottom: 3px;
+}
+
+.enemy-slot.active-lane-slot .slot-role-tag {
+  color: var(--dracula-pink);
+}
+
+@media (max-width: 1100px) {
+  .split-six-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   ABA 0: HOME / VISÃO GERAL (ESTILO BLITZ HOME)
+   ========================================================================== */
+
+.home-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 18px;
+}
+
+.home-profile-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(189, 147, 249, 0.14), var(--dracula-card) 65%);
+}
+
+.home-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+
+.home-summoner-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  border: 3px solid var(--dracula-purple);
+  box-shadow: 0 0 18px rgba(189, 147, 249, 0.35);
+}
+
+.home-status-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.home-summoner-info h1 {
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.home-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 9px;
+  padding: 12px;
+}
+
+.home-stat-box {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.home-stat-box strong {
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Módulos Ativos da IA na Home */
+.ai-features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ai-feat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background-color: var(--dracula-bg);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.ai-feat-icon {
+  font-size: 20px;
+}
+
+.ai-feat-item strong {
+  display: block;
+  font-size: 12.5px;
+  color: var(--dracula-fg);
+  margin-bottom: 2px;
+}
+
+.ai-feat-item p {
+  font-size: 11px;
+  color: #b8bfe0;
+  line-height: 1.35;
+}
+
+/* Atalhos da Home */
+.home-shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.shortcut-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.shortcut-card:hover {
+  border-color: var(--dracula-purple);
+  background-color: var(--dracula-elevated);
+  transform: translateY(-2px);
+}
+
+.sc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(189, 147, 249, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.shortcut-card strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.shortcut-card p {
+  font-size: 11.5px;
+  color: var(--dracula-comment);
+}
+
+@media (max-width: 1050px) {
+  .home-hero-grid, .home-shortcuts-grid, .ai-features-grid, .home-stats-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* Logo Oficial Babilônia */
+.babilonia-logo-img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  box-shadow: 0 0 14px rgba(189, 147, 249, 0.45);
+  flex-shrink: 0;
+}
