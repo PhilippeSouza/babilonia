@@ -2099,9 +2099,16 @@ body {
 
 /* Logo Oficial Babilônia */
 .babilonia-logo-img {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  box-shadow: 0 0 14px rgba(189, 147, 249, 0.45);
+  width: 56px;
+  height: 56px;
+  border-radius: 13px;
+  box-shadow: 0 0 18px rgba(189, 147, 249, 0.55);
   flex-shrink: 0;
+  object-fit: cover;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.babilonia-logo-img:hover {
+  transform: scale(1.14);
+  box-shadow: 0 0 24px rgba(255, 121, 198, 0.75);
 }
