@@ -1,18 +1,17 @@
 {
-  "name": "babilonia-lol-companion",
+  "name": "babilonia-buff",
   "version": "1.0.0",
-  "description": "Babilônia — Assistente em tempo real para League of Legends (Dracula Mode, 6 Picks Pós-Ban, 3 Builds e Popups Táticos)",
+  "description": "Babilonia Buff — Assistente em tempo real para League of Legends (Dracula Mode, 6 Picks Pós-Ban, 3 Builds e Popups Táticos)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "keywords": [
     "league-of-legends",
-    "babilonia",
+    "babilonia-buff",
     "lcu",
     "live-client-api",
-    "dracula-theme",
-    "blitz-clone"
+    "dracula-theme"
   ],
   "author": "Philippe Souza",
   "license": "MIT"

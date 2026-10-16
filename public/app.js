@@ -1,5 +1,5 @@
 /**
- * Babilônia — Frontend Principal
+ * Babilonia Buff — Frontend Principal
  * Inclui:
  * 1) Recomendador Pós-Banimentos com 6 Opções de Campeões Fortes no Meta Atual
  * 2) Gerador de 3 Opções de Build (Maior Winrate, Alternativa e Anti-Time Inimigo)
@@ -96,31 +96,6 @@ function showTacticalPopup({ id, type = 'MACRO', badge = 'DICA TÁTICA', title, 
     if (popup.parentNode) popup.remove();
   }, 7000);
 }
-
-document.getElementById('btnTestPopup')?.addEventListener('click', () => {
-  const samples = [
-    {
-      type: 'URGENT',
-      badge: '💰 PICO DE COMPRA (1550 OURO)',
-      title: 'Hora de dar Recall!',
-      message: 'Empurre a onda atual até a torre inimiga e volte base para fechar seu próximo item antes do Dragão.'
-    },
-    {
-      type: 'BUILD',
-      badge: '🛡️ BUILD 3 RECOMENDADA',
-      title: 'Adaptação Anti-Time Inimigo Ativa',
-      message: `Contra (${enemyTeam.slice(0, 3).join(', ')}), confira a Opção 3 de Build com defesas e penetração ajustadas!`
-    },
-    {
-      type: 'URGENT',
-      badge: '🐉 DRAGÃO EM 45 SEGUNDOS',
-      title: 'Rotação para o Rio Sul',
-      message: 'Ganhe prioridade no meio e posicione uma Sentinela de Controle no rio antes do time inimigo.'
-    }
-  ];
-  const pick = samples[Math.floor(Math.random() * samples.length)];
-  showTacticalPopup({ ...pick, force: true });
-});
 
 // =========================================================================
 // NAVEGAÇÃO LATERAL ESTILO BLITZ
@@ -300,31 +275,6 @@ window.updateEnemySlot = async function (slotIdx, newChampId) {
     force: true
   });
 };
-
-// Presets de Composição Inimiga (Ordem: [0]=TOP, [1]=JG, [2]=MID, [3]=ADC, [4]=SUP)
-document.querySelectorAll('.preset-btn').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    const p = btn.dataset.preset;
-    if (p === 'balanced') {
-      enemyTeam = ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona'];
-    } else if (p === 'heavy_ap') {
-      enemyTeam = ['Mordekaiser', 'Lillia', 'Syndra', 'Ziggs', 'Lux'];
-    } else if (p === 'heavy_ad') {
-      enemyTeam = ['Darius', 'Viego', 'Zed', 'Caitlyn', 'Pyke'];
-    } else if (p === 'heavy_heal') {
-      enemyTeam = ['Aatrox', 'Warwick', 'Sylas', 'Samira', 'Soraka'];
-    }
-    activeBuildIndex = 2;
-    await refreshDraftAndBuilds();
-    showTacticalPopup({
-      type: 'BUILD',
-      badge: '🛡️ COMPOSIÇÃO INIMIGA ANALISADA',
-      title: '3 Counters + 3 Meta + Build 3 Atualizados!',
-      message: currentGuide?.enemyCompAnalysis?.summaryText || 'Itens defensivos, botas e corta-cura ajustados.',
-      force: true
-    });
-  });
-});
 
 // Seletor de Rota (também atualiza qual inimigo é seu oponente direto)
 document.querySelectorAll('#draftRoleTabs .role-tab').forEach((btn) => {
@@ -785,7 +735,7 @@ async function pollStatus() {
       if (homeSummonerSub) {
         homeSummonerSub.textContent = isLiveMatchNow
           ? `Você está em partida de ${data.activeChampionId}! Veja seu Guia de Jogo em Andamento na aba Partida Ao Vivo.`
-          : 'Conectado em tempo real ao seu League of Legends! Quando achar partida, o Babilônia muda de tela sozinho.';
+          : 'Conectado em tempo real ao seu League of Legends! Quando achar partida, o Babilonia Buff muda de tela sozinho.';
       }
       if (homeProfileIcon && sum?.profileIconId) {
         homeProfileIcon.src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${sum.profileIconId}.png`;
@@ -1246,7 +1196,7 @@ async function askCoachQuestion(questionText) {
 
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-bubble assistant';
-  loadingDiv.innerHTML = `<div class="bubble-author">⚡ Babilônia AI</div><div class="bubble-text">⏳ Analisando dados...</div>`;
+  loadingDiv.innerHTML = `<div class="bubble-author">⚡ Babilonia Buff AI</div><div class="bubble-text">⏳ Analisando dados...</div>`;
   chatBox.appendChild(loadingDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -1263,7 +1213,7 @@ async function askCoachQuestion(questionText) {
     const data = await res.json();
 
     loadingDiv.innerHTML = `
-      <div class="bubble-author">⚡ ${data.source || 'Babilônia AI'}</div>
+      <div class="bubble-author">⚡ ${data.source || 'Babilonia Buff AI'}</div>
       <div class="bubble-text">${formatSimpleMarkdown(data.answer || '')}</div>
     `;
     chatBox.scrollTop = chatBox.scrollHeight;

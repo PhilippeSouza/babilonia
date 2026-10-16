@@ -21,8 +21,8 @@ function generateLocalTacticalCoaching(
           id: 'idle-tip',
           type: 'MACRO',
           badge: 'PRONTO',
-          title: 'Babilônia Monitorando o Cliente do LoL',
-          message: 'Entre na fila ou Seleção de Campeões no seu League of Legends — o Babilônia mudará de tela automaticamente!'
+          title: 'Babilonia Buff Monitorando o Cliente do LoL',
+          message: 'Entre na fila ou Seleção de Campeões no seu League of Legends — o Babilonia Buff mudará de tela automaticamente!'
         }
       ]
     };
@@ -233,7 +233,7 @@ async function answerPlayerQuestion({ question, matchState, selectedChampionId, 
   }
 
   return {
-    source: 'BaronAI Motor Tático Local',
+    source: 'Babilonia Buff AI',
     answer,
     voiceText
   };
@@ -254,7 +254,7 @@ DADOS REAIS DA PARTIDA AO VIVO:
 `;
   }
 
-  return `Você é o BaronAI, um Coach Challenger de League of Legends direto, tático e objetivo.
+  return `Você é o Babilonia Buff, um Coach Challenger de League of Legends direto, tático e objetivo.
 Responda em Português do Brasil em no máximo 4 tópicos curtos e práticos para o jogador ler ou ouvir rápido durante a partida.
 ${stateDesc}
 Pergunta/Pedido do Jogador: "${question || 'O que eu devo fazer agora para vencer essa partida?'}"`;

@@ -1,4 +1,4 @@
-# 🧠 CONTEXTO COMPLETO DO PROJETO BABILÔNIA (PARA CONTINUIDADE NO ANTIGRAVITY)
+# 🧠 CONTEXTO COMPLETO DO PROJETO BABILONIA BUFF (PARA CONTINUIDADE NO ANTIGRAVITY)
 
 > **INSTRUÇÃO PARA O AGENTE ANTIGRAVITY:**
 > O usuário (Philippe) iniciou o desenvolvimento deste projeto em outro computador e subiu todo o código e este arquivo de contexto para o GitHub (`https://github.com/PhilippeSouza/babilonia`) para continuar o desenvolvimento na máquina pessoal dele, onde o **League of Legends** está instalado.
@@ -7,7 +7,7 @@
 ---
 
 ## 📌 1. Visão Geral e Identidade do Projeto
-- **Nome Oficial do Aplicativo:** **Babilônia**
+- **Nome Oficial do Aplicativo:** **Babilonia Buff** (sem acento)
 - **Estilo Visual:** Cópia inspirada no **Blitz.gg / Buff Baron**, porém 100% estilizada na paleta **Dracula Dark Mode**:
   - Background principal: `#191a24` / `#282a36`
   - Cards / Superfícies: `#44475a` / `#1e1f29`
@@ -26,8 +26,9 @@
 1. **PROIBIDO Coach com Voz (TTS):**
    - O usuário deixou explícito que **não quer voz** porque atrapalha na partida.
    - Toda comunicação durante a partida deve ser feita via **Popups Visuais Táticos Silenciosos** no canto inferior direito (`#tacticalPopupContainer`), estilo notificações do Blitz.
-2. **Tela Inicial Limpa (`🏠 Início / Home`) FORA do Modo de Simulação:**
-   - O aplicativo abre por padrão na aba **Home** com o Modo Simulação **DESLIGADO (`OFF`)**.
+2. **Sem Simulador nem Atalhos de Teste:**
+   - O usuário testa direto em partida real. **Não** recriar simulador de partida, botão "Simular Partida", "Testar Popup", presets de time inimigo ou textos de debug.
+   - O aplicativo abre por padrão na aba **Home**.
    - Quando o League of Legends está aberto na máquina, a Home mostra o Perfil Real do jogador (`Nome#TAG`, Ícone, Nível, Elo Solo/Duo, PDL, Vitórias/Derrotas e Winrate) lido via LCU API (`/lol-summoner/v1/current-summoner` e `/lol-ranked/v1/current-ranked-stats`).
    - Permite consultar qualquer um dos 173 campeões, builds, runas e tier list livremente fora de partida.
 3. **Detecção Automática de Lane + 6 Recomendações Pós-Banimentos (Divisão 3 + 3 Sem Repetição):**
@@ -54,8 +55,8 @@
 - `src/BabiloniaLauncher.cs` — Código-fonte C# do executável `Babilonia.exe`.
 - `server.js` — Servidor HTTP Node.js (porta `3000`, zero dependências externas no `package.json`).
 - `src/lcu.js` — Conector automático LCU (`lockfile` + processo `LeagueClientUx.exe`), leitura de perfil/elo, champ select, bans, lane automática e exportação de runas (`/lol-perks/v1/pages`).
-- `src/liveClient.js` — Leitor da partida ao vivo na porta `2999` + Simulador de cenários de partida.
+- `src/liveClient.js` — Leitor da partida ao vivo na porta `2999`.
 - `src/championsDb.js` — Integração Data Dragon (`pt_BR`) + algoritmo dos `3 Counters + 3 Meta` sem repetição + gerador das `3 Builds` (`best_wr`, `alternative`, `anti_enemy`).
 - `src/coachEngine.js` — Motor de IA local (Popups Táticos e Chat) + integração opcional Gemini 2.5 Flash.
-- `public/index.html`, `public/styles.css`, `public/app.js` — Interface completa Babilônia em Dracula Dark Mode.
-- `public/logo.png`, `public/favicon.ico`, `public/logo.svg` — Arte oficial do Babilônia.
+- `public/index.html`, `public/styles.css`, `public/app.js` — Interface completa Babilonia Buff em Dracula Dark Mode.
+- `public/logo.png`, `public/favicon.ico`, `public/logo.svg` — Arte oficial do Babilonia Buff.

@@ -244,7 +244,8 @@ async function exportRunePageToLCU(runePageData) {
 
   const pages = await lcuRequest('GET', '/lol-perks/v1/pages', null, creds);
   if (Array.isArray(pages)) {
-    const existingBaronPage = pages.find((p) => p.name && (p.name.startsWith('Babilônia:') || p.name.startsWith('Blitz:')));
+    const ownPagePrefixes = ['Babilonia Buff', 'Babilônia:', 'Blitz:', 'Blitz Anti-Comp:'];
+    const existingBaronPage = pages.find((p) => p.name && ownPagePrefixes.some((prefix) => p.name.startsWith(prefix)));
     if (existingBaronPage && existingBaronPage.isDeletable !== false) {
       await lcuRequest('DELETE', `/lol-perks/v1/pages/${existingBaronPage.id}`, null, creds).catch(() => {});
     } else {
@@ -256,7 +257,7 @@ async function exportRunePageToLCU(runePageData) {
   }
 
   const payload = {
-    name: runePageData.name || 'Blitz: Página Recomendada',
+    name: runePageData.name || 'Babilonia Buff: Página Recomendada',
     primaryStyleId: runePageData.primaryStyleId,
     subStyleId: runePageData.subStyleId,
     selectedPerkIds: runePageData.selectedPerkIds,

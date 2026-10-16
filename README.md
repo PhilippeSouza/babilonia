@@ -1,7 +1,7 @@
-# ⚡ Babilônia — LoL Live Companion & AI Coach (Dracula Edition)
+# ⚡ Babilonia Buff — LoL Live Companion & AI Coach (Dracula Edition)
 
 <p align="center">
-  <img src="public/logo.png" width="180" alt="Babilônia Logo Oficial" />
+  <img src="public/logo.png" width="180" alt="Babilonia Buff" />
 </p>
 
 Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, com tema **Dracula Dark Mode**, executável nativo para Windows (**`Babilonia.exe`**) com ícone na Barra de Tarefas e na Bandeja do Sistema (System Tray), e conexão 100% automática ao cliente do jogo (sem precisar de chave da Riot API e 100% seguro contra banimentos do Vanguard).
@@ -9,7 +9,7 @@ Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, c
 ## 🚀 Funcionalidades Principais
 
 - **🖥️ Executável Nativo (`Babilonia.exe`):**
-  - Abre uma central desktop em **Dracula Dark Mode** com o ícone oficial do **Babilônia** visível tanto na **Barra de Tarefas do Windows** quanto na **Bandeja do Sistema (System Tray, perto do relógio)**.
+  - Abre uma central desktop em **Dracula Dark Mode** com o ícone oficial do **Babilonia Buff** visível tanto na **Barra de Tarefas do Windows** quanto na **Bandeja do Sistema (System Tray, perto do relógio)**.
   - Inicia o servidor Node.js automaticamente em segundo plano (sem janela preta de CMD) e abre o painel do aplicativo em modo janela dedicada (`--app`).
 - **🏠 Home & Perfil Real do LoL:** Conecta sozinho ao cliente aberto e exibe seu `Nome#TAG`, Nível, Elo Ranqueado Solo/Duo, PDL e Vitórias/Derrotas.
 - **📍 Detecção Automática de Lane + 6 Sugestões Pós-Ban (3 + 3 Sem Repetição):**

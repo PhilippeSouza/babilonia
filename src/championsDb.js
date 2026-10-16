@@ -11,63 +11,63 @@
 
 const RUNE_TEMPLATES = {
   CONQUEROR_PRECISION: {
-    name: 'Blitz: Conquistador (Duelo & Sustento)',
+    name: 'Babilonia Buff: Conquistador (Duelo & Sustento)',
     primaryStyleId: 8000,
     subStyleId: 8400,
     selectedPerkIds: [8010, 9111, 9104, 8299, 8444, 8451, 5005, 5008, 5001],
     summary: 'Precisão (Conquistador) + Determinação — Ideal para trocas prolongadas.'
   },
   LETHAL_TEMPO_ADC: {
-    name: 'Blitz: Ritmo Fatal (Máximo DPS)',
+    name: 'Babilonia Buff: Ritmo Fatal (Máximo DPS)',
     primaryStyleId: 8000,
     subStyleId: 8300,
     selectedPerkIds: [8008, 8009, 9103, 8014, 8304, 8345, 5005, 5008, 5001],
     summary: 'Precisão (Ritmo Fatal) + Inspiração — Velocidade de ataque máxima e escala.'
   },
   FLEET_SURVIVAL: {
-    name: 'Blitz: Agilidade nos Pés (Anti-Poke / Segurança)',
+    name: 'Babilonia Buff: Agilidade nos Pés (Anti-Poke / Segurança)',
     primaryStyleId: 8000,
     subStyleId: 8400,
     selectedPerkIds: [8021, 9111, 9103, 8014, 8444, 8242, 5005, 5008, 5001],
     summary: 'Precisão (Agilidade nos Pés) + Determinação — Cura na rota e resistência a CC.'
   },
   ELECTROCUTE_BURST: {
-    name: 'Blitz: Eletrocutar (Explosão Rápida)',
+    name: 'Babilonia Buff: Eletrocutar (Explosão Rápida)',
     primaryStyleId: 8100,
     subStyleId: 8200,
     selectedPerkIds: [8112, 8143, 8138, 8106, 8226, 8210, 5008, 5008, 5001],
     summary: 'Dominação (Eletrocutar) + Feitiçaria — Abate instantâneo em alvos frágeis.'
   },
   FIRST_STRIKE_SCALE: {
-    name: 'Blitz: Primeiro Ataque (Ouro & Explosão)',
+    name: 'Babilonia Buff: Primeiro Ataque (Ouro & Explosão)',
     primaryStyleId: 8300,
     subStyleId: 8200,
     selectedPerkIds: [8369, 8304, 8345, 8347, 8226, 8210, 5008, 5008, 5001],
     summary: 'Inspiração (Primeiro Ataque) + Feitiçaria — Acelera itens gerando ouro extra.'
   },
   ARCANE_COMET_MAGE: {
-    name: 'Blitz: Cometa Arcano (Pressão de Rota)',
+    name: 'Babilonia Buff: Cometa Arcano (Pressão de Rota)',
     primaryStyleId: 8200,
     subStyleId: 8300,
     selectedPerkIds: [8229, 8226, 8210, 8237, 8345, 8347, 5008, 5008, 5001],
     summary: 'Feitiçaria (Cometa Arcano) + Inspiração — Poke constante e controle de mana.'
   },
   GRASP_TANK: {
-    name: 'Blitz: Aperto dos Mortos-Vivos (Colosso)',
+    name: 'Babilonia Buff: Aperto dos Mortos-Vivos (Colosso)',
     primaryStyleId: 8400,
     subStyleId: 8300,
     selectedPerkIds: [8437, 8446, 8429, 8451, 8304, 8345, 5007, 5001, 5001],
     summary: 'Determinação (Aperto) + Inspiração — Trocas curtas fortes e destruição de torres.'
   },
   AERY_ENCHANTER: {
-    name: 'Blitz: Invocar Aery (Escudos & Poke)',
+    name: 'Babilonia Buff: Invocar Aery (Escudos & Poke)',
     primaryStyleId: 8200,
     subStyleId: 8400,
     selectedPerkIds: [8214, 8226, 8210, 8237, 8473, 8453, 5007, 5008, 5001],
     summary: 'Feitiçaria (Aery) + Determinação — Proteção contínua e pressão nos níveis iniciais.'
   },
   AFTERSHOCK_ENGAGE: {
-    name: 'Blitz: Pós-Choque (Iniciação Blindada)',
+    name: 'Babilonia Buff: Pós-Choque (Iniciação Blindada)',
     primaryStyleId: 8400,
     subStyleId: 8300,
     selectedPerkIds: [8439, 8463, 8473, 8242, 8306, 8347, 5007, 5001, 5001],
@@ -1321,7 +1321,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     spells: comp.ccThreats.length >= 2 && primaryTag === 'Marksman' ? ['Flash', 'Purificar'] : (baseGuide.spells || ['Flash', 'Incendiar']),
     runes: {
       ...(baseGuide.runes || RUNE_TEMPLATES.CONQUEROR_PRECISION),
-      name: `Blitz Anti-Comp: ${baseGuide.name} (Defesa Adaptada)`
+      name: `Babilonia Buff Anti-Comp: ${baseGuide.name} (Defesa Adaptada)`
     },
     starterPack: getStarterPackForBuild(primaryTag, baseGuide.role, 'anti_enemy', comp),
     items: enrichList(antiItems.slice(0, 6))

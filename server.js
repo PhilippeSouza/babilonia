@@ -1,5 +1,5 @@
 /**
- * Servidor Principal - Babilônia
+ * Servidor Principal - Babilonia Buff
  * Detecta automaticamente a Lane que você caiu via LCU,
  * retorna 3 Counters do seu Oponente de Rota + 3 Mais Fortes do Meta (sem repetição)
  * e gera as 3 Opções de Build para o campeão escolhido.
@@ -10,7 +10,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { getLCUState, exportRunePageToLCU } = require('./src/lcu');
-const { fetchLiveGameData, parseLiveMatchState, createSimulatedRawGame } = require('./src/liveClient');
+const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
 const { getChampionGuide, getTop6MetaPicks } = require('./src/championsDb');
 const { generateLocalTacticalCoaching, answerPlayerQuestion } = require('./src/coachEngine');
 
@@ -46,20 +46,6 @@ let draftState = {
   myChampionId: 'Renekton',
   bannedChampions: ['Jax', 'Garen', 'Zed'],
   enemyTeam: ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona']
-};
-
-let simulatorState = {
-  enabled: false,
-  scenario: 'dragon_gold',
-  championId: 'Renekton',
-  enemyChampionId: 'Aatrox',
-  gameTime: 560,
-  level: 8,
-  currentGold: 1550,
-  kills: 3,
-  deaths: 1,
-  assists: 2,
-  cs: 74
 };
 
 async function initDataDragon() {
@@ -183,8 +169,6 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    // Modo 100% Real (Sem Simulador)
-    simulatorState.enabled = false;
     const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
 
     // Quando a partida ao vivo começa (porta 2999), sincroniza automaticamente seu Campeão, Rota e os 5 Inimigos!
@@ -235,8 +219,6 @@ const server = http.createServer(async (req, res) => {
       hasGeminiKey: Boolean(appConfig.geminiApiKey && appConfig.geminiApiKey.trim().length > 10),
       lcu: lcuState,
       inLiveGame: Boolean(liveRaw),
-      isSimulated: false,
-      simulatorState,
       draftState,
       matchState,
       activeChampionId: activeChampId,
@@ -333,7 +315,7 @@ const server = http.createServer(async (req, res) => {
 
     try {
       const result = await exportRunePageToLCU({
-        name: chosenBuild.runes.name || `Blitz: ${guide.name}`,
+        name: chosenBuild.runes.name || `Babilonia Buff: ${guide.name}`,
         primaryStyleId: chosenBuild.runes.primaryStyleId,
         subStyleId: chosenBuild.runes.subStyleId,
         selectedPerkIds: chosenBuild.runes.selectedPerkIds
@@ -355,8 +337,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/coach/ask' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     const liveRaw = await fetchLiveGameData();
-    const rawToUse = liveRaw || (simulatorState.enabled ? createSimulatedRawGame(simulatorState) : null);
-    const matchState = rawToUse ? parseLiveMatchState(rawToUse, championNameMap) : null;
+    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
 
     const champId = body.championId || draftState.myChampionId || 'Darius';
     const ddragonChamp = ddragonChampions[champId] || null;
@@ -365,7 +346,7 @@ const server = http.createServer(async (req, res) => {
       question: body.question,
       matchState,
       selectedChampionId: champId,
-      enemyChampionId: draftState.enemyTeam[0] || simulatorState.enemyChampionId,
+      enemyChampionId: draftState.enemyTeam[0],
       geminiApiKey: appConfig.geminiApiKey,
       ddragonChampData: ddragonChamp
     });
@@ -373,29 +354,7 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, response);
   }
 
-  // 7. Controlar o Simulador
-  if ((pathname === '/api/simulator' || pathname === '/api/simulate') && req.method === 'POST') {
-    const body = await parseJsonBody(req);
-    if (typeof body.enabled === 'boolean') simulatorState.enabled = body.enabled;
-    if (body.championId) {
-      simulatorState.championId = body.championId;
-      draftState.myChampionId = body.championId;
-    }
-    if (body.enemyChampionId) simulatorState.enemyChampionId = body.enemyChampionId;
-    if (body.scenario) {
-      simulatorState.scenario = body.scenario;
-      if (body.scenario === 'early_lane') {
-        Object.assign(simulatorState, { gameTime: 210, level: 3, currentGold: 450, kills: 1, deaths: 0, assists: 0, cs: 24 });
-      } else if (body.scenario === 'dragon_gold') {
-        Object.assign(simulatorState, { gameTime: 560, level: 8, currentGold: 1550, kills: 3, deaths: 1, assists: 2, cs: 74 });
-      } else if (body.scenario === 'late_baron') {
-        Object.assign(simulatorState, { gameTime: 1150, level: 14, currentGold: 2100, kills: 7, deaths: 3, assists: 6, cs: 162 });
-      }
-    }
-    return sendJson(res, 200, { ok: true, simulatorState });
-  }
-
-  // 8. Salvar Configurações
+  // 7. Salvar Configurações
   if (pathname === '/api/config' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     if (typeof body.geminiApiKey === 'string') {
@@ -414,7 +373,7 @@ const server = http.createServer(async (req, res) => {
 initDataDragon().then(() => {
   server.listen(PORT, () => {
     console.log('==============================================================');
-    console.log(`⚡ Babilônia rodando em: http://localhost:${PORT}`);
+    console.log(`⚡ Babilonia Buff rodando em: http://localhost:${PORT}`);
     console.log('==============================================================');
   });
 });
