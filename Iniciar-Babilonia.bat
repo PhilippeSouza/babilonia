@@ -1,7 +1,7 @@
 @echo off
 cd /d "%~dp0"
-if exist "Babilonia.exe" (
-    start "" "Babilonia.exe"
+for %%F in ("Babil*nia Buff.exe") do (
+    start "" "%%F"
     exit
 )
 start "" http://localhost:3000

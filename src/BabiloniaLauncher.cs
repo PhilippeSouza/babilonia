@@ -61,7 +61,7 @@ namespace BabiloniaApp
             this.DoubleBuffered = true;
             this.ShowInTaskbar = true; // Garante o ícone na Barra de Tarefas do Sistema Operacional
 
-            // Carrega o ícone embutido no próprio executável ou do arquivo Babilonia.ico
+            // Carrega o ícone embutido no próprio executável ou do arquivo Babilônia Buff-icone.ico
             Icon appIcon = LoadAppIcon();
             if (appIcon != null)
             {
@@ -306,7 +306,7 @@ namespace BabiloniaApp
         {
             try
             {
-                string icoPath = Path.Combine(appDir, "Babilonia.ico");
+                string icoPath = Path.Combine(appDir, "Babilônia Buff-icone.ico");
                 if (File.Exists(icoPath))
                 {
                     return new Icon(icoPath);
