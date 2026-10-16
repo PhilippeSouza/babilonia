@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BABILÔNIA — LoL Companion, 6 Meta Picks &amp; 3 Builds Inteligentes</title>
+  <title>Babilonia Buff — LoL Companion</title>
   <link rel="icon" type="image/png" href="/logo.png" />
   <link rel="shortcut icon" href="/favicon.ico" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,12 +13,12 @@
 </head>
 <body>
   <div class="blitz-layout">
-    <!-- BARRA LATERAL BABILÔNIA (DRACULA THEME) -->
+    <!-- BARRA LATERAL BABILONIA BUFF (DRACULA THEME) -->
     <aside class="blitz-sidebar">
       <div class="sidebar-brand">
-        <img src="/logo.png" alt="Babilônia Ícone" class="babilonia-logo-img" />
+        <img src="/logo.png" alt="Babilonia Buff" class="babilonia-logo-img" />
         <div class="brand-text">
-          <span class="brand-name">BABILÔNIA</span>
+          <span class="brand-name">BABILONIA BUFF</span>
           <span class="brand-tag">DRACULA LOL</span>
         </div>
       </div>
@@ -91,22 +91,11 @@
         </div>
 
         <div class="topbar-controls">
-          <div class="patch-pill">Patch <strong id="patchVersionLabel">16.20.1</strong></div>
-
-          <div class="sim-bar">
-            <button id="btnToggleSim" class="btn-dracula btn-sim-toggle">
-              🎮 Simular Partida: <strong id="simStateLabel">OFF</strong>
-            </button>
-            <select id="simScenarioSelect" class="dracula-select">
-              <option value="dragon_gold">🔥 09:20 • Dragão 45s + 1550g</option>
-              <option value="early_lane">⚔️ 03:30 • Nível 3 + Gank</option>
-              <option value="late_baron">👑 19:10 • Barão + Zed 5/1</option>
-            </select>
+          <div id="liveGameStatusPill" class="patch-pill">
+            Estado LoL: <strong id="topPhaseLabel">Monitorando Cliente...</strong>
           </div>
 
-          <button id="btnTestPopup" class="btn-dracula btn-purple" title="Disparar um Popup Tático de demonstração">
-            🔔 Testar Popup
-          </button>
+          <div class="patch-pill">Patch <strong id="patchVersionLabel">16.20.1</strong></div>
 
           <button id="btnFloatingOverlay" class="btn-dracula btn-outline" title="Abrir em janela compacta estilo Overlay">
             🪟 Mini Overlay
@@ -122,7 +111,7 @@
       <main class="blitz-content">
 
         <!-- =================================================================== -->
-        <!-- ABA 0: HOME / VISÃO GERAL (SEM SIMULAÇÃO • MODO REAL BLITZ)         -->
+        <!-- ABA 0: HOME / VISÃO GERAL                                         -->
         <!-- =================================================================== -->
         <section id="home-tab" class="tab-pane active">
           <!-- Hero Card: Conexão Real com Seu LoL + Perfil -->
@@ -132,7 +121,7 @@
                 <img
                   id="homeProfileIcon"
                   src="/logo.png"
-                  alt="Ícone Babilônia"
+                  alt="Babilonia Buff"
                   class="home-summoner-avatar"
                 />
                 <div class="home-summoner-info">
@@ -142,7 +131,7 @@
                   </div>
                   <h1 id="homeSummonerName">Abra o League of Legends</h1>
                   <p id="homeSummonerSub" class="card-sub">
-                    Assim que você abrir o cliente do LoL no PC, seu Nome#TAG, Nível, Elo Ranqueado e Seleção de Campeões aparecerão aqui automaticamente (sem simulação!).
+                    Assim que você abrir o cliente do LoL no PC, seu Nome#TAG, Nível, Elo Ranqueado e Seleção de Campeões aparecerão aqui automaticamente.
                   </p>
                 </div>
               </div>
@@ -295,12 +284,6 @@
               <div class="draft-box">
                 <div class="draft-box-header">
                   <span class="text-pink">🟥 Time Inimigo por Rota (Alimenta os 3 Counters e a 3ª Build!)</span>
-                  <div class="comp-presets">
-                    <button class="preset-btn" data-preset="balanced" title="Simular time inimigo equilibrado">Misto</button>
-                    <button class="preset-btn" data-preset="heavy_ap" title="Simular time inimigo com muito AP e CC">Full AP/CC</button>
-                    <button class="preset-btn" data-preset="heavy_ad" title="Simular time inimigo Full AD">Full AD</button>
-                    <button class="preset-btn" data-preset="heavy_heal" title="Simular time inimigo de muita cura e tanques">Cura/Tanques</button>
-                  </div>
                 </div>
                 <div id="enemyDraftSlots" class="enemy-slots-row"></div>
                 <div id="enemyCompSummaryBadge" class="comp-summary-bar"></div>
@@ -461,7 +444,7 @@
               </div>
             </div>
 
-            <!-- Coluna Direita: Os 6 Itens da Build Selecionada + Explicação Tática -->
+            <!-- Coluna Direita: Itens Iniciais + Os 6 Itens Grandes com Receita de Componentes + Explicação Tática -->
             <div class="build-col-right">
               <div class="card-dracula build-showcase-card">
                 <div class="card-head">
@@ -472,7 +455,12 @@
                   <span id="activeBuildWinrateBadge" class="badge-dracula green">53.4% WR</span>
                 </div>
 
-                <div class="build-stage-label">ORDEM COMPLETA DE COMPRA (1º AO 6º ITEM)</div>
+                <!-- SEÇÃO 1: ITENS INICIAIS (SAÍDA DA BASE - 500G) -->
+                <div class="build-stage-label">🏁 1. ITENS INICIAIS (SAÍDA DA BASE — 500 OURO NÍVEL 1)</div>
+                <div id="guideStarterPack" class="starter-pack-box mb-18"></div>
+
+                <!-- SEÇÃO 2: ORDEM DOS 6 ITENS GRANDES + QUAL COMPONENTE FAZER PRIMEIRO -->
+                <div class="build-stage-label">🛒 2. ORDEM DOS 6 ITENS GRANDES + QUAL ITEM FAZER PRIMEIRO DE CADA UM</div>
                 <div id="guideCoreItems" class="blitz-items-timeline"></div>
               </div>
 
@@ -501,34 +489,32 @@
         </section>
 
         <!-- =================================================================== -->
-        <!-- ABA 2: PARTIDA AO VIVO (BLITZ LIVE SCOUT + BENCHMARKS + POPUPS)     -->
+        <!-- ABA 2: PARTIDA AO VIVO (MODO JOGO EM ANDAMENTO AUTOMÁTICO)          -->
         <!-- =================================================================== -->
         <section id="live-game-tab" class="tab-pane">
           <div id="idleLiveBanner" class="dracula-banner">
             <div>
-              <h3>⚡ Monitor de Partida Ao Vivo (Porta 2999)</h3>
+              <h3>⚡ Modo Jogo em Andamento Automático (Porta 2999)</h3>
               <p>
-                Quando sua partida começar, esta tela mostra seus <strong>Benchmarks em tempo real (CS/min, Ouro no Bolso, KDA)</strong>,
-                os <strong>Temporizadores de Objetivos</strong> e dispara <strong>Popups Táticos</strong> silenciosos no canto da tela!
+                Assim que sua partida do League of Legends começar, o Babilonia Buff muda <strong>automaticamente</strong> para esta tela,
+                carregando seu campeão, os 5 inimigos da partida, seus <strong>Itens Iniciais</strong>, <strong>qual componente comprar primeiro</strong> com seu ouro atual e temporizadores ao vivo!
               </p>
             </div>
-            <button id="btnStartSimBanner" class="btn-dracula btn-import-blitz">
-              ▶️ Ativar Simulação de Partida Agora
-            </button>
+            <span class="badge-dracula cyan">🔌 Aguardando início da partida no LoL...</span>
           </div>
 
           <div class="live-benchmarks-grid">
             <div class="card-dracula">
               <div class="card-head">
                 <div class="live-me-header">
-                  <img id="hudChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Yasuo.png" alt="Champ" class="live-me-avatar" />
+                  <img id="hudChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Renekton.png" alt="Champ" class="live-me-avatar" />
                   <div>
-                    <h2 id="hudChampName">Yasuo</h2>
+                    <h2 id="hudChampName">Renekton</h2>
                     <span id="hudSummonerName" class="card-sub">Aguardando partida...</span>
                   </div>
                 </div>
                 <div class="live-clock-pill">
-                  <span>TEMPO</span>
+                  <span>TEMPO DE JOGO</span>
                   <strong id="hudGameTime">00:00</strong>
                 </div>
               </div>
@@ -585,6 +571,47 @@
                 <span>📌 RECOMENDAÇÕES ATIVAS AGORA</span>
               </div>
               <div id="coachPriorityCards" class="live-alerts-stack"></div>
+            </div>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- PAINEL DE CONFIGURAÇÃO DE JOGO EM ANDAMENTO (BUILD + SKILLS)    -->
+          <!-- =============================================================== -->
+          <div class="card-dracula mb-18 live-ingame-build-panel">
+            <div class="live-build-top">
+              <div>
+                <span class="step-pill">MODO JOGO EM ANDAMENTO • GUIA DE COMPRA PASSO A PASSO</span>
+                <h2 id="liveBuildHeaderTitle">⚔️ Sua Build &amp; Ordem de Componentes na Partida</h2>
+                <p id="liveBuildEnemySummary" class="card-sub">Sincronizado automaticamente com os 5 inimigos da sua partida atual</p>
+              </div>
+              <div class="live-build-Import-btns" id="liveThreeBuildsSwitch">
+                <button class="btn-dracula btn-outline active" data-live-build="0">🏆 Build 1: Maior WR</button>
+                <button class="btn-dracula btn-outline" data-live-build="1">⚡ Build 2: Alternativa</button>
+                <button class="btn-dracula btn-outline" data-live-build="2">🛡️ Build 3: Anti-Inimigos</button>
+              </div>
+            </div>
+
+            <!-- Destaque: O que comprar agora na próxima volta à base -->
+            <div id="liveNextBuyBanner" class="live-next-buy-banner"></div>
+
+            <div class="live-build-columns">
+              <!-- Esquerda: Itens Iniciais (500g) + Skills Nível a Nível -->
+              <div class="live-build-left">
+                <div class="build-stage-label">🏁 ITENS INICIAIS (SAÍDA DA BASE — 500 OURO)</div>
+                <div id="liveStarterPackBox" class="starter-pack-box mb-18"></div>
+
+                <div class="build-stage-label">📈 QUAL HABILIDADE UPAR EM CADA NÍVEL (<span id="liveSkillPriorityText">Q &gt; E &gt; W</span>)</div>
+                <div id="liveSkillMatrix" class="skill-matrix mb-18"></div>
+
+                <div class="build-stage-label">🔮 RUNAS &amp; FEITIÇOS ATIVOS</div>
+                <div id="liveRunesCompactBox" class="rune-tree-box"></div>
+              </div>
+
+              <!-- Direita: Os 6 Itens Grandes + Qual Componente Fazer Primeiro de cada um -->
+              <div class="live-build-right">
+                <div class="build-stage-label">🛒 ORDEM DOS 6 ITENS GRANDES (E QUAL ITEM FAZER PRIMEIRO DE CADA UM)</div>
+                <div id="liveCoreItemsTimeline" class="blitz-items-timeline"></div>
+              </div>
             </div>
           </div>
 
@@ -654,7 +681,7 @@
 
             <div id="chatMessages" class="dracula-chat-box">
               <div class="chat-bubble assistant">
-                <div class="bubble-author">⚡ Babilônia AI</div>
+                <div class="bubble-author">⚡ Babilonia Buff AI</div>
                 <div class="bubble-text">
                   Pronto! As análises durante a partida aparecem automaticamente em <strong>Popups visuais silenciosos</strong> no canto da tela. Você também pode tirar qualquer dúvida tática aqui abaixo!
                 </div>
@@ -685,7 +712,7 @@
   <div id="settingsModal" class="modal-backdrop hidden">
     <div class="modal-dracula">
       <div class="modal-header">
-        <h3>⚙️ Configurações do Babilônia</h3>
+        <h3>⚙️ Configurações do Babilonia Buff</h3>
         <button id="btnCloseSettings" class="btn-close">✕</button>
       </div>
       <div class="modal-body">

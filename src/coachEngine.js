@@ -6,7 +6,13 @@
 
 const { getChampionGuide } = require('./championsDb');
 
-function generateLocalTacticalCoaching(matchState, ddragonChampData = null) {
+function generateLocalTacticalCoaching(
+  matchState,
+  ddragonChampData = null,
+  enemyTeamIds = [],
+  ddragonChampions = {},
+  ddragonItems = {}
+) {
   if (!matchState || !matchState.activePlayer) {
     return {
       voiceCallout: 'Aguardando início da partida ou seleção de campeões.',
@@ -15,33 +21,54 @@ function generateLocalTacticalCoaching(matchState, ddragonChampData = null) {
           id: 'idle-tip',
           type: 'MACRO',
           badge: 'PRONTO',
-          title: 'BaronAI Monitorando o Cliente',
-          message: 'Abra o League of Legends ou ative o Modo Simulador no topo da tela para testar o Coach em tempo real!'
+          title: 'Babilonia Buff Monitorando o Cliente do LoL',
+          message: 'Entre na fila ou Seleção de Campeões no seu League of Legends — o Babilonia Buff mudará de tela automaticamente!'
         }
       ]
     };
   }
 
   const p = matchState.activePlayer;
-  const guide = getChampionGuide(p.championId || p.championName, ddragonChampData);
+  const liveEnemies =
+    Array.isArray(matchState.enemies) && matchState.enemies.length > 0
+      ? matchState.enemies.map((e) => (e.championName || '').replace(/[^a-zA-Z]/g, '')).filter(Boolean)
+      : enemyTeamIds;
+
+  const guide = getChampionGuide(
+    p.championId || p.championName,
+    ddragonChampData,
+    liveEnemies,
+    ddragonChampions,
+    ddragonItems
+  );
   const cards = [];
   let voiceCallout = '';
 
-  // 1. Alerta de Ouro Acumulado no Bolso (Recall Timing)
-  if (p.currentGold >= 1300) {
-    const nextItem = guide.coreItems.find(
-      (ci) => !p.items.some((owned) => String(owned.itemID) === String(ci.id))
-    ) || guide.coreItems[1] || guide.coreItems[0];
+  // Descobre o próximo Item Grande e seu 1º Componente que o jogador ainda não tem no inventário
+  const ownedIds = new Set((p.items || []).map((i) => String(i.itemID)));
+  const nextItem =
+    guide.coreItems.find((ci) => !ownedIds.has(String(ci.id))) || guide.coreItems[1] || guide.coreItems[0];
+  const nextSubComp =
+    nextItem && Array.isArray(nextItem.components)
+      ? nextItem.components.find((comp) => !ownedIds.has(String(comp.id))) || nextItem.firstComponent
+      : nextItem?.firstComponent;
 
-    const goldMsg = `Você está com ${p.currentGold} de ouro guardado! Empurre a wave atual até a torre inimiga e dê Recall agora para comprar ${nextItem ? nextItem.name : 'seu próximo componente'}.`;
+  // 1. Alerta de Ouro Acumulado no Bolso (Recall Timing + Componente Exato)
+  if (p.currentGold >= 900) {
+    const subText = nextSubComp ? `${nextSubComp.name} (${nextSubComp.cost})` : nextItem?.name || 'seu próximo componente';
+    const isUrgentRecall = p.currentGold >= 1200;
+    const goldMsg = nextSubComp
+      ? `Você está com ${p.currentGold}g no bolso! Empurre a wave e dê Recall para comprar "${nextSubComp.name}" (${nextSubComp.cost}) — 1º passo para fechar ${nextItem.name}.`
+      : `Você está com ${p.currentGold}g guardado! Empurre a wave atual e dê Recall para adiantar ${nextItem ? nextItem.name : 'seu próximo item'}.`;
+
     cards.push({
-      id: `gold-${Math.floor(p.currentGold / 200)}`,
-      type: 'URGENT',
-      badge: `${p.currentGold} OURO NO BOLSO`,
-      title: 'Hora de dar Recall (Pico de Compra)',
+      id: `gold-${Math.floor(p.currentGold / 250)}`,
+      type: isUrgentRecall ? 'URGENT' : 'BUILD',
+      badge: `${p.currentGold} OURO • COMPRE: ${subText.toUpperCase()}`,
+      title: isUrgentRecall ? 'Hora de dar Recall (Pico de Compra!)' : `Próxima Compra na Base: ${subText}`,
       message: goldMsg
     });
-    voiceCallout = `Atenção: você tem ${p.currentGold} de ouro no bolso. Empurre a rota e dê base para comprar ${nextItem ? nextItem.name : 'itens'} antes da próxima luta.`;
+    voiceCallout = goldMsg;
   }
 
   // 2. Alerta de Objetivo Próximo (Dragão / Vastilarvas / Arauto / Barão)
@@ -206,7 +233,7 @@ async function answerPlayerQuestion({ question, matchState, selectedChampionId, 
   }
 
   return {
-    source: 'BaronAI Motor Tático Local',
+    source: 'Babilonia Buff AI',
     answer,
     voiceText
   };
@@ -227,7 +254,7 @@ DADOS REAIS DA PARTIDA AO VIVO:
 `;
   }
 
-  return `Você é o BaronAI, um Coach Challenger de League of Legends direto, tático e objetivo.
+  return `Você é o Babilonia Buff, um Coach Challenger de League of Legends direto, tático e objetivo.
 Responda em Português do Brasil em no máximo 4 tópicos curtos e práticos para o jogador ler ou ouvir rápido durante a partida.
 ${stateDesc}
 Pergunta/Pedido do Jogador: "${question || 'O que eu devo fazer agora para vencer essa partida?'}"`;

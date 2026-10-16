@@ -1,5 +1,5 @@
 /**
- * Conector Live Client Data API (Porta 2999) + Simulador Interativo de Partida
+ * Conector Live Client Data API (Porta 2999)
  * Lê os dados da partida em andamento a cada segundo (Ouro, KDA, CS, Itens, Eventos de Dragão/Barão).
  */
 
@@ -51,7 +51,7 @@ function fetchLiveGameData() {
 }
 
 /**
- * Normaliza os dados da Live Client Data API (ou do Simulador) em um resumo tático limpo
+ * Normaliza os dados da Live Client Data API em um resumo tático limpo
  * para a interface e para o Coach de IA.
  */
 function parseLiveMatchState(rawGame, championNameMap = {}) {
@@ -223,148 +223,7 @@ function formatSeconds(sec) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-/**
- * Gera dados realistas para o Modo Simulador (para o usuário testar o Coach de IA e Voz sem estar em partida)
- */
-function createSimulatedRawGame(simConfig) {
-  const elapsed = simConfig.gameTime || 560; // Ex: 9:20 de partida
-  const myChamp = simConfig.championId || 'Yasuo';
-  const enemyLaner = simConfig.enemyChampionId || 'Malzahar';
-
-  return {
-    gameData: {
-      gameMode: 'CLASSIC',
-      gameTime: elapsed
-    },
-    activePlayer: {
-      summonerName: 'Você (Simulador)',
-      level: simConfig.level || 8,
-      currentGold: simConfig.currentGold ?? 1550,
-      championStats: {
-        attackDamage: 142,
-        abilityPower: 0,
-        armor: 68,
-        magicResist: 48,
-        moveSpeed: 385,
-        maxHealth: 1380,
-        currentHealth: 1120
-      }
-    },
-    allPlayers: [
-      {
-        summonerName: 'Você (Simulador)',
-        championName: myChamp,
-        team: 'ORDER',
-        position: 'MIDDLE',
-        level: simConfig.level || 8,
-        scores: {
-          kills: simConfig.kills ?? 3,
-          deaths: simConfig.deaths ?? 1,
-          assists: simConfig.assists ?? 2,
-          creepScore: simConfig.cs ?? 74,
-          wardScore: 8.5
-        },
-        items: [
-          { itemID: 1055, displayName: 'Lâmina de Doran' },
-          { itemID: 3006, displayName: 'Grevas do Berserker' },
-          { itemID: 1053, displayName: 'Cetro Vampírico' },
-          { itemID: 3340, displayName: 'Sentinela Invisível' }
-        ]
-      },
-      {
-        summonerName: 'Aliado Top',
-        championName: 'Darius',
-        team: 'ORDER',
-        position: 'TOP',
-        level: 8,
-        scores: { kills: 2, deaths: 1, assists: 1, creepScore: 68 },
-        items: [{ itemID: 3047, displayName: 'Botas Galvanizadas de Aço' }]
-      },
-      {
-        summonerName: 'Aliado Jungle',
-        championName: 'LeeSin',
-        team: 'ORDER',
-        position: 'JUNGLE',
-        level: 7,
-        scores: { kills: 2, deaths: 2, assists: 4, creepScore: 52 },
-        items: [{ itemID: 6692, displayName: 'Eclipse' }]
-      },
-      {
-        summonerName: 'Aliado ADC',
-        championName: 'Jinx',
-        team: 'ORDER',
-        position: 'BOTTOM',
-        level: 7,
-        scores: { kills: 1, deaths: 2, assists: 2, creepScore: 71 },
-        items: [{ itemID: 3006, displayName: 'Grevas do Berserker' }]
-      },
-      {
-        summonerName: 'Aliado Supp',
-        championName: 'Thresh',
-        team: 'ORDER',
-        position: 'UTILITY',
-        level: 6,
-        scores: { kills: 0, deaths: 2, assists: 5, creepScore: 14 },
-        items: [{ itemID: 3117, displayName: 'Botas da Mobilidade' }]
-      },
-      // Time Inimigo
-      {
-        summonerName: 'Rival Mid',
-        championName: enemyLaner,
-        team: 'CHAOS',
-        position: 'MIDDLE',
-        level: 8,
-        scores: { kills: 1, deaths: 3, assists: 1, creepScore: 65 },
-        items: [{ itemID: 3802, displayName: 'Capítulo Perdido' }]
-      },
-      {
-        summonerName: 'Rival Jungle (Forte)',
-        championName: 'Zed',
-        team: 'CHAOS',
-        position: 'JUNGLE',
-        level: 8,
-        scores: { kills: 5, deaths: 1, assists: 2, creepScore: 60 },
-        items: [{ itemID: 3142, displayName: 'Lâmina Fantasma de Youmuu' }]
-      },
-      {
-        summonerName: 'Rival Top',
-        championName: 'Garen',
-        team: 'CHAOS',
-        position: 'TOP',
-        level: 8,
-        scores: { kills: 1, deaths: 2, assists: 0, creepScore: 63 },
-        items: [{ itemID: 3006, displayName: 'Grevas do Berserker' }]
-      },
-      {
-        summonerName: 'Rival ADC',
-        championName: 'Caitlyn',
-        team: 'CHAOS',
-        position: 'BOTTOM',
-        level: 7,
-        scores: { kills: 1, deaths: 1, assists: 1, creepScore: 76 },
-        items: [{ itemID: 3006, displayName: 'Grevas do Berserker' }]
-      },
-      {
-        summonerName: 'Rival Supp',
-        championName: 'Lux',
-        team: 'CHAOS',
-        position: 'UTILITY',
-        level: 6,
-        scores: { kills: 0, deaths: 1, assists: 2, creepScore: 12 },
-        items: [{ itemID: 1001, displayName: 'Botas' }]
-      }
-    ],
-    events: {
-      Events: [
-        { EventName: 'GameStart', EventTime: 0 },
-        { EventName: 'DragonKill', EventTime: Math.max(305, elapsed - 255) } // Faz o próximo Dragão nascer em ~45s!
-      ]
-    }
-  };
-}
-
 module.exports = {
   fetchLiveGameData,
-  parseLiveMatchState,
-  createSimulatedRawGame
+  parseLiveMatchState
 };

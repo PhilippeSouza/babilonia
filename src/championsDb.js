@@ -11,63 +11,63 @@
 
 const RUNE_TEMPLATES = {
   CONQUEROR_PRECISION: {
-    name: 'Blitz: Conquistador (Duelo & Sustento)',
+    name: 'Babilonia Buff: Conquistador (Duelo & Sustento)',
     primaryStyleId: 8000,
     subStyleId: 8400,
     selectedPerkIds: [8010, 9111, 9104, 8299, 8444, 8451, 5005, 5008, 5001],
     summary: 'Precisão (Conquistador) + Determinação — Ideal para trocas prolongadas.'
   },
   LETHAL_TEMPO_ADC: {
-    name: 'Blitz: Ritmo Fatal (Máximo DPS)',
+    name: 'Babilonia Buff: Ritmo Fatal (Máximo DPS)',
     primaryStyleId: 8000,
     subStyleId: 8300,
     selectedPerkIds: [8008, 8009, 9103, 8014, 8304, 8345, 5005, 5008, 5001],
     summary: 'Precisão (Ritmo Fatal) + Inspiração — Velocidade de ataque máxima e escala.'
   },
   FLEET_SURVIVAL: {
-    name: 'Blitz: Agilidade nos Pés (Anti-Poke / Segurança)',
+    name: 'Babilonia Buff: Agilidade nos Pés (Anti-Poke / Segurança)',
     primaryStyleId: 8000,
     subStyleId: 8400,
     selectedPerkIds: [8021, 9111, 9103, 8014, 8444, 8242, 5005, 5008, 5001],
     summary: 'Precisão (Agilidade nos Pés) + Determinação — Cura na rota e resistência a CC.'
   },
   ELECTROCUTE_BURST: {
-    name: 'Blitz: Eletrocutar (Explosão Rápida)',
+    name: 'Babilonia Buff: Eletrocutar (Explosão Rápida)',
     primaryStyleId: 8100,
     subStyleId: 8200,
     selectedPerkIds: [8112, 8143, 8138, 8106, 8226, 8210, 5008, 5008, 5001],
     summary: 'Dominação (Eletrocutar) + Feitiçaria — Abate instantâneo em alvos frágeis.'
   },
   FIRST_STRIKE_SCALE: {
-    name: 'Blitz: Primeiro Ataque (Ouro & Explosão)',
+    name: 'Babilonia Buff: Primeiro Ataque (Ouro & Explosão)',
     primaryStyleId: 8300,
     subStyleId: 8200,
     selectedPerkIds: [8369, 8304, 8345, 8347, 8226, 8210, 5008, 5008, 5001],
     summary: 'Inspiração (Primeiro Ataque) + Feitiçaria — Acelera itens gerando ouro extra.'
   },
   ARCANE_COMET_MAGE: {
-    name: 'Blitz: Cometa Arcano (Pressão de Rota)',
+    name: 'Babilonia Buff: Cometa Arcano (Pressão de Rota)',
     primaryStyleId: 8200,
     subStyleId: 8300,
     selectedPerkIds: [8229, 8226, 8210, 8237, 8345, 8347, 5008, 5008, 5001],
     summary: 'Feitiçaria (Cometa Arcano) + Inspiração — Poke constante e controle de mana.'
   },
   GRASP_TANK: {
-    name: 'Blitz: Aperto dos Mortos-Vivos (Colosso)',
+    name: 'Babilonia Buff: Aperto dos Mortos-Vivos (Colosso)',
     primaryStyleId: 8400,
     subStyleId: 8300,
     selectedPerkIds: [8437, 8446, 8429, 8451, 8304, 8345, 5007, 5001, 5001],
     summary: 'Determinação (Aperto) + Inspiração — Trocas curtas fortes e destruição de torres.'
   },
   AERY_ENCHANTER: {
-    name: 'Blitz: Invocar Aery (Escudos & Poke)',
+    name: 'Babilonia Buff: Invocar Aery (Escudos & Poke)',
     primaryStyleId: 8200,
     subStyleId: 8400,
     selectedPerkIds: [8214, 8226, 8210, 8237, 8473, 8453, 5007, 5008, 5001],
     summary: 'Feitiçaria (Aery) + Determinação — Proteção contínua e pressão nos níveis iniciais.'
   },
   AFTERSHOCK_ENGAGE: {
-    name: 'Blitz: Pós-Choque (Iniciação Blindada)',
+    name: 'Babilonia Buff: Pós-Choque (Iniciação Blindada)',
     primaryStyleId: 8400,
     subStyleId: 8300,
     selectedPerkIds: [8439, 8463, 8473, 8242, 8306, 8347, 5007, 5001, 5001],
@@ -413,7 +413,604 @@ function analyzeEnemyComposition(enemyTeamIds = [], ddragonChampions = {}) {
   };
 }
 
+// ============================================================================
+// PACOTES DE ITENS INICIAIS (SAÍDA DA BASE — 500 OURO NÍVEL 1)
+// ============================================================================
+const STARTER_PACKS = {
+  DORAN_BLADE: {
+    title: 'Saída Agressiva / Troca Franca (500g)',
+    summary: 'Ideal para vencer trocas curtas/longas nos níveis 1 a 3 e ter sustento batendo na wave.',
+    items: [
+      { id: '1055', name: 'Lâmina de Doran', cost: '450g', count: 1, role: 'Item Inicial' },
+      { id: '2003', name: 'Poção de Vida', cost: '50g', count: 1, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  },
+  DORAN_SHIELD: {
+    title: 'Saída Anti-Poke / Sobrevivência (500g)',
+    summary: 'Melhor escolha contra campeões de longo alcance (Ranged) ou rotas de muito dano contínuo.',
+    items: [
+      { id: '1054', name: 'Escudo de Doran', cost: '450g', count: 1, role: 'Anti-Poke' },
+      { id: '2003', name: 'Poção de Vida', cost: '50g', count: 1, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  },
+  DORAN_RING: {
+    title: 'Saída Mago / Pressão de Mana (500g)',
+    summary: 'Garante Poder de Habilidade e regeneração de mana ao abater tropas para empurrar a onda.',
+    items: [
+      { id: '1056', name: 'Anel de Doran', cost: '400g', count: 1, role: 'Item Inicial AP' },
+      { id: '2003', name: 'Poção de Vida (x2)', cost: '100g', count: 2, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  },
+  JUNGLE_RED: {
+    title: 'Saída Caçador Agressivo / Dano (500g)',
+    summary: 'Companheiro da selva que aplica lentidão e dano queimado ao acumular cargas após evoluir o Golpear.',
+    items: [
+      { id: '1101', name: 'Cria de Andarilho', cost: '450g', count: 1, role: 'Pet da Selva' },
+      { id: '2003', name: 'Poção de Vida', cost: '50g', count: 1, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível / Lente', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  },
+  JUNGLE_GREEN: {
+    title: 'Saída Caçador Lutador / Tanque (500g)',
+    summary: 'Companheiro da selva que concede escudo de vida e tenacidade extra nas lutas.',
+    items: [
+      { id: '1103', name: 'Broto de Esmagamusgo', cost: '450g', count: 1, role: 'Pet da Selva' },
+      { id: '2003', name: 'Poção de Vida', cost: '50g', count: 1, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível / Lente', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  },
+  SUPPORT_ATLAS: {
+    title: 'Saída Suporte / Missão de Sentinelas (500g)',
+    summary: 'Gera ouro ao atacar inimigos ou dividir tropas e evolui gratuitamente para seu item de visão.',
+    items: [
+      { id: '3865', name: 'Atlas Mundial', cost: '400g', count: 1, role: 'Item de Suporte' },
+      { id: '2003', name: 'Poção de Vida (x2)', cost: '100g', count: 2, role: 'Sustento' },
+      { id: '3340', name: 'Sentinela Invisível', cost: 'Grátis', count: 1, role: 'Visão (Trinket)' }
+    ]
+  }
+};
+
+// ============================================================================
+// MAPA TÁTICO DE COMPONENTES DE CADA ITEM GRANDE (QUAL FAZER PRIMEIRO!)
+// ============================================================================
+const ITEM_BUILD_RECIPE_GUIDE = {
+  // Lutadores / AD / Bruisers
+  '6610': { // Céu Dividido
+    totalCost: '3100g',
+    firstReason: 'Compre o Tunelizador (ou Espada Longa + Rubi) na 1ª volta para ganhar AD e Vida imediata nas trocas.',
+    components: [
+      { id: '2021', name: 'Tunelizador', cost: '1150g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3133', name: 'Martelo de Guerra de Caulfield', cost: '1050g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3071': { // Cutelo Negro
+    totalCost: '3000g',
+    firstReason: 'Faça o Fago primeiro: dá velocidade de movimento ao atacar para colar no inimigo.',
+    components: [
+      { id: '3044', name: 'Fago', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3133', name: 'Martelo de Guerra de Caulfield', cost: '1050g', priorityLabel: '2º Componente' },
+      { id: '3067', name: 'Gema Ardente', cost: '800g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3078': { // Força da Trindade
+    totalCost: '3333g',
+    firstReason: 'Sempre feche o Fulgor na 1ª volta à base para dobrar o dano do seu próximo ataque após usar habilidade!',
+    components: [
+      { id: '3057', name: 'Fulgor', cost: '900g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3044', name: 'Fago', cost: '1100g', priorityLabel: '2º Componente' },
+      { id: '6690', name: 'Machado Termagante', cost: '1100g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3153': { // Espada do Rei Destruído
+    totalCost: '3200g',
+    firstReason: 'Comece pelo Cetro Vampírico (900g) para ter roubo de vida infinito na rota.',
+    components: [
+      { id: '1053', name: 'Cetro Vampírico', cost: '900g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1043', name: 'Arco Recurvo', cost: '700g', priorityLabel: '2º Componente' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3053': { // Sinal de Sterak
+    totalCost: '3200g',
+    firstReason: 'Compre a Picareta primeiro se quiser dano ou o Tunelizador se precisar aguentar explosão.',
+    components: [
+      { id: '2021', name: 'Tunelizador', cost: '1150g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '2º Componente' },
+      { id: '1028', name: 'Cristal de Rubi', cost: '400g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '6333': { // Dança da Morte
+    totalCost: '3200g',
+    firstReason: 'Se estiver contra AD forte, compre a Cota de Malha (800g) primeiro; se estiver na frente, Martelo de Caulfield.',
+    components: [
+      { id: '3133', name: 'Martelo de Guerra de Caulfield', cost: '1050g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1031', name: 'Cota de Malha', cost: '800g', priorityLabel: '2º Componente' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3181': { // Quebracascos
+    totalCost: '3000g',
+    firstReason: 'Comece pelo Tunelizador para ganhar AD + Vida nas trocas laterais.',
+    components: [
+      { id: '2021', name: 'Tunelizador', cost: '1150g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3134', name: ' Retriz Alada', cost: '800g', priorityLabel: '2º Componente' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3026': { // Anjo Guardião
+    totalCost: '3200g',
+    firstReason: 'Compre a Espada G. p. C. (1300g) primeiro para um pico alto de Dano de Ataque.',
+    components: [
+      { id: '1038', name: 'Espada G. p. C.', cost: '1300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3131', name: ' Força de Aço', cost: '1100g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3156': { // Mandíbula de Malmortius
+    totalCost: '3100g',
+    firstReason: 'Feche a Hexdrinker (1300g) imediatamente: só ela já te dá o escudo anti-magia salva-vidas!',
+    components: [
+      { id: '3155', name: 'Hexdrinker (Escudo Mágico)', cost: '1300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3133', name: 'Martelo de Guerra de Caulfield', cost: '1050g', priorityLabel: '2º Componente' }
+    ]
+  },
+  // Crítico / ADCs
+  '6672': { // Mata-Cráquens
+    totalCost: '3100g',
+    firstReason: 'Feche a Aljava Vespertina ou Retriz + Arco Recurvo primeiro para limpar ondas rápido.',
+    components: [
+      { id: '1043', name: 'Arco Recurvo', cost: '700g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '6690', name: 'Machado Termagante', cost: '1100g', priorityLabel: '2º Componente' },
+      { id: '3134', name: 'Retriz Alada', cost: '800g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3031': { // Gume do Infinito
+    totalCost: '3400g',
+    firstReason: 'Junte 1300g para comprar a Espada G. p. C. na volta à base — é o maior pico de AD puro.',
+    components: [
+      { id: '1038', name: 'Espada G. p. C.', cost: '1300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '2º Componente' },
+      { id: '1018', name: 'Capa da Agilidade', cost: '600g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '6673': { // Arco-Escudo Imortal
+    totalCost: '3000g',
+    firstReason: 'Comece pela Picareta (875g) para não perder dano antes de fechar o escudo.',
+    components: [
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '6670', name: 'Aljava Vespertina', cost: '1300g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3072': { // Sedenta por Sangue
+    totalCost: '3400g',
+    firstReason: 'Compre o Cetro Vampírico (900g) primeiro se precisar se curar, ou Espada G. p. C. (1300g) se tiver o ouro cheio.',
+    components: [
+      { id: '1053', name: 'Cetro Vampírico', cost: '900g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1038', name: 'Espada G. p. C.', cost: '1300g', priorityLabel: '2º Componente' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3036': { // Lembranças do Lorde Dominik
+    totalCost: '3000g',
+    firstReason: 'Faça o Último Sussurro (1450g) primeiro: ele já te dá 20% de Penetração de Armadura imediata!',
+    components: [
+      { id: '3035', name: 'Último Sussurro (Penetração)', cost: '1450g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '6670', name: 'Aljava Vespertina', cost: '1300g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3033': { // Lembrança Mortal
+    totalCost: '3000g',
+    firstReason: 'Compre o Chamado do Carrasco (800g) IMEDIATAMENTE por 800g: ele já aplica o Corta-Cura de 40%!',
+    components: [
+      { id: '3123', name: 'Chamado do Carrasco (Corta-Cura 800g!)', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3035', name: 'Último Sussurro', cost: '1450g', priorityLabel: '2º Componente' },
+      { id: '1018', name: 'Capa da Agilidade', cost: '600g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3095': { // Faca de Statikk
+    totalCost: '2900g',
+    firstReason: 'Comece pelo Estilingue do Patrulheiro ou Machado Termagante para velocidade de ataque e push.',
+    components: [
+      { id: '6690', name: 'Machado Termagante', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3144', name: 'Estilingue do Patrulheiro', cost: '600g', priorityLabel: '2º Componente' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3094': { // Canhão Fumegante
+    totalCost: '2650g',
+    firstReason: 'Faça o Zelo (1100g) primeiro para ganhar Crítico e Velocidade de Movimento.',
+    components: [
+      { id: '3086', name: 'Zelo', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3144', name: 'Estilingue do Patrulheiro', cost: '600g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3046': { // Dançarina Fantasma
+    totalCost: '2650g',
+    firstReason: 'Comece pelo Zelo (1100g) para atravessar a rota com velocidade e crítico.',
+    components: [
+      { id: '3086', name: 'Zelo', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3134', name: 'Retriz Alada', cost: '800g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '6035': { // Cimitarra Mercurial
+    totalCost: '3300g',
+    firstReason: 'Compre a Bandana de Mercúrio (1300g) primeiro: o ativo dela já remove qualquer Stun/Supressão!',
+    components: [
+      { id: '3140', name: 'Bandana de Mercúrio (Remove CC!)', cost: '1300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1037', name: 'Picareta', cost: '875g', priorityLabel: '2º Componente' },
+      { id: '1053', name: 'Cetro Vampírico', cost: '900g', priorityLabel: '3º Componente' }
+    ]
+  },
+  // Assassinos AD
+  '3142': { // Lâmina Fantasma de Youmuu
+    totalCost: '2800g',
+    firstReason: 'Feche o Punhal Serrilhado (1000g) na 1ª volta: a Letalidade inicial derrete alvos sem armadura.',
+    components: [
+      { id: '3134', name: 'Punhal Serrilhado (Letalidade)', cost: '1000g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3133', name: 'Retriz / Picareta', cost: '875g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '6699': { // Espada Ciclovoltaica
+    totalCost: '2900g',
+    firstReason: 'Comece pelo Brutalizador (1337g) para Letalidade + Aceleração de Habilidade.',
+    components: [
+      { id: '2020', name: 'O Brutalizador', cost: '1337g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '2015', name: 'Estilhaço de Kircheis', cost: '700g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '6694': { // Rancor de Serylda
+    totalCost: '3000g',
+    firstReason: 'Compre o Último Sussurro (1450g) primeiro para atravessar a armadura inimiga.',
+    components: [
+      { id: '3035', name: 'Último Sussurro', cost: '1450g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '2020', name: 'O Brutalizador', cost: '1337g', priorityLabel: '2º Componente' }
+    ]
+  },
+  // Magos / AP
+  '6655': { // Companheiro de Luden
+    totalCost: '2850g',
+    firstReason: 'Sempre feche o Capítulo Perdido (1200g) primeiro: ele resolve 100% da sua falta de mana na rota!',
+    components: [
+      { id: '3802', name: 'Capítulo Perdido (Mana Infinita)', cost: '1200g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3145', name: 'Alternador Hextec', cost: '1100g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '6697': { // Malevolência
+    totalCost: '2700g',
+    firstReason: 'Feche o Capítulo Perdido (1200g) na 1ª volta para nunca mais ficar sem mana.',
+    components: [
+      { id: '3802', name: 'Capítulo Perdido', cost: '1200g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3108', name: 'Códice Demoníaco', cost: '850g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '4645': { // Chamaombria
+    totalCost: '3200g',
+    firstReason: 'Compre o Alternador Hextec (1100g) primeiro para ter explosão extra no seu combo.',
+    components: [
+      { id: '3145', name: 'Alternador Hextec', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1058', name: 'Bastão Desnecessariamente Grande', cost: '1200g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3089': { // Capuz da Morte de Rabadon
+    totalCost: '3600g',
+    firstReason: 'Junte 1200g para o primeiro Bastão Desnecessariamente Grande.',
+    components: [
+      { id: '1058', name: 'Bastão Desnecessariamente Grande', cost: '1200g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1058', name: '2º Bastão Desnecessariamente Grande', cost: '1200g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3157': { // Ampulheta de Zhonya
+    totalCost: '3250g',
+    firstReason: 'Compre a Proteção Glacial (Armadura + Estase única de 1600g) primeiro contra assassinos AD!',
+    components: [
+      { id: '2420', name: ' Guarda-Braço da Caçadora (Estase!)', cost: '1600g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1058', name: 'Bastão Desnecessariamente Grande', cost: '1200g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3102': { // Véu da Banshee
+    totalCost: '3000g',
+    firstReason: 'Compre a Barreira Verdejante (1600g) primeiro: ela já te dá o Escudo de Feitiço antes de fechar o item!',
+    components: [
+      { id: '4632', name: 'Barreira Verdejante (Escudo Anti-Magia!)', cost: '1600g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1058', name: 'Bastão Desnecessariamente Grande', cost: '1200g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '6653': { // Tormento de Liandry
+    totalCost: '3000g',
+    firstReason: 'Faça a Máscara Assustadora (1300g) primeiro: ela já amplifica todo o seu dano em até 6%!',
+    components: [
+      { id: '3147', name: 'Máscara Assustadora', cost: '1300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '2508', name: 'Cinzas Predestinadas (Queima)', cost: '900g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3165': { // Morellonomicon
+    totalCost: '2200g',
+    firstReason: 'Compre o Orbe do Oblívio por apenas 800g primeiro: ele já corta 40% da cura inimiga imediatamente!',
+    components: [
+      { id: '3916', name: 'Orbe do Oblívio (Corta-Cura 800g!)', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3108', name: 'Códice Demoníaco', cost: '850g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3135': { // Cajado do Vazio
+    totalCost: '3000g',
+    firstReason: 'Compre a Joia da Ruína (1100g) primeiro: ela já fornece 13% de Penetração Mágica imediata.',
+    components: [
+      { id: '4630', name: 'Joia da Ruína (Penetração Mágica)', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1026', name: 'Varinha Explosiva', cost: '850g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '4628': { // Foco do Horizonte
+    totalCost: '2700g',
+    firstReason: 'Comece pelo Alternador Hextec (1100g) para dano extra no poke.',
+    components: [
+      { id: '3145', name: 'Alternador Hextec', cost: '1100g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3108', name: 'Códice Demoníaco', cost: '850g', priorityLabel: '2º Componente' }
+    ]
+  },
+  // Tanques & Suportes
+  '3068': { // Égide de Fogo Solar
+    totalCost: '2700g',
+    firstReason: 'Compre a Brasa de Bami (900g) na 1ª volta à base para queimar a wave e limpar tropas rápido!',
+    components: [
+      { id: '6660', name: 'Brasa de Bami (Queima em Área)', cost: '900g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1031', name: 'Cota de Malha', cost: '800g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3075': { // Armadura de Espinhos
+    totalCost: '2450g',
+    firstReason: 'Compre o Colete Espinhoso por 800g primeiro: só ele já reflete dano e corta 40% da cura inimiga!',
+    components: [
+      { id: '3076', name: 'Colete Espinhoso (Corta-Cura 800g!)', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1031', name: 'Cota de Malha', cost: '800g', priorityLabel: '2º Componente' },
+      { id: '1028', name: 'Cristal de Rubi', cost: '400g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '6665': { // Jak'Sho, o Inconstante
+    totalCost: '3200g',
+    firstReason: 'Comece pela Cota de Malha (800g) contra AD ou Capa Negatron (850g) contra AP.',
+    components: [
+      { id: '1031', name: 'Cota de Malha', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1057', name: 'Capa Negatron (Resistência Mágica)', cost: '850g', priorityLabel: '2º Componente' },
+      { id: '1011', name: 'Cinto do Gigante', cost: '900g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '4401': { // Força da Natureza
+    totalCost: '2800g',
+    firstReason: 'Compre a Capa Negatron (850g) primeiro para +50 de Resistência Mágica imediata.',
+    components: [
+      { id: '1057', name: 'Capa Negatron (+50 RM)', cost: '850g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3066', name: 'Armadura Lunar Alada', cost: '800g', priorityLabel: '2º Componente' },
+      { id: '1028', name: 'Cristal de Rubi', cost: '400g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '3143': { // Presságio de Randuin
+    totalCost: '2700g',
+    firstReason: 'Feche a Carapaça do Vigia (1000g) primeiro para reduzir o dano de todos os ataques básicos inimigos.',
+    components: [
+      { id: '3082', name: 'Carapaça do Vigia (Reduz Ataques)', cost: '1000g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1011', name: 'Cinto do Gigante', cost: '900g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3742': { // Couraça do Defunto
+    totalCost: '2900g',
+    firstReason: 'Comece pela Armadura Lunar Alada (800g) para ganhar Vida + 5% de Velocidade de Movimento.',
+    components: [
+      { id: '3066', name: 'Armadura Lunar Alada', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1031', name: 'Cota de Malha', cost: '800g', priorityLabel: '2º Componente' },
+      { id: '1028', name: 'Cristal de Rubi', cost: '400g', priorityLabel: '3º Componente' }
+    ]
+  },
+  '6617': { // Renovador de Pedra Lunar
+    totalCost: '2200g',
+    firstReason: 'Compre a Gema Ardente (800g) ou Espelho de Bandópolis (900g) na 1ª volta para regeneração de mana e CDR.',
+    components: [
+      { id: '4642', name: 'Espelho de Bandópolis', cost: '900g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3067', name: 'Gema Ardente', cost: '800g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3107': { // Redenção
+    totalCost: '2300g',
+    firstReason: 'Compre o Ídolo Proibido (800g) primeiro para aumentar o poder de todas as suas curas e escudos.',
+    components: [
+      { id: '3114', name: 'Ídolo Proibido (+Cura/Escudo)', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '3067', name: 'Gema Ardente', cost: '800g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3190': { // Medalhão dos Solari de Ferro
+    totalCost: '2200g',
+    firstReason: 'Comece pela Gema Ardente (800g) para vida e aceleração de habilidade.',
+    components: [
+      { id: '3067', name: 'Gema Ardente', cost: '800g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1029', name: 'Couraça de Pano', cost: '300g', priorityLabel: '2º Componente' },
+      { id: '1033', name: 'Manto Anula-Magia', cost: '400g', priorityLabel: '3º Componente' }
+    ]
+  },
+  // Botas Nível 2
+  '3006': { // Grevas do Berserker
+    totalCost: '1100g',
+    firstReason: 'Na 1ª volta com 300g-600g, compre a Botas (300g) + Adaga (250g) antes de fechar a Greva.',
+    components: [
+      { id: '1001', name: 'Botas (Velocidade Base)', cost: '300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1042', name: 'Adaga (+Velocidade de Ataque)', cost: '250g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3111': { // Passos de Mercúrio
+    totalCost: '1200g',
+    firstReason: 'Compre o Manto Anula-Magia (400g) + Botas (300g) para já segurar o dano mágico na rota.',
+    components: [
+      { id: '1001', name: 'Botas', cost: '300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1033', name: 'Manto Anula-Magia (+RM)', cost: '400g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3047': { // Botas Galvanizadas de Aço
+    totalCost: '1200g',
+    firstReason: 'Compre a Couraça de Pano (300g) + Botas (300g) na 1ª volta contra oponentes AD.',
+    components: [
+      { id: '1001', name: 'Botas', cost: '300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '1029', name: 'Couraça de Pano (+Armadura)', cost: '300g', priorityLabel: '2º Componente' }
+    ]
+  },
+  '3020': { // Sapatos do Feiticeiro
+    totalCost: '1100g',
+    firstReason: 'Compre a Botas (300g) primeiro para desviar de skillshots na rota.',
+    components: [
+      { id: '1001', name: 'Botas', cost: '300g', priorityLabel: '1º FAÇA PRIMEIRO' }
+    ]
+  },
+  '3158': { // Botas Ionianas da Lucidez
+    totalCost: '1000g',
+    firstReason: 'Compre a Botas (300g) + Cristal de Brilho (250g) na 1ª volta.',
+    components: [
+      { id: '1001', name: 'Botas', cost: '300g', priorityLabel: '1º FAÇA PRIMEIRO' },
+      { id: '2022', name: 'Cristal de Brilho (+Aceleração)', cost: '250g', priorityLabel: '2º Componente' }
+    ]
+  }
+};
+
+/**
+ * Enriquecedor de Item Grande: adiciona qual sub-item comprar primeiro (`firstComponent`)
+ * e a receita passo a passo (`components`) com suporte ao `ddragonItems` oficial quando disponível.
+ */
+function enrichItemWithComponents(item, ddragonItems = {}) {
+  const itemId = String(item.id);
+  const recipe = ITEM_BUILD_RECIPE_GUIDE[itemId];
+  const ddItem = ddragonItems[itemId];
+
+  if (recipe) {
+    const comps = recipe.components.map((c, idx) => ({
+      ...c,
+      step: idx + 1,
+      isFirst: idx === 0
+    }));
+    return {
+      ...item,
+      totalCost: ddItem?.gold?.total ? `${ddItem.gold.total}g` : recipe.totalCost,
+      firstComponent: {
+        ...comps[0],
+        reason: recipe.firstReason
+      },
+      components: comps
+    };
+  }
+
+  // Fallback dinâmico usando a árvore `from` oficial do Data Dragon (item.json)
+  if (ddItem && Array.isArray(ddItem.from) && ddItem.from.length > 0) {
+    const subItems = ddItem.from
+      .map((subId) => {
+        const sub = ddragonItems[String(subId)];
+        return {
+          id: String(subId),
+          name: sub?.name || `Componente #${subId}`,
+          cost: `${sub?.gold?.total || 800}g`,
+          rawGold: sub?.gold?.total || 800
+        };
+      })
+      .sort((a, b) => b.rawGold - a.rawGold);
+
+    const comps = subItems.map((c, idx) => ({
+      id: c.id,
+      name: c.name,
+      cost: c.cost,
+      step: idx + 1,
+      isFirst: idx === 0,
+      priorityLabel: idx === 0 ? '1º FAÇA PRIMEIRO' : `${idx + 1}º Componente`
+    }));
+
+    return {
+      ...item,
+      totalCost: `${ddItem.gold?.total || 3000}g`,
+      firstComponent: {
+        ...comps[0],
+        reason: `Compre ${comps[0].name} (${comps[0].cost}) primeiro na volta à base para adiantar o pico de ${item.name}.`
+      },
+      components: comps
+    };
+  }
+
+  // Fallback universal caso Data Dragon ainda esteja carregando
+  return {
+    ...item,
+    totalCost: '3000g',
+    firstComponent: {
+      id: '1036',
+      name: 'Componente Principal (1ª Volta)',
+      cost: '1000g',
+      priorityLabel: '1º FAÇA PRIMEIRO',
+      reason: `Compre o componente ofensivo principal na 1ª volta à base antes de fechar ${item.name}.`
+    },
+    components: []
+  };
+}
+
+/**
+ * Determina quais são os Itens Iniciais (500g no Nível 1) ideais para a Build e Rota
+ */
+function getStarterPackForBuild(primaryTag, roleStr = '', buildType = 'best_wr', comp = {}) {
+  const r = String(roleStr).toUpperCase();
+  if (r.includes('SUPPORT') || r.includes('SUP') || primaryTag === 'Support') {
+    return STARTER_PACKS.SUPPORT_ATLAS;
+  }
+  if (r.includes('JUNGLE') && !r.includes('TOP') && !r.includes('MID')) {
+    return primaryTag === 'Tank' || primaryTag === 'Fighter' ? STARTER_PACKS.JUNGLE_GREEN : STARTER_PACKS.JUNGLE_RED;
+  }
+  if (primaryTag === 'Mage') {
+    return STARTER_PACKS.DORAN_RING;
+  }
+  if (primaryTag === 'Tank') {
+    return STARTER_PACKS.DORAN_SHIELD;
+  }
+  if (buildType === 'anti_enemy' && (comp.apCount >= 3 || comp.ccThreats?.length >= 2)) {
+    return STARTER_PACKS.DORAN_SHIELD;
+  }
+  return STARTER_PACKS.DORAN_BLADE;
+}
+
 const CURATED_CHAMPIONS = {
+  Renekton: {
+    role: 'Top / Mid',
+    tier: 'S+',
+    winRate: '52.1%',
+    pickRate: '9.4%',
+    banRate: '7.8%',
+    difficulty: 'Média',
+    damageType: 'AD Colosso (Fúria)',
+    spells: ['Flash', 'Teleporte'],
+    skillOrder: ['Q', 'E', 'W', 'Q', 'Q', 'R', 'Q', 'E', 'Q', 'E', 'R', 'E', 'E', 'W', 'W', 'R', 'W', 'W'],
+    skillPriority: 'Q > E > W',
+    runeTemplate: 'CONQUEROR_PRECISION',
+    coreItems: [
+      { id: '3071', name: 'Cutelo Negro', timing: '10 min', note: 'Reduz 30% da armadura no W enfurecido + Vida e CDR.' },
+      { id: '3111', name: 'Passos de Mercúrio', timing: '12 min', note: 'Tenacidade essencial para colar nos alvos.' },
+      { id: '6610', name: 'Céu Dividido', timing: '17 min', note: 'Crítico garantido na entrada com E + grande cura.' },
+      { id: '3053', name: 'Sinal de Sterak', timing: '22 min', note: 'Escudo gigante quando você ulta no meio de 5.' },
+      { id: '6333', name: 'Dança da Morte', timing: '26 min', note: 'Mitiga explosão física e cura em cada abate.' },
+      { id: '3026', name: 'Anjo Guardião', timing: '30 min', note: 'Segunda vida para mergulhar na backline inimiga.' }
+    ],
+    altBuild: {
+      title: '⚡ Build 2: Explosão Nível 3 & Abate de Carries (Rei Destruído + Youmuu)',
+      winRate: '51.8%',
+      subtitle: 'O W enfurecido aplica 3 vezes seguidas o dano de % de vida da Espada do Rei Destruído!',
+      spells: ['Flash', 'Incendiar'],
+      runeTemplate: 'CONQUEROR_PRECISION',
+      items: [
+        { id: '3153', name: 'Espada do Rei Destruído', timing: '10 min', note: 'Seu W com 50 de Fúria aplica 3x a passiva do Rei Destruído instantaneamente!' },
+        { id: '3047', name: 'Botas Galvanizadas de Aço', timing: '12 min', note: 'Segurança para duelar na rota lateral.' },
+        { id: '3071', name: 'Cutelo Negro', timing: '17 min', note: 'Penetração de armadura e vida.' },
+        { id: '6610', name: 'Céu Dividido', timing: '22 min', note: 'Sustento e explosão no primeiro golpe.' },
+        { id: '3053', name: 'Sinal de Sterak', timing: '26 min', note: 'Sobrevivência contra foco.' },
+        { id: '6333', name: 'Dança da Morte', timing: '30 min', note: 'Fecha a build imortal em lutas.' }
+      ]
+    },
+    counters: ['Illaoi', 'Vayne', 'Mordekaiser', 'Ornn', 'Quinn'],
+    goodAgainst: ['Yasuo', 'Yone', 'Riven', 'Irelia', 'Camille'],
+    coachTips: {
+      early: 'Acumule 50+ de Fúria nas tropas. Entre com E1, dê Auto + W Enfurecido + Q + E2 para trás sem deixar o inimigo revidar!',
+      mid: 'Seu pico mais forte do jogo é entre 1 e 2 itens (Cutelo + Céu Dividido). Force lutas no Dragão/Arauto com sua Ultimate ligada.',
+      late: 'Use Flash + W Enfurecido direto no ADC ou Mago inimigo para eliminá-lo antes que ele consiga jogar.'
+    }
+  },
   Yasuo: {
     role: 'Mid / Top',
     tier: 'S+',
@@ -459,7 +1056,7 @@ const CURATED_CHAMPIONS = {
   }
 };
 
-function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enemyTeamIds = [], ddragonChampions = {}) {
+function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enemyTeamIds = [], ddragonChampions = {}, ddragonItems = {}) {
   const tags = ddragonChampData?.tags || baseGuide.tags || ['Fighter'];
   const primaryTag = tags[0];
   const comp = analyzeEnemyComposition(enemyTeamIds, ddragonChampions);
@@ -489,6 +1086,8 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     coreSix = [...coreSix, ...fillers].slice(0, 6);
   }
 
+  const enrichList = (items) => (items || []).map((it) => enrichItemWithComponents(it, ddragonItems));
+
   const buildBestWinrate = {
     id: 'best_wr',
     badge: '🏆 MAIOR WINRATE',
@@ -498,7 +1097,8 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     description: `A build mais consistente e vitoriosa do patch atual para ${baseGuide.name}, focada no seu pico de poder principal.`,
     spells: baseGuide.spells || ['Flash', 'Incendiar'],
     runes: baseGuide.runes || RUNE_TEMPLATES.CONQUEROR_PRECISION,
-    items: coreSix
+    starterPack: getStarterPackForBuild(primaryTag, baseGuide.role, 'best_wr', comp),
+    items: enrichList(coreSix)
   };
 
   let buildAlternative;
@@ -512,7 +1112,8 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       description: baseGuide.altBuild.subtitle,
       spells: baseGuide.altBuild.spells,
       runes: RUNE_TEMPLATES[baseGuide.altBuild.runeTemplate] || RUNE_TEMPLATES.CONQUEROR_PRECISION,
-      items: baseGuide.altBuild.items
+      starterPack: getStarterPackForBuild(primaryTag, baseGuide.role, 'alternative', comp),
+      items: enrichList(baseGuide.altBuild.items)
     };
   } else if (primaryTag === 'Mage') {
     buildAlternative = {
@@ -524,14 +1125,15 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       description: 'Troca explosão inicial por recarga de Ultimate reduzida e dano contínuo em lutas longas.',
       spells: ['Flash', 'Teleporte'],
       runes: RUNE_TEMPLATES.FIRST_STRIKE_SCALE,
-      items: [
+      starterPack: getStarterPackForBuild(primaryTag, baseGuide.role, 'alternative', comp),
+      items: enrichList([
         { id: '6697', name: 'Malevolência', timing: '10 min', note: 'Reduz o tempo de recarga da Ultimate e queima o chão.' },
         { id: '3158', name: 'Botas Ionianas da Lucidez', timing: '12 min', note: 'Aceleração de habilidades e feitiços.' },
         { id: '6653', name: 'Tormento de Liandry', timing: '17 min', note: 'Queima inimigos por % de vida máxima.' },
         { id: '4628', name: 'Foco do Horizonte', timing: '22 min', note: 'Revela alvos e amplifica dano à distância.' },
         { id: '3157', name: 'Ampulheta de Zhonya', timing: '26 min', note: 'Sobrevivência contra mergulhos.' },
         { id: '3089', name: 'Capuz da Morte de Rabadon', timing: '30 min', note: 'Pico final de Poder de Habilidade.' }
-      ]
+      ])
     };
   } else if (primaryTag === 'Marksman') {
     buildAlternative = {
@@ -543,14 +1145,15 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       description: 'Ideal para rotas de muito poke ou quando você precisa de velocidade de movimento para se reposicionar.',
       spells: ['Flash', 'Purificar'],
       runes: RUNE_TEMPLATES.FLEET_SURVIVAL,
-      items: [
+      starterPack: STARTER_PACKS.DORAN_BLADE,
+      items: enrichList([
         { id: '3095', name: 'Faca de Statikk', timing: '10 min', note: 'Limpeza de onda instantânea e custo acessível.' },
         { id: '3006', name: 'Grevas do Berserker', timing: '12 min', note: 'Mobilidade e velocidade de ataque.' },
         { id: '3094', name: 'Canhão Fumegante', timing: '17 min', note: 'Alcance extra seguro para dar poke.' },
         { id: '3031', name: 'Gume do Infinito', timing: '22 min', note: 'Crítico amplificado.' },
         { id: '3072', name: 'Sedenta por Sangue', timing: '26 min', note: 'Sustentação alta em lutas longas.' },
         { id: '6673', name: 'Arco-Escudo Imortal', timing: '30 min', note: 'Escudo anti-explosão.' }
-      ]
+      ])
     };
   } else {
     buildAlternative = {
@@ -562,14 +1165,15 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       description: 'Focada em destruir torres rapidamente e vencer qualquer confronto 1v1 na rota lateral.',
       spells: ['Flash', 'Teleporte'],
       runes: RUNE_TEMPLATES.GRASP_TANK,
-      items: [
+      starterPack: STARTER_PACKS.DORAN_SHIELD,
+      items: enrichList([
         { id: '3078', name: 'Força da Trindade', timing: '11 min', note: 'Dano explosivo de Fulgor contra campeões e torres.' },
         { id: '3111', name: 'Passos de Mercúrio', timing: '13 min', note: 'Tenacidade para não ser parado.' },
         { id: '3181', name: 'Quebracascos', timing: '17 min', note: 'Fortalece tropas canhão e demole estruturas.' },
         { id: '3053', name: 'Sinal de Sterak', timing: '22 min', note: 'Escudo para segurar 1v2 na side lane.' },
         { id: '6333', name: 'Dança da Morte', timing: '26 min', note: 'Mitigação de dano físico e cura.' },
         { id: '3742', name: 'Couraça do Defunto', timing: '30 min', note: 'Velocidade de rotação pelo mapa.' }
-      ]
+      ])
     };
   }
 
@@ -691,7 +1295,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
         id: '6333',
         name: 'Dança da Morte (Anti-Burst Físico)',
         timing: '24 min',
-        note: `Impede que você seja explodido pelos ${comp.adCount} campeões AD inimigos.`
+        note: `Impede que você seja explodido pelos ${Math.max(1, comp.adCount)} campeões AD inimigos.`
       });
     }
   }
@@ -717,9 +1321,10 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     spells: comp.ccThreats.length >= 2 && primaryTag === 'Marksman' ? ['Flash', 'Purificar'] : (baseGuide.spells || ['Flash', 'Incendiar']),
     runes: {
       ...(baseGuide.runes || RUNE_TEMPLATES.CONQUEROR_PRECISION),
-      name: `Blitz Anti-Comp: ${baseGuide.name} (Defesa Adaptada)`
+      name: `Babilonia Buff Anti-Comp: ${baseGuide.name} (Defesa Adaptada)`
     },
-    items: antiItems.slice(0, 6)
+    starterPack: getStarterPackForBuild(primaryTag, baseGuide.role, 'anti_enemy', comp),
+    items: enrichList(antiItems.slice(0, 6))
   };
 
   return {
@@ -728,7 +1333,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
   };
 }
 
-function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = [], ddragonChampions = {}) {
+function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = [], ddragonChampions = {}, ddragonItems = {}) {
   let base;
   if (CURATED_CHAMPIONS[championId]) {
     const c = CURATED_CHAMPIONS[championId];
@@ -738,6 +1343,10 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
       title: ddragonChampData?.title || 'Campeão de Runeterra',
       tags: ddragonChampData?.tags || ['Fighter'],
       ...c,
+      situationalItems: c.situationalItems || [
+        { id: '3156', name: 'Mandíbula de Malmortius / Passos de Mercúrio', vs: 'Magos AP e Controle de Grupo' },
+        { id: '6333', name: 'Dança da Morte / Presságio de Randuin', vs: 'Dano Físico Explosivo (AD)' }
+      ],
       runes: RUNE_TEMPLATES[c.runeTemplate] || RUNE_TEMPLATES.CONQUEROR_PRECISION
     };
   } else {
@@ -848,11 +1457,14 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
     base,
     ddragonChampData,
     enemyTeamIds,
-    ddragonChampions
+    ddragonChampions,
+    ddragonItems
   );
 
   return {
     ...base,
+    coreItems: builds[0].items,
+    starterPack: builds[0].starterPack,
     enemyCompAnalysis,
     builds
   };
@@ -860,6 +1472,8 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
 
 module.exports = {
   RUNE_TEMPLATES,
+  STARTER_PACKS,
+  ITEM_BUILD_RECIPE_GUIDE,
   CURATED_CHAMPIONS,
   getTop6MetaPicks,
   analyzeEnemyComposition,

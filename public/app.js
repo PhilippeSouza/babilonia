@@ -1,5 +1,5 @@
 /**
- * Babilônia — Frontend Principal
+ * Babilonia Buff — Frontend Principal
  * Inclui:
  * 1) Recomendador Pós-Banimentos com 6 Opções de Campeões Fortes no Meta Atual
  * 2) Gerador de 3 Opções de Build (Maior Winrate, Alternativa e Anti-Time Inimigo)
@@ -96,31 +96,6 @@ function showTacticalPopup({ id, type = 'MACRO', badge = 'DICA TÁTICA', title, 
     if (popup.parentNode) popup.remove();
   }, 7000);
 }
-
-document.getElementById('btnTestPopup')?.addEventListener('click', () => {
-  const samples = [
-    {
-      type: 'URGENT',
-      badge: '💰 PICO DE COMPRA (1550 OURO)',
-      title: 'Hora de dar Recall!',
-      message: 'Empurre a onda atual até a torre inimiga e volte base para fechar seu próximo item antes do Dragão.'
-    },
-    {
-      type: 'BUILD',
-      badge: '🛡️ BUILD 3 RECOMENDADA',
-      title: 'Adaptação Anti-Time Inimigo Ativa',
-      message: `Contra (${enemyTeam.slice(0, 3).join(', ')}), confira a Opção 3 de Build com defesas e penetração ajustadas!`
-    },
-    {
-      type: 'URGENT',
-      badge: '🐉 DRAGÃO EM 45 SEGUNDOS',
-      title: 'Rotação para o Rio Sul',
-      message: 'Ganhe prioridade no meio e posicione uma Sentinela de Controle no rio antes do time inimigo.'
-    }
-  ];
-  const pick = samples[Math.floor(Math.random() * samples.length)];
-  showTacticalPopup({ ...pick, force: true });
-});
 
 // =========================================================================
 // NAVEGAÇÃO LATERAL ESTILO BLITZ
@@ -301,31 +276,6 @@ window.updateEnemySlot = async function (slotIdx, newChampId) {
   });
 };
 
-// Presets de Composição Inimiga (Ordem: [0]=TOP, [1]=JG, [2]=MID, [3]=ADC, [4]=SUP)
-document.querySelectorAll('.preset-btn').forEach((btn) => {
-  btn.addEventListener('click', async () => {
-    const p = btn.dataset.preset;
-    if (p === 'balanced') {
-      enemyTeam = ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona'];
-    } else if (p === 'heavy_ap') {
-      enemyTeam = ['Mordekaiser', 'Lillia', 'Syndra', 'Ziggs', 'Lux'];
-    } else if (p === 'heavy_ad') {
-      enemyTeam = ['Darius', 'Viego', 'Zed', 'Caitlyn', 'Pyke'];
-    } else if (p === 'heavy_heal') {
-      enemyTeam = ['Aatrox', 'Warwick', 'Sylas', 'Samira', 'Soraka'];
-    }
-    activeBuildIndex = 2;
-    await refreshDraftAndBuilds();
-    showTacticalPopup({
-      type: 'BUILD',
-      badge: '🛡️ COMPOSIÇÃO INIMIGA ANALISADA',
-      title: '3 Counters + 3 Meta + Build 3 Atualizados!',
-      message: currentGuide?.enemyCompAnalysis?.summaryText || 'Itens defensivos, botas e corta-cura ajustados.',
-      force: true
-    });
-  });
-});
-
 // Seletor de Rota (também atualiza qual inimigo é seu oponente direto)
 document.querySelectorAll('#draftRoleTabs .role-tab').forEach((btn) => {
   btn.addEventListener('click', async () => {
@@ -455,14 +405,119 @@ function renderChampionAndThreeBuilds(g) {
   renderActiveBuildOption();
 }
 
+function renderStarterPackHtml(starterPack, ownedItemIds = new Set()) {
+  if (!starterPack || !Array.isArray(starterPack.items)) return '';
+  const itemsHtml = starterPack.items
+    .map((st) => {
+      const isOwned = ownedItemIds.has(String(st.id));
+      return `
+        <div class="starter-item-pill ${isOwned ? 'owned-item' : ''}">
+          <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${st.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/1055.png'" alt="${st.name}" />
+          <div class="starter-item-info">
+            <strong>${st.name} ${isOwned ? '✅' : ''}</strong>
+            <span>${st.role} • <b class="text-orange">${st.cost}</b></span>
+          </div>
+        </div>
+      `;
+    })
+    .join('<span class="starter-plus">+</span>');
+
+  return `
+    <div class="starter-pack-header">
+      <strong>🎒 ${starterPack.title}</strong>
+      <span class="badge-dracula green">Saída Nível 1 (500g)</span>
+    </div>
+    <p class="starter-pack-desc">${starterPack.summary}</p>
+    <div class="starter-items-row">${itemsHtml}</div>
+  `;
+}
+
+function renderCoreItemsWithComponentsHtml(items, ownedItemIds = new Set()) {
+  return (items || [])
+    .map((item, idx) => {
+      const isCompleted = ownedItemIds.has(String(item.id));
+      const fc = item.firstComponent;
+      const isFirstCompOwned = fc && ownedItemIds.has(String(fc.id));
+      const comps = Array.isArray(item.components) ? item.components : [];
+
+      const compsStepperHtml =
+        comps.length > 0
+          ? `
+          <div class="item-components-flow">
+            <span class="comp-flow-label">Ordem dos Componentes deste Item:</span>
+            <div class="comp-steps-row">
+              ${comps
+                .map((c, cIdx) => {
+                  const compOwned = ownedItemIds.has(String(c.id)) || isCompleted;
+                  return `
+                    <div class="comp-step-chip ${cIdx === 0 ? 'first-priority' : ''} ${compOwned ? 'owned-comp' : ''}">
+                      <span class="comp-step-num">${cIdx === 0 ? '1º FAÇA PRIMEIRO' : `${cIdx + 1}º Depois`}</span>
+                      <div class="comp-step-main">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${c.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/1036.png'" alt="${c.name}" />
+                        <div>
+                          <strong>${c.name} ${compOwned ? '✅' : ''}</strong>
+                          <small>${c.cost}</small>
+                        </div>
+                      </div>
+                    </div>
+                  `;
+                })
+                .join('<span class="comp-arrow">➔</span>')}
+            </div>
+          </div>
+        `
+          : '';
+
+      const firstCalloutHtml = fc
+        ? `
+          <div class="first-component-banner ${isFirstCompOwned || isCompleted ? 'done' : ''}">
+            <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${fc.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/1036.png'" alt="${fc.name}" />
+            <div class="fc-text">
+              <div class="fc-title">
+                <span class="fc-badge">🔨 QUAL FAZER PRIMEIRO:</span>
+                <strong>${fc.name} (${fc.cost})</strong>
+                ${isFirstCompOwned || isCompleted ? '<span class="badge-dracula green">✅ JÁ COMPRADO</span>' : ''}
+              </div>
+              <div class="fc-reason">${fc.reason || ''}</div>
+            </div>
+          </div>
+        `
+        : '';
+
+      return `
+        <div class="blitz-item-card detailed-item-card ${isCompleted ? 'item-completed-live' : ''}">
+          <div class="blitz-item-top-row">
+            <img class="big-item-img" src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${item.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/3006.png'" alt="${item.name}" />
+            <div class="blitz-item-meta">
+              <div class="blitz-item-title">
+                <span>${idx + 1}º Item Grande: <strong>${item.name}</strong> ${isCompleted ? '✅ FECHADO' : ''}</span>
+                <div class="item-badges-right">
+                  <span class="badge-dracula cyan">💰 ${item.totalCost || '3000g'}</span>
+                  <span class="badge-dracula purple">⏱️ ${item.timing || `${(idx + 1) * 5} min`}</span>
+                </div>
+              </div>
+              <div class="blitz-item-note">${item.note}</div>
+            </div>
+          </div>
+          ${firstCalloutHtml}
+          ${compsStepperHtml}
+        </div>
+      `;
+    })
+    .join('');
+}
+
 function renderActiveBuildOption() {
   if (!currentGuide || !Array.isArray(currentGuide.builds)) return;
   const b = currentGuide.builds[activeBuildIndex] || currentGuide.builds[0];
   if (!b) return;
 
-  // Marca a aba ativa
+  // Marca a aba ativa (tanto na aba Draft quanto na aba Partida Ao Vivo)
   document.querySelectorAll('#threeBuildsTabs .build-option-tab').forEach((tab) => {
     tab.classList.toggle('active', Number(tab.dataset.buildIdx) === activeBuildIndex);
+  });
+  document.querySelectorAll('#liveThreeBuildsSwitch button').forEach((btn) => {
+    btn.classList.toggle('active', Number(btn.dataset.liveBuild) === activeBuildIndex);
   });
 
   // Atualiza Card de Runas e Feitiços da Build Ativa
@@ -471,44 +526,48 @@ function renderActiveBuildOption() {
   document.getElementById('guideRuneSummary').textContent = b.runes?.summary || '';
 
   const perkIds = b.runes?.selectedPerkIds || [];
-  document.getElementById('visualRuneTree').innerHTML = perkIds
+  const runesHtml = perkIds
     .map((pid, idx) => {
       const label = PERK_NAMES_PT[pid] || `Runa #${pid}`;
       return `<div class="rune-node ${idx === 0 ? 'keystone' : ''}">${label}</div>`;
     })
     .join('');
+  document.getElementById('visualRuneTree').innerHTML = runesHtml;
 
   document.getElementById('guideSpellsBox').innerHTML = (b.spells || ['Flash', 'Incendiar'])
     .map((s) => `<span class="spell-pill">✨ ${s}</span>`)
     .join('');
 
-  // Atualiza Card dos 6 Itens da Build Ativa
+  // Atualiza Card de Itens Iniciais (500g) + 6 Itens Grandes com Componentes
   document.getElementById('activeBuildMainTitle').textContent = `🛒 ${b.title}`;
   document.getElementById('activeBuildDescription').textContent = b.description;
   document.getElementById('activeBuildWinrateBadge').textContent = b.winRate;
 
-  document.getElementById('guideCoreItems').innerHTML = (b.items || [])
-    .map(
-      (item, idx) => `
-      <div class="blitz-item-card">
-        <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${item.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/3006.png'" alt="${item.name}" />
-        <div class="blitz-item-meta">
-          <div class="blitz-item-title">
-            <span>${idx + 1}º Item: ${item.name}</span>
-            <span class="badge-dracula purple">⏱️ ${item.timing || `${(idx + 1) * 5} min`}</span>
-          </div>
-          <div class="blitz-item-note">${item.note}</div>
-        </div>
-      </div>
-    `
-    )
-    .join('');
+  const starterEl = document.getElementById('guideStarterPack');
+  if (starterEl) {
+    starterEl.innerHTML = renderStarterPackHtml(b.starterPack || currentGuide.starterPack);
+  }
+
+  document.getElementById('guideCoreItems').innerHTML = renderCoreItemsWithComponentsHtml(b.items);
+
+  // Também atualiza o painel da aba Partida Ao Vivo se estiver visível
+  if (window.latestLiveStatusData) {
+    renderLiveInGameBuildPanel(window.latestLiveStatusData);
+  }
 }
 
-// Clique nas 3 Abas de Opções de Build
+// Clique nas 3 Abas de Opções de Build (Aba Draft)
 document.querySelectorAll('#threeBuildsTabs .build-option-tab').forEach((btn) => {
   btn.addEventListener('click', () => {
     activeBuildIndex = Number(btn.dataset.buildIdx);
+    renderActiveBuildOption();
+  });
+});
+
+// Clique nos 3 Botões de Build dentro da aba Partida Ao Vivo
+document.querySelectorAll('#liveThreeBuildsSwitch button').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    activeBuildIndex = Number(btn.dataset.liveBuild);
     renderActiveBuildOption();
   });
 });
@@ -568,8 +627,10 @@ window.selectChampionFromAnywhere = async function (champId) {
 // =========================================================================
 async function exportRunesForChamp(champId, buildIdx = activeBuildIndex) {
   const feedback = document.getElementById('runeExportFeedback');
-  feedback.className = 'export-toast';
-  feedback.textContent = '⏳ Enviando página de runas da Build selecionada para o LoL...';
+  if (feedback) {
+    feedback.className = 'export-toast';
+    feedback.textContent = '⏳ Enviando página de runas da Build selecionada para o LoL...';
+  }
 
   try {
     const res = await fetch('/api/lcu/export-runes', {
@@ -579,8 +640,10 @@ async function exportRunesForChamp(champId, buildIdx = activeBuildIndex) {
     });
     const data = await res.json();
     if (data.ok) {
-      feedback.className = 'export-toast success';
-      feedback.textContent = `✅ ${data.message}`;
+      if (feedback) {
+        feedback.className = 'export-toast success';
+        feedback.textContent = `✅ ${data.message}`;
+      }
       showTacticalPopup({
         type: 'MACRO',
         badge: '⚡ RUNAS EXPORTADAS',
@@ -588,13 +651,15 @@ async function exportRunesForChamp(champId, buildIdx = activeBuildIndex) {
         message: data.message,
         force: true
       });
-    } else {
+    } else if (feedback) {
       feedback.className = 'export-toast error';
       feedback.textContent = `⚠️ ${data.message}`;
     }
   } catch (err) {
-    feedback.className = 'export-toast error';
-    feedback.textContent = '⚠️ Erro ao conectar ao servidor local.';
+    if (feedback) {
+      feedback.className = 'export-toast error';
+      feedback.textContent = '⚠️ Erro ao conectar ao servidor local.';
+    }
   }
 }
 
@@ -603,12 +668,15 @@ document.getElementById('btnExportRunes')?.addEventListener('click', () => {
 });
 
 // =========================================================================
-// MONITORAMENTO EM TEMPO REAL (LCU + PARTIDA AO VIVO + POPUPS SILENCIOSOS)
+// MONITORAMENTO EM TEMPO REAL + TRANSIÇÃO AUTOMÁTICA PARA JOGO EM ANDAMENTO
 // =========================================================================
+let lastAutoPhaseState = 'INIT';
+
 async function pollStatus() {
   try {
     const res = await fetch('/api/status');
     const data = await res.json();
+    window.latestLiveStatusData = data;
 
     document.getElementById('aiModeLabel').textContent = data.hasGeminiKey
       ? 'Google Gemini AI Ativo'
@@ -617,6 +685,7 @@ async function pollStatus() {
     const lcuBox = document.getElementById('lcuStatusCard');
     const lcuTitle = document.getElementById('lcuStatusTitle');
     const lcuSub = document.getElementById('lcuStatusSub');
+    const topPhaseLabel = document.getElementById('topPhaseLabel');
 
     const homeClientBadge = document.getElementById('homeClientBadge');
     const homePhaseBadge = document.getElementById('homePhaseBadge');
@@ -627,22 +696,46 @@ async function pollStatus() {
     const homeRankedWL = document.getElementById('homeRankedWL');
     const homeSummonerLevel = document.getElementById('homeSummonerLevel');
 
+    const rawPhase = data.lcu?.phase || 'Disconnected';
+    const isLiveMatchNow = Boolean(data.inLiveGame || rawPhase === 'InProgress' || rawPhase === 'GameStart');
+
+    if (topPhaseLabel) {
+      if (isLiveMatchNow) {
+        topPhaseLabel.textContent = `🔥 EM PARTIDA AO VIVO (${data.matchState?.formattedTime || 'Ativa'})`;
+        topPhaseLabel.className = 'text-green';
+      } else if (rawPhase === 'ChampSelect') {
+        topPhaseLabel.textContent = '⚡ NA SELEÇÃO DE CAMPEÕES';
+        topPhaseLabel.className = 'text-purple';
+      } else if (rawPhase === 'Matchmaking' || rawPhase === 'ReadyCheck') {
+        topPhaseLabel.textContent = '🎯 BUSCANDO / PARTIDA ENCONTRADA!';
+        topPhaseLabel.className = 'text-pink';
+      } else if (data.lcu?.connected) {
+        topPhaseLabel.textContent = `🟢 Conectado (${rawPhase})`;
+        topPhaseLabel.className = 'text-cyan';
+      } else {
+        topPhaseLabel.textContent = 'Aguardando LoL...';
+        topPhaseLabel.className = '';
+      }
+    }
+
     if (data.lcu && data.lcu.connected) {
       lcuBox.className = 'client-status-box connected';
       const sum = data.lcu.summoner;
       const sumName = sum ? `${sum.gameName}#${sum.tagLine}` : 'Invocador';
       lcuTitle.textContent = `LoL Conectado: ${sum ? sum.gameName : 'Invocador'}`;
-      lcuSub.textContent = `Fase: ${data.lcu.phase}`;
+      lcuSub.textContent = isLiveMatchNow ? '🔥 Jogo em Andamento' : `Fase: ${data.lcu.phase}`;
 
       // Atualiza Card de Perfil Real na Home
       if (homeClientBadge) {
         homeClientBadge.className = 'badge-dracula green';
         homeClientBadge.textContent = '🟢 CLIENTE DO LOL CONECTADO';
       }
-      if (homePhaseBadge) homePhaseBadge.textContent = `Fase: ${data.lcu.phase}`;
+      if (homePhaseBadge) homePhaseBadge.textContent = isLiveMatchNow ? '🔥 Em Partida Ao Vivo' : `Fase: ${data.lcu.phase}`;
       if (homeSummonerName) homeSummonerName.textContent = sumName;
       if (homeSummonerSub) {
-        homeSummonerSub.textContent = 'Conectado em tempo real ao seu League of Legends! Entre na Seleção de Campeões para ativar o Draft e Auto-Runas.';
+        homeSummonerSub.textContent = isLiveMatchNow
+          ? `Você está em partida de ${data.activeChampionId}! Veja seu Guia de Jogo em Andamento na aba Partida Ao Vivo.`
+          : 'Conectado em tempo real ao seu League of Legends! Quando achar partida, o Babilonia Buff muda de tela sozinho.';
       }
       if (homeProfileIcon && sum?.profileIconId) {
         homeProfileIcon.src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${sum.profileIconId}.png`;
@@ -659,43 +752,67 @@ async function pollStatus() {
         if (homeRankedWL) homeRankedWL.textContent = '-- / --';
       }
 
-      // Se o jogador estiver no Champ Select do LoL, sincroniza banimentos, time inimigo e campeão!
+      // 1) QUANDO ACHAR PARTIDA / ENTRAR NA SELEÇÃO DE CAMPEÕES -> MUDA SOZINHO PARA ABA DE DRAFT & BUILDS!
       const cs = data.lcu.champSelect;
-      if (cs) {
-        let shouldRefreshDraft = false;
-        if (cs.detectedRole && cs.detectedRole !== currentRole) {
-          currentRole = cs.detectedRole;
-          syncRoleUI();
-          shouldRefreshDraft = true;
+      if (rawPhase === 'ReadyCheck' && lastAutoPhaseState !== 'ReadyCheck') {
+        lastAutoPhaseState = 'ReadyCheck';
+        switchTab('champ-build-tab');
+        showTacticalPopup({
+          id: 'match-found-readycheck',
+          type: 'URGENT',
+          badge: '🔥 PARTIDA ENCONTRADA!',
+          title: 'Preparando Draft & 6 Recomendações',
+          message: 'Já mudamos para a tela de Seleção de Campeões! Assim que entrar no lobby, sua rota será detectada automaticamente.'
+        });
+      } else if (rawPhase === 'ChampSelect') {
+        if (lastAutoPhaseState !== 'ChampSelect') {
+          lastAutoPhaseState = 'ChampSelect';
+          switchTab('champ-build-tab');
           showTacticalPopup({
-            id: `lane-detected-${cs.detectedRole}`,
+            id: 'entered-champ-select',
             type: 'MACRO',
-            badge: `📍 ROTA RECONHECIDA: ${cs.detectedRole}`,
-            title: `Você caiu na rota ${cs.detectedRole}!`,
-            message: `Listamos automaticamente 3 Counters contra seu rival de ${cs.detectedRole} + 3 Mais Fortes do Meta atual.`
+            badge: '⚡ SELEÇÃO DE CAMPEÕES ATIVA',
+            title: 'Modo Draft Ativado Automaticamente!',
+            message: 'Acompanhe os 3 Counters da sua rota + 3 Top Meta e as 3 opções de Build com Itens Iniciais e Componentes.'
           });
         }
-        if (Array.isArray(cs.bannedChampions) && cs.bannedChampions.length !== bannedChampions.length) {
-          bannedChampions = cs.bannedChampions;
-          shouldRefreshDraft = true;
-        }
-        const liveEnemies = (cs.theirTeam || []).map((p) => p.championId).filter(Boolean);
-        if (liveEnemies.length > 0 && JSON.stringify(liveEnemies) !== JSON.stringify(enemyTeam)) {
-          enemyTeam = liveEnemies;
-          shouldRefreshDraft = true;
-        }
-        if (cs.myChampionId && cs.myChampionId !== selectedChampionId) {
-          selectedChampionId = cs.myChampionId;
-          shouldRefreshDraft = true;
 
-          const autoImport = document.getElementById('chkAutoImportRunes')?.checked;
-          if (autoImport && lastAutoImportedChamp !== cs.myChampionId) {
-            lastAutoImportedChamp = cs.myChampionId;
-            exportRunesForChamp(cs.myChampionId, activeBuildIndex);
+        if (cs) {
+          let shouldRefreshDraft = false;
+          if (cs.detectedRole && cs.detectedRole !== currentRole) {
+            currentRole = cs.detectedRole;
+            syncRoleUI();
+            shouldRefreshDraft = true;
+            showTacticalPopup({
+              id: `lane-detected-${cs.detectedRole}`,
+              type: 'MACRO',
+              badge: `📍 ROTA RECONHECIDA: ${cs.detectedRole}`,
+              title: `Você caiu na rota ${cs.detectedRole}!`,
+              message: `Listamos automaticamente 3 Counters contra seu rival de ${cs.detectedRole} + 3 Mais Fortes do Meta atual.`
+            });
           }
-        }
-        if (shouldRefreshDraft) {
-          await refreshDraftAndBuilds();
+          if (Array.isArray(cs.bannedChampions) && cs.bannedChampions.length !== bannedChampions.length) {
+            bannedChampions = cs.bannedChampions;
+            shouldRefreshDraft = true;
+          }
+          const liveEnemies = (cs.theirTeam || []).map((p) => p.championId).filter(Boolean);
+          if (liveEnemies.length > 0 && JSON.stringify(liveEnemies) !== JSON.stringify(enemyTeam)) {
+            enemyTeam = liveEnemies;
+            shouldRefreshDraft = true;
+          }
+          if (cs.myChampionId && cs.myChampionId !== selectedChampionId) {
+            selectedChampionId = cs.myChampionId;
+            shouldRefreshDraft = true;
+
+            const autoImport = document.getElementById('chkAutoImportRunes')?.checked;
+            if (autoImport && lastAutoImportedChamp !== cs.myChampionId) {
+              lastAutoImportedChamp = cs.myChampionId;
+              exportRunesForChamp(cs.myChampionId, activeBuildIndex);
+            }
+          }
+          if (shouldRefreshDraft) {
+            await refreshDraftAndBuilds();
+          }
         }
       }
     } else {
@@ -711,14 +828,46 @@ async function pollStatus() {
       if (homeSummonerName) homeSummonerName.textContent = 'Abra o League of Legends';
     }
 
+    // 2) QUANDO A PARTIDA COMEÇAR (PORTA 2999 OU FASE INPROGRESS) -> VIRA AUTOMATICAMENTE PARA O MODO JOGO EM ANDAMENTO!
+    if (isLiveMatchNow) {
+      const liveChamp = data.matchState?.activePlayer?.championId || data.activeChampionId;
+      const liveEnemies = data.draftState?.enemyTeam || [];
+      let needsSync = false;
+
+      if (liveChamp && liveChamp !== selectedChampionId) {
+        selectedChampionId = liveChamp;
+        needsSync = true;
+      }
+      if (liveEnemies.length > 0 && JSON.stringify(liveEnemies) !== JSON.stringify(enemyTeam)) {
+        enemyTeam = liveEnemies;
+        needsSync = true;
+      }
+      if (needsSync) {
+        await refreshDraftAndBuilds();
+      }
+
+      if (lastAutoPhaseState !== 'InProgress') {
+        lastAutoPhaseState = 'InProgress';
+        switchTab('live-game-tab');
+        showTacticalPopup({
+          id: `live-match-started-${selectedChampionId}`,
+          type: 'URGENT',
+          badge: `⚔️ JOGO EM ANDAMENTO (${selectedChampionId.toUpperCase()})`,
+          title: 'Modo Partida Ao Vivo Ativado Automaticamente!',
+          message: `Carregamos os Itens Iniciais, o 1º Componente de cada Item Grande e os alertas em tempo real para ${selectedChampionId}!`,
+          force: true
+        });
+      }
+    } else if (rawPhase !== 'ChampSelect' && rawPhase !== 'ReadyCheck') {
+      lastAutoPhaseState = rawPhase;
+    }
+
     const sidebarLiveDot = document.getElementById('sidebarLiveDot');
-    const btnToggleSim = document.getElementById('btnToggleSim');
-    const simStateLabel = document.getElementById('simStateLabel');
     const idleBanner = document.getElementById('idleLiveBanner');
 
-    if (data.inLiveGame || data.isSimulated) {
+    if (isLiveMatchNow) {
       sidebarLiveDot.className = 'live-mini-badge on';
-      sidebarLiveDot.textContent = data.inLiveGame ? 'AO VIVO' : 'SIM';
+      sidebarLiveDot.textContent = 'AO VIVO';
       idleBanner?.classList.add('hidden');
     } else {
       sidebarLiveDot.className = 'live-mini-badge';
@@ -726,29 +875,133 @@ async function pollStatus() {
       idleBanner?.classList.remove('hidden');
     }
 
-    btnToggleSim?.classList.toggle('active', Boolean(data.isSimulated));
-    if (simStateLabel) simStateLabel.textContent = data.isSimulated ? 'ON' : 'OFF';
-
     renderLiveMatchView(data);
-    processCoachingPopups(data.coaching, data.inLiveGame || data.isSimulated);
+    renderLiveInGameBuildPanel(data);
+    processCoachingPopups(data.coaching, isLiveMatchNow);
   } catch (err) {
     console.error('Erro ao atualizar status:', err);
   }
 }
 
+function renderLiveInGameBuildPanel(data) {
+  const guideToUse = data.coaching?.championGuide || currentGuide;
+  if (!guideToUse || !Array.isArray(guideToUse.builds)) return;
+
+  const b = guideToUse.builds[activeBuildIndex] || guideToUse.builds[0];
+  if (!b) return;
+
+  const m = data.matchState;
+  const p = m?.activePlayer;
+  const ownedIds = new Set((p?.items || []).map((i) => String(i.itemID)));
+  const currentGold = p?.currentGold ?? 500;
+  const currentLevel = p?.level ?? 1;
+
+  const headerTitle = document.getElementById('liveBuildHeaderTitle');
+  if (headerTitle) {
+    headerTitle.textContent = `⚔️ Guia em Partida: ${guideToUse.name} — ${b.title}`;
+  }
+
+  const enemySum = document.getElementById('liveBuildEnemySummary');
+  if (enemySum && guideToUse.enemyCompAnalysis) {
+    enemySum.textContent = `📊 Time Inimigo da Partida: ${guideToUse.enemyCompAnalysis.summaryText}`;
+  }
+
+  // Calcula qual é o PRÓXIMO ITEM/COMPONENTE EXATO que o jogador deve comprar agora na base
+  const nextBigItem = (b.items || []).find((it) => !ownedIds.has(String(it.id))) || b.items[0];
+  const nextSubComp =
+    nextBigItem && Array.isArray(nextBigItem.components)
+      ? nextBigItem.components.find((c) => !ownedIds.has(String(c.id))) || nextBigItem.firstComponent
+      : nextBigItem?.firstComponent;
+
+  const nextBanner = document.getElementById('liveNextBuyBanner');
+  if (nextBanner && nextBigItem) {
+    const targetComp = nextSubComp || { id: nextBigItem.id, name: nextBigItem.name, cost: nextBigItem.totalCost || '1100g' };
+    const numericCost = parseInt(String(targetComp.cost).replace(/[^0-9]/g, ''), 10) || 1000;
+    const canAffordNow = currentGold >= numericCost;
+    const missingGold = Math.max(0, numericCost - currentGold);
+
+    nextBanner.innerHTML = `
+      <div class="next-buy-left">
+        <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${targetComp.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/1036.png'" alt="${targetComp.name}" />
+        <div>
+          <span class="next-buy-tag">${canAffordNow ? '🟢 OURO SUFICIENTE PARA COMPRAR AGORA!' : `⏳ FALTAM ${missingGold} DE OURO (VOCÊ TEM ${currentGold}g)`}</span>
+          <h3>👉 Próxima Compra na Base: <span class="text-orange">${targetComp.name} (${targetComp.cost})</span></h3>
+          <p>1º passo para fechar <strong>${nextBigItem.name} (${nextBigItem.totalCost || '3000g'})</strong> • ${nextBigItem.firstComponent?.reason || nextBigItem.note}</p>
+        </div>
+      </div>
+      <div class="next-buy-right">
+        <span class="badge-dracula ${canAffordNow ? 'green' : 'purple'}">
+          ${canAffordNow ? '⚡ DÊ RECALL APÓS EMPURRAR A WAVE!' : `Farme mais ~${Math.ceil(missingGold / 21)} minions`}
+        </span>
+      </div>
+    `;
+  }
+
+  // Renderiza Itens Iniciais (marcando com ✅ se já comprou na partida)
+  const liveStarterEl = document.getElementById('liveStarterPackBox');
+  if (liveStarterEl) {
+    liveStarterEl.innerHTML = renderStarterPackHtml(b.starterPack || guideToUse.starterPack, ownedIds);
+  }
+
+  // Renderiza os 6 Itens Grandes + Qual Componente Fazer Primeiro de cada um (marcando com ✅ o que já comprou)
+  const liveCoreEl = document.getElementById('liveCoreItemsTimeline');
+  if (liveCoreEl) {
+    liveCoreEl.innerHTML = renderCoreItemsWithComponentsHtml(b.items, ownedIds);
+  }
+
+  // Renderiza Matriz de Habilidades destacando o Nível Atual na partida!
+  const skillPrioEl = document.getElementById('liveSkillPriorityText');
+  if (skillPrioEl) skillPrioEl.textContent = guideToUse.skillPriority || 'Q > E > W';
+
+  const liveSkillMatrix = document.getElementById('liveSkillMatrix');
+  if (liveSkillMatrix) {
+    liveSkillMatrix.innerHTML = (guideToUse.skillOrder || [])
+      .map((sk, idx) => {
+        const lvl = idx + 1;
+        const isCurrentLvl = m && lvl === currentLevel;
+        const isPastLvl = m && lvl < currentLevel;
+        return `
+          <div class="skill-cell ${sk} ${isCurrentLvl ? 'current-live-lvl' : ''} ${isPastLvl ? 'past-live-lvl' : ''}" title="Nível ${lvl}: Upar ${sk}">
+            <span class="lvl-num">${isCurrentLvl ? `Nv.${lvl} AGORA` : lvl}</span>
+            <span class="key-letter">${sk}</span>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  // Runas & Feitiços compactos
+  const liveRunesBox = document.getElementById('liveRunesCompactBox');
+  if (liveRunesBox) {
+    const perkIds = b.runes?.selectedPerkIds || [];
+    const spellsHtml = (b.spells || ['Flash', 'Teleporte'])
+      .map((s) => `<span class="spell-pill">✨ ${s}</span>`)
+      .join(' ');
+    liveRunesBox.innerHTML =
+      `<div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <strong class="text-purple">${b.runes?.name || 'Runas Ativas'}</strong>
+        <div>${spellsHtml}</div>
+      </div>` +
+      perkIds
+        .slice(0, 6)
+        .map((pid, idx) => `<div class="rune-node ${idx === 0 ? 'keystone' : ''}">${PERK_NAMES_PT[pid] || `Runa #${pid}`}</div>`)
+        .join('');
+  }
+}
+
 function renderLiveMatchView(data) {
   const m = data.matchState;
-  const g = data.coaching?.championGuide;
+  const g = data.coaching?.championGuide || currentGuide;
   const champId = m?.activePlayer?.championId || data.activeChampionId || selectedChampionId;
 
   document.getElementById('hudChampIcon').src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${champId}.png`;
   document.getElementById('hudChampName').textContent = g?.name || champId;
 
   if (!m) {
-    document.getElementById('hudSummonerName').textContent = 'Fora de partida • Ligue o Simulador no topo para testar';
+    document.getElementById('hudSummonerName').textContent = 'Aguardando início da partida no LoL • Guia abaixo já carregado!';
     document.getElementById('hudGameTime').textContent = '00:00';
     document.getElementById('hudGoldValue').textContent = '500g';
-    document.getElementById('hudGoldHint').textContent = 'Ouro inicial';
+    document.getElementById('hudGoldHint').textContent = 'Compre seus Itens Iniciais abaixo';
     document.getElementById('hudGoldBox').classList.remove('urgent-gold');
     document.getElementById('hudCsPerMin').textContent = '0.0 /min';
     document.getElementById('hudCsValue').textContent = 'Total: 0 CS';
@@ -759,17 +1012,17 @@ function renderLiveMatchView(data) {
   }
 
   const p = m.activePlayer;
-  document.getElementById('hudSummonerName').textContent = `${p.summonerName} • Nível ${p.level}`;
+  document.getElementById('hudSummonerName').textContent = `🔥 EM JOGO: ${p.summonerName} • Nível ${p.level}`;
   document.getElementById('hudGameTime').textContent = m.formattedTime;
 
   document.getElementById('hudGoldValue').textContent = `${p.currentGold}g`;
   const goldBox = document.getElementById('hudGoldBox');
-  if (p.currentGold >= 1300) {
+  if (p.currentGold >= 1100) {
     goldBox.classList.add('urgent-gold');
-    document.getElementById('hudGoldHint').textContent = '⚠️ Recall recomendado agora!';
+    document.getElementById('hudGoldHint').textContent = '⚠️ Ouro para fechar 1º Componente! Veja abaixo';
   } else {
     goldBox.classList.remove('urgent-gold');
-    document.getElementById('hudGoldHint').textContent = 'Acumulando para próximo item';
+    document.getElementById('hudGoldHint').textContent = 'Acumulando para 1º componente abaixo';
   }
 
   document.getElementById('hudCsPerMin').textContent = `${p.csPerMin} /min`;
@@ -800,7 +1053,7 @@ function renderTeamTable(containerId, players, isEnemy) {
 
   el.innerHTML = (players || [])
     .map((p) => {
-      const cleanChamp = (p.championName || 'Yasuo').replace(/[^a-zA-Z]/g, '');
+      const cleanChamp = (p.championName || 'Renekton').replace(/[^a-zA-Z]/g, '');
       const itemsHtml = (p.items || [])
         .slice(0, 6)
         .map(
@@ -819,7 +1072,7 @@ function renderTeamTable(containerId, players, isEnemy) {
       return `
         <div class="player-row">
           <div class="player-row-left">
-            <img class="player-row-avatar" src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${cleanChamp}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/14.20.1/img/champion/Yasuo.png'" alt="${p.championName}" />
+            <img class="player-row-avatar" src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${cleanChamp}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/Renekton.png'" alt="${p.championName}" />
             <div>
               <div class="player-row-name">${p.championName} <small>Nv.${p.level}</small></div>
               <div class="player-row-sub">${p.summonerName}</div>
@@ -835,7 +1088,7 @@ function renderTeamTable(containerId, players, isEnemy) {
 }
 
 function renderEmptyTables() {
-  const msg = `<div class="player-row"><span class="player-row-sub">Nenhuma partida ativa no momento. Clique em "Simular Partida" na barra superior para testar!</span></div>`;
+  const msg = `<div class="player-row"><span class="player-row-sub">Assim que a partida iniciar no League of Legends, os 10 jogadores aparecerão aqui automaticamente!</span></div>`;
   document.getElementById('allyTeamList').innerHTML = msg;
   document.getElementById('enemyTeamList').innerHTML = msg;
 }
@@ -863,52 +1116,6 @@ function processCoachingPopups(coaching, isMatchActive) {
     });
   }
 }
-
-// =========================================================================
-// SIMULADOR INTERATIVO DE PARTIDA
-// =========================================================================
-async function toggleSimulator(forceState = null) {
-  const isCurrentlyOn = document.getElementById('simStateLabel').textContent === 'ON';
-  const nextState = forceState !== null ? forceState : !isCurrentlyOn;
-  const scenario = document.getElementById('simScenarioSelect').value;
-
-  shownPopupIds.clear();
-
-  await fetch('/api/simulator', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      enabled: nextState,
-      scenario,
-      championId: selectedChampionId,
-      enemyChampionId: enemyTeam[0] || 'Malzahar'
-    })
-  });
-
-  if (nextState) {
-    switchTab('live-game-tab');
-  }
-  await pollStatus();
-}
-
-document.getElementById('btnToggleSim')?.addEventListener('click', () => toggleSimulator());
-document.getElementById('btnStartSimBanner')?.addEventListener('click', () => toggleSimulator(true));
-
-document.getElementById('simScenarioSelect')?.addEventListener('change', async (e) => {
-  shownPopupIds.clear();
-  await fetch('/api/simulator', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      enabled: true,
-      scenario: e.target.value,
-      championId: selectedChampionId,
-      enemyChampionId: enemyTeam[0] || 'Malzahar'
-    })
-  });
-  switchTab('live-game-tab');
-  await pollStatus();
-});
 
 // =========================================================================
 // TIER LIST (TODOS OS 173 CAMPEÕES)
@@ -989,7 +1196,7 @@ async function askCoachQuestion(questionText) {
 
   const loadingDiv = document.createElement('div');
   loadingDiv.className = 'chat-bubble assistant';
-  loadingDiv.innerHTML = `<div class="bubble-author">⚡ Babilônia AI</div><div class="bubble-text">⏳ Analisando dados...</div>`;
+  loadingDiv.innerHTML = `<div class="bubble-author">⚡ Babilonia Buff AI</div><div class="bubble-text">⏳ Analisando dados...</div>`;
   chatBox.appendChild(loadingDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 
@@ -1006,7 +1213,7 @@ async function askCoachQuestion(questionText) {
     const data = await res.json();
 
     loadingDiv.innerHTML = `
-      <div class="bubble-author">⚡ ${data.source || 'Babilônia AI'}</div>
+      <div class="bubble-author">⚡ ${data.source || 'Babilonia Buff AI'}</div>
       <div class="bubble-text">${formatSimpleMarkdown(data.answer || '')}</div>
     `;
     chatBox.scrollTop = chatBox.scrollHeight;

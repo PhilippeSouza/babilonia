@@ -30,12 +30,10 @@ namespace BabiloniaApp
         private System.Windows.Forms.Timer statusTimer;
         private Process nodeProcess;
         private string appDir;
-        private bool isSimulated = false;
 
         private Label lblServerStatus;
         private Label lblLcuStatus;
         private Label lblMatchStatus;
-        private Button btnToggleSim;
 
         // Suporte para arrastar a janela sem borda padrão do Windows
         [DllImport("user32.dll")]
@@ -54,7 +52,7 @@ namespace BabiloniaApp
 
         private void InitializeComponent()
         {
-            this.Text = "BABILÔNIA — LoL Companion & Coach IA";
+            this.Text = "Babilonia Buff — LoL Companion & Coach IA";
             this.Size = new Size(480, 620);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.None;
@@ -77,21 +75,19 @@ namespace BabiloniaApp
             trayMenu.BackColor = BgCard;
             trayMenu.ForeColor = DraculaFg;
 
-            var itemOpenMain = new ToolStripMenuItem("⚡ Abrir Painel Babilônia Completo", null, (s, e) => OpenAppWindow(false));
+            var itemOpenMain = new ToolStripMenuItem("⚡ Abrir Painel Babilonia Buff", null, (s, e) => OpenAppWindow(false));
             var itemOpenOverlay = new ToolStripMenuItem("🪟 Abrir Mini Overlay Compacto", null, (s, e) => OpenAppWindow(true));
-            var itemShowController = new ToolStripMenuItem("🎛️ Mostrar Central Babilônia", null, (s, e) => RestoreFromTray());
-            var itemToggleSim = new ToolStripMenuItem("🎮 Alternar Simulação de Partida", null, (s, e) => ToggleSimulation());
-            var itemExit = new ToolStripMenuItem("❌ Fechar Babilônia Completo", null, (s, e) => ExitApplication());
+            var itemShowController = new ToolStripMenuItem("🎛️ Mostrar Central Babilonia Buff", null, (s, e) => RestoreFromTray());
+            var itemExit = new ToolStripMenuItem("❌ Fechar Babilonia Buff", null, (s, e) => ExitApplication());
 
             trayMenu.Items.Add(itemOpenMain);
             trayMenu.Items.Add(itemOpenOverlay);
-            trayMenu.Items.Add(itemToggleSim);
             trayMenu.Items.Add(new ToolStripSeparator());
             trayMenu.Items.Add(itemShowController);
             trayMenu.Items.Add(itemExit);
 
             trayIcon = new NotifyIcon();
-            trayIcon.Text = "BABILÔNIA — LoL Companion (Ativo)";
+            trayIcon.Text = "Babilonia Buff — LoL Companion (Ativo)";
             trayIcon.Icon = appIcon ?? SystemIcons.Application;
             trayIcon.ContextMenuStrip = trayMenu;
             trayIcon.Visible = true;
@@ -110,7 +106,7 @@ namespace BabiloniaApp
 
             Label titleLabel = new Label
             {
-                Text = "⚡ BABILÔNIA DESKTOP • DRACULA EDITION",
+                Text = "⚡ BABILONIA BUFF • DRACULA EDITION",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
                 ForeColor = DraculaPurple,
                 AutoSize = true,
@@ -151,8 +147,8 @@ namespace BabiloniaApp
 
             Label lblBrandTitle = new Label
             {
-                Text = "BABILÔNIA",
-                Font = new Font("Segoe UI", 22f, FontStyle.Bold),
+                Text = "BABILONIA BUFF",
+                Font = new Font("Segoe UI", 17f, FontStyle.Bold),
                 ForeColor = DraculaFg,
                 AutoSize = true,
                 Location = new Point(180, 68)
@@ -235,7 +231,7 @@ namespace BabiloniaApp
             // 5. BOTÕES DE AÇÃO ESTILO DRACULA NEON
             // ====================================================================
             Button btnOpenMain = CreateActionButton(
-                "⚡ ABRIR PAINEL BABILÔNIA COMPLETO",
+                "⚡ ABRIR PAINEL BABILONIA BUFF",
                 new Point(28, 354),
                 new Size(424, 50),
                 DraculaPurple,
@@ -248,24 +244,13 @@ namespace BabiloniaApp
             Button btnOpenMini = CreateActionButton(
                 "🪟 ABRIR MINI OVERLAY (SEGUNDA TELA)",
                 new Point(28, 416),
-                new Size(206, 44),
+                new Size(424, 44),
                 BgCard,
                 DraculaCyan,
                 9f
             );
             btnOpenMini.Click += (s, e) => OpenAppWindow(true);
             this.Controls.Add(btnOpenMini);
-
-            btnToggleSim = CreateActionButton(
-                "🎮 SIMULAR PARTIDA: OFF",
-                new Point(246, 416),
-                new Size(206, 44),
-                BgCard,
-                DraculaPink,
-                9f
-            );
-            btnToggleSim.Click += (s, e) => ToggleSimulation();
-            this.Controls.Add(btnToggleSim);
 
             Button btnHideTray = CreateActionButton(
                 "🔽 Minimizar para a Bandeja (Continua Rodando)",
@@ -279,7 +264,7 @@ namespace BabiloniaApp
             this.Controls.Add(btnHideTray);
 
             Button btnQuitAll = CreateActionButton(
-                "🛑 Encerrar Babilônia Completo",
+                "🛑 Encerrar Babilonia Buff",
                 new Point(28, 526),
                 new Size(424, 40),
                 Color.FromArgb(55, 28, 36),
@@ -291,7 +276,7 @@ namespace BabiloniaApp
 
             Label lblFooter = new Label
             {
-                Text = "Babilônia v2.0 • Sem Voz (Popups Visuais) • API Oficial Local Riot LCU",
+                Text = "Babilonia Buff v2.0 • Popups Visuais • API Oficial Local Riot LCU",
                 Font = new Font("Segoe UI", 8f, FontStyle.Regular),
                 ForeColor = DraculaComment,
                 AutoSize = false,
@@ -403,9 +388,11 @@ namespace BabiloniaApp
                 {
                     try
                     {
+                        string defaultNode = @"C:\Program Files\nodejs\node.exe";
+                        string nodeExe = File.Exists(defaultNode) ? defaultNode : "node";
                         ProcessStartInfo psi = new ProcessStartInfo
                         {
-                            FileName = "node",
+                            FileName = nodeExe,
                             Arguments = "server.js",
                             WorkingDirectory = appDir,
                             CreateNoWindow = true,
@@ -440,13 +427,11 @@ namespace BabiloniaApp
                     {
                         string json = reader.ReadToEnd();
                         bool lcuConnected = json.Contains("\"connected\":true");
-                        bool simOn = json.Contains("\"isSimulated\":true");
                         bool liveOn = json.Contains("\"inLiveGame\":true");
 
                         this.BeginInvoke((MethodInvoker)delegate
                         {
-                            isSimulated = simOn;
-                            lblServerStatus.Text = "🟢 Servidor Babilônia: ONLINE (http://localhost:3000)";
+                            lblServerStatus.Text = "🟢 Servidor Babilonia Buff: ONLINE (localhost:3000)";
                             lblServerStatus.ForeColor = DraculaGreen;
 
                             if (lcuConnected)
@@ -465,19 +450,11 @@ namespace BabiloniaApp
                                 lblMatchStatus.Text = "🔥 Partida Ao Vivo Detectada (Monitorando Porta 2999)";
                                 lblMatchStatus.ForeColor = DraculaGreen;
                             }
-                            else if (simOn)
-                            {
-                                lblMatchStatus.Text = "🎮 Modo Simulação de Partida Ativo";
-                                lblMatchStatus.ForeColor = DraculaPink;
-                            }
                             else
                             {
-                                lblMatchStatus.Text = "🏠 Modo Real: Pronto na Tela Inicial (Home)";
+                                lblMatchStatus.Text = "🏠 Pronto, aguardando partida";
                                 lblMatchStatus.ForeColor = DraculaComment;
                             }
-
-                            btnToggleSim.Text = simOn ? "🎮 SIMULAR PARTIDA: ON" : "🎮 SIMULAR PARTIDA: OFF";
-                            btnToggleSim.ForeColor = simOn ? DraculaGreen : DraculaPink;
                         });
                     }
                 }
@@ -489,31 +466,6 @@ namespace BabiloniaApp
                         lblServerStatus.ForeColor = DraculaRed;
                     });
                 }
-            });
-        }
-
-        private void ToggleSimulation()
-        {
-            ThreadPool.QueueUserWorkItem(_ =>
-            {
-                try
-                {
-                    bool nextState = !isSimulated;
-                    string payload = "{\"enabled\":" + (nextState ? "true" : "false") + ",\"scenario\":\"dragon_gold\"}";
-                    byte[] bytes = Encoding.UTF8.GetBytes(payload);
-
-                    HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://localhost:3000/api/simulate");
-                    req.Method = "POST";
-                    req.ContentType = "application/json";
-                    req.ContentLength = bytes.Length;
-                    using (Stream reqStream = req.GetRequestStream())
-                    {
-                        reqStream.Write(bytes, 0, bytes.Length);
-                    }
-                    using (HttpWebResponse res = (HttpWebResponse)req.GetResponse()) { }
-                    PollBackendStatus();
-                }
-                catch { }
             });
         }
 
@@ -563,8 +515,8 @@ namespace BabiloniaApp
             this.Hide();
             trayIcon.ShowBalloonTip(
                 2500,
-                "Babilônia continua ativo!",
-                "O ícone do Babilônia continua aqui na barra do sistema monitorando seu LoL.",
+                "Babilonia Buff continua ativo!",
+                "O ícone do Babilonia Buff continua aqui na barra do sistema monitorando seu LoL.",
                 ToolTipIcon.Info
             );
         }
