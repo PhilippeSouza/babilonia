@@ -4,11 +4,11 @@
   <img src="public/logo.png" width="180" alt="Babilonia Buff" />
 </p>
 
-Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, com tema **Dracula Dark Mode**, executável nativo para Windows (**`Babilonia.exe`**) com ícone na Barra de Tarefas e na Bandeja do Sistema (System Tray), e conexão 100% automática ao cliente do jogo (sem precisar de chave da Riot API e 100% seguro contra banimentos do Vanguard).
+Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, com tema **Dracula Dark Mode**, executável nativo para Windows (**`Babilônia Buff.exe`**) com ícone na Barra de Tarefas e na Bandeja do Sistema (System Tray), e conexão 100% automática ao cliente do jogo (sem precisar de chave da Riot API e 100% seguro contra banimentos do Vanguard).
 
 ## 🚀 Funcionalidades Principais
 
-- **🖥️ Executável Nativo (`Babilonia.exe`):**
+- **🖥️ Executável Nativo (`Babilônia Buff.exe`):**
   - Abre uma central desktop em **Dracula Dark Mode** com o ícone oficial do **Babilonia Buff** visível tanto na **Barra de Tarefas do Windows** quanto na **Bandeja do Sistema (System Tray, perto do relógio)**.
   - Inicia o servidor Node.js automaticamente em segundo plano (sem janela preta de CMD) e abre o painel do aplicativo em modo janela dedicada (`--app`).
 - **🏠 Home & Perfil Real do LoL:** Conecta sozinho ao cliente aberto e exibe seu `Nome#TAG`, Nível, Elo Ranqueado Solo/Duo, PDL e Vitórias/Derrotas.
@@ -33,10 +33,10 @@ Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, c
    cd babilonia
    ```
 3. **Para abrir com o Executável e Ícone na Barra do Windows:**
-   - Dê dois cliques diretamente em **`Babilonia.exe`** (ou em **`Iniciar-Babilonia.bat`**).
+   - Dê dois cliques diretamente em **`Babilônia Buff.exe`** (ou em **`Iniciar-Babilonia.bat`**).
 4. Caso queira recompilar o executável no Windows a qualquer momento:
    ```powershell
-   & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:Babilonia.ico /out:Babilonia.exe /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll src\BabiloniaLauncher.cs
+   & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:"Babilônia Buff-icone.ico" /out:"Babilônia Buff.exe" /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll src\BabiloniaLauncher.cs
    ```
 
 ---

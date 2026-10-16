@@ -12,10 +12,10 @@
   - Background principal: `#191a24` / `#282a36`
   - Cards / Superfícies: `#44475a` / `#1e1f29`
   - Destaques Neon: Roxo (`#bd93f9`), Rosa (`#ff79c6`), Ciano (`#8be9fd`), Verde (`#50fa7b`), Laranja (`#ffb86c`), Vermelho (`#ff5555`).
-- **Ícone / Logo Oficial (`public/logo.png`, `Babilonia.ico`, `public/favicon.ico`, `public/logo.svg`):**
+- **Ícone / Logo Oficial (`public/logo.png`, `Babilônia Buff-icone.ico`, `public/favicon.ico`, `public/logo.svg`):**
   - Ilustração estilo quadrinhos realista traçada e hachurada (comic-book ink line-art com iluminação neon Dracula) de um jogador com headset meio em pé/agachado em cima de uma cadeira gamer com as calças jeans abaixadas até os joelhos mostrando a bunda.
-- **Executável Nativo Windows (`Babilonia.exe` & `src/BabiloniaLauncher.cs`):**
-  - Aplicativo Windows Forms nativo compilado com `.NET Framework csc.exe` (`/target:winexe /win32icon:Babilonia.ico`).
+- **Executável Nativo Windows (`Babilônia Buff.exe` & `src/BabiloniaLauncher.cs`):**
+  - Aplicativo Windows Forms nativo compilado com `.NET Framework csc.exe` (`/target:winexe /win32icon:"Babilônia Buff-icone.ico"`).
   - Quando aberto, exibe o ícone oficial tanto na **Barra de Tarefas do Sistema Operacional (Taskbar)** quanto na **Bandeja do Sistema (System Tray / Área de Notificação perto do relógio)** com menu de contexto.
   - Inicia automaticamente o servidor `node server.js` em segundo plano oculto (sem janela preta de CMD), monitora o status do servidor/LoL em tempo real e abre a interface em modo janela dedicada (`--app=http://localhost:3000`).
 
@@ -50,9 +50,9 @@
 
 ## 📂 3. Estrutura de Arquivos do Repositório
 
-- `Babilonia.exe` — Executável nativo Windows com ícone na Barra de Tarefas e Bandeja do Sistema.
-- `Babilonia.ico` — Ícone multi-resolução (`16x16` a `256x256`) da arte realista traçada.
-- `src/BabiloniaLauncher.cs` — Código-fonte C# do executável `Babilonia.exe`.
+- `Babilônia Buff.exe` — Executável nativo Windows com ícone na Barra de Tarefas e Bandeja do Sistema.
+- `Babilônia Buff-icone.ico` — Ícone multi-resolução (`16x16` a `256x256`) da arte realista traçada.
+- `src/BabiloniaLauncher.cs` — Código-fonte C# do executável `Babilônia Buff.exe`.
 - `server.js` — Servidor HTTP Node.js (porta `3000`, zero dependências externas no `package.json`).
 - `src/lcu.js` — Conector automático LCU (`lockfile` + processo `LeagueClientUx.exe`), leitura de perfil/elo, champ select, bans, lane automática e exportação de runas (`/lol-perks/v1/pages`).
 - `src/liveClient.js` — Leitor da partida ao vivo na porta `2999`.

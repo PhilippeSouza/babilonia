@@ -2091,3 +2091,357 @@ body {
   transform: scale(1.14);
   box-shadow: 0 0 24px rgba(255, 121, 198, 0.75);
 }
+
+/* ==========================================================================
+   ITENS INICIAIS (500G) + QUAL COMPONENTE FAZER PRIMEIRO DE CADA ITEM GRANDE
+   ========================================================================== */
+
+.starter-pack-box {
+  background: linear-gradient(135deg, rgba(80, 250, 123, 0.08), var(--dracula-bg));
+  border: 1px solid rgba(80, 250, 123, 0.45);
+  border-radius: 10px;
+  padding: 13px 15px;
+}
+
+.starter-pack-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--dracula-green);
+}
+
+.starter-pack-desc {
+  font-size: 11.5px;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+
+.starter-items-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.starter-item-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.starter-item-pill.owned-item {
+  border-color: var(--dracula-green);
+  background: rgba(80, 250, 123, 0.14);
+}
+
+.starter-item-pill img {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--dracula-green);
+}
+
+.starter-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.starter-item-info strong {
+  font-size: 12px;
+  color: var(--dracula-fg);
+}
+
+.starter-item-info span {
+  font-size: 10.5px;
+  color: var(--dracula-comment);
+}
+
+.starter-plus {
+  font-weight: 800;
+  color: var(--dracula-comment);
+  font-size: 14px;
+}
+
+/* Card Detalhado de Item Grande + 1º Componente + Fluxo de Receita */
+.detailed-item-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  padding: 12px 14px;
+  transition: border 0.2s;
+}
+
+.detailed-item-card.item-completed-live {
+  border-color: var(--dracula-green);
+  background: linear-gradient(90deg, rgba(80, 250, 123, 0.1), var(--dracula-bg));
+}
+
+.blitz-item-top-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.big-item-img {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 9px !important;
+  border: 2px solid var(--dracula-purple) !important;
+  flex-shrink: 0;
+}
+
+.item-badges-right {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Destaque: QUAL COMPONENTE FAZER PRIMEIRO */
+.first-component-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, rgba(255, 184, 108, 0.16), rgba(189, 147, 249, 0.08));
+  border: 1px solid rgba(255, 184, 108, 0.55);
+  border-left: 4px solid var(--dracula-orange);
+  border-radius: 8px;
+  padding: 8px 11px;
+}
+
+.first-component-banner.done {
+  border-color: var(--dracula-green);
+  border-left-color: var(--dracula-green);
+  background: rgba(80, 250, 123, 0.1);
+}
+
+.first-component-banner img {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 6px !important;
+  border: 1.5px solid var(--dracula-orange) !important;
+  flex-shrink: 0;
+}
+
+.fc-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fc-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.fc-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 184, 108, 0.25);
+  color: var(--dracula-orange);
+}
+
+.fc-reason {
+  font-size: 11px;
+  color: #dbeafe;
+}
+
+/* Receita Passo a Passo (1º -> 2º -> 3º Componente) */
+.item-components-flow {
+  border-top: 1px dashed rgba(98, 114, 164, 0.4);
+  padding-top: 8px;
+}
+
+.comp-flow-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--dracula-comment);
+  margin-bottom: 6px;
+}
+
+.comp-steps-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.comp-step-chip {
+  background-color: var(--dracula-card);
+  border: 1px solid var(--dracula-line);
+  border-radius: 7px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.comp-step-chip.first-priority {
+  border-color: var(--dracula-orange);
+  background: rgba(255, 184, 108, 0.1);
+}
+
+.comp-step-chip.owned-comp {
+  border-color: var(--dracula-green);
+  background: rgba(80, 250, 123, 0.12);
+}
+
+.comp-step-num {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--dracula-comment);
+}
+
+.comp-step-chip.first-priority .comp-step-num {
+  color: var(--dracula-orange);
+}
+
+.comp-step-main {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comp-step-main img {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 5px !important;
+  border: 1px solid var(--dracula-line) !important;
+}
+
+.comp-step-main strong {
+  display: block;
+  font-size: 11px;
+  color: var(--dracula-fg);
+}
+
+.comp-step-main small {
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--dracula-cyan);
+}
+
+.comp-arrow {
+  color: var(--dracula-comment);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   PAINEL DE JOGO EM ANDAMENTO NA ABA PARTIDA AO VIVO
+   ========================================================================== */
+
+.live-ingame-build-panel {
+  border: 1.5px solid rgba(189, 147, 249, 0.55);
+  background: linear-gradient(180deg, rgba(40, 42, 54, 0.98), var(--dracula-card));
+}
+
+.live-build-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.live-build-Import-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.live-build-Import-btns button.active {
+  background: linear-gradient(135deg, var(--dracula-purple), var(--dracula-pink));
+  color: #191a21;
+  border-color: transparent;
+  font-weight: 800;
+}
+
+.live-next-buy-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: linear-gradient(90deg, rgba(255, 184, 108, 0.16), rgba(80, 250, 123, 0.1));
+  border: 1.5px solid var(--dracula-orange);
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.next-buy-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.next-buy-left img {
+  width: 48px;
+  height: 48px;
+  border-radius: 9px;
+  border: 2px solid var(--dracula-orange);
+}
+
+.next-buy-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--dracula-green);
+  margin-bottom: 2px;
+}
+
+.next-buy-left h3 {
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.next-buy-left p {
+  font-size: 12px;
+  color: #dbeafe;
+}
+
+.live-build-columns {
+  display: grid;
+  grid-template-columns: 0.95fr 1.25fr;
+  gap: 18px;
+}
+
+.skill-cell.current-live-lvl {
+  border: 2px solid var(--dracula-green) !important;
+  background: rgba(80, 250, 123, 0.22) !important;
+  box-shadow: 0 0 12px rgba(80, 250, 123, 0.4);
+  transform: scale(1.06);
+}
+
+.skill-cell.current-live-lvl .lvl-num {
+  color: var(--dracula-green);
+  font-weight: 800;
+}
+
+.skill-cell.past-live-lvl {
+  opacity: 0.55;
+}
+
+@media (max-width: 1100px) {
+  .live-build-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
