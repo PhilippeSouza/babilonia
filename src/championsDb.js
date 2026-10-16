@@ -1094,7 +1094,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     id: 'best_wr',
     badge: '🏆 MAIOR WINRATE',
     title: 'Build 1: Maior Taxa de Vitória (Meta Dominante)',
-    winRate: baseGuide.winRate || '53.4%',
+    winRate: baseGuide.winRate || null,
     pickRate: '68.5% dos Pro Players',
     description: `A build mais consistente e vitoriosa do patch atual para ${baseGuide.name}, focada no seu pico de poder principal.`,
     spells: baseGuide.spells || ['Flash', 'Incendiar'],
@@ -1122,7 +1122,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       id: 'alternative',
       badge: '⚡ BUILD ALTERNATIVA',
       title: 'Build 2: Aceleração de Ultimate & Escalonamento (Malevolência)',
-      winRate: '51.4%',
+      winRate: null,
       pickRate: '22.3% de Escolha',
       description: 'Troca explosão inicial por recarga de Ultimate reduzida e dano contínuo em lutas longas.',
       spells: ['Flash', 'Teleporte'],
@@ -1142,7 +1142,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       id: 'alternative',
       badge: '⚡ BUILD ALTERNATIVA',
       title: 'Build 2: Mobilidade, Kiting & Sobrevivência (Pé Veloz)',
-      winRate: '51.6%',
+      winRate: null,
       pickRate: '19.8% de Escolha',
       description: 'Ideal para rotas de muito poke ou quando você precisa de velocidade de movimento para se reposicionar.',
       spells: ['Flash', 'Purificar'],
@@ -1162,7 +1162,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
       id: 'alternative',
       badge: '⚡ BUILD ALTERNATIVA',
       title: 'Build 2: Splitpush & Duelo 1v1 nas Rotas Laterais',
-      winRate: '51.5%',
+      winRate: null,
       pickRate: '20.4% de Escolha',
       description: 'Focada em destruir torres rapidamente e vencer qualquer confronto 1v1 na rota lateral.',
       spells: ['Flash', 'Teleporte'],
@@ -1317,7 +1317,7 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
     id: 'anti_enemy',
     badge: '🛡️ ANTI-TIME INIMIGO',
     title: `Build 3: Counter-Composição (${comp.adPct}% AD / ${comp.apPct}% AP)`,
-    winRate: '55.1% vs esta Comp',
+    winRate: null,
     pickRate: 'Adaptada por IA',
     description: `Montada sob medida contra (${comp.enemies.join(', ') || 'Time Inimigo'}): ${comp.summaryText}.`,
     spells: comp.ccThreats.length >= 2 && primaryTag === 'Marksman' ? ['Flash', 'Purificar'] : (baseGuide.spells || ['Flash', 'Incendiar']),
@@ -1335,8 +1335,26 @@ function buildThreeOptionsForChampion(champId, baseGuide, ddragonChampData, enem
   };
 }
 
+/**
+ * Dados fixos de ranqueada Solo/Duo de um campeão (das listas de meta por rota).
+ * Retorna a entrada de melhor tier + todas as rotas em que ele aparece, ou null se não houver dado.
+ */
+const TIER_ORDER = ['S+', 'S', 'A+', 'A', 'B+', 'B', 'C'];
+function getRankedMetaEntry(championId) {
+  const low = String(championId || '').toLowerCase();
+  const found = [];
+  Object.entries(META_POOL_BY_ROLE).forEach(([lane, pool]) => {
+    const e = pool.find((c) => c.id.toLowerCase() === low);
+    if (e) found.push({ ...e, lane });
+  });
+  if (found.length === 0) return null;
+  found.sort((a, b) => TIER_ORDER.indexOf(a.tier) - TIER_ORDER.indexOf(b.tier));
+  return { ...found[0], lanes: found.map((f) => f.lane) };
+}
+
 function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = [], ddragonChampions = {}, ddragonItems = {}) {
   let base;
+  const rankedEntry = getRankedMetaEntry(championId);
   if (CURATED_CHAMPIONS[championId]) {
     const c = CURATED_CHAMPIONS[championId];
     base = {
@@ -1429,10 +1447,11 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
       title: ddragonChampData?.title || 'Campeão de Runeterra',
       tags,
       role,
-      tier: 'S',
-      winRate: '51.4%',
-      pickRate: '8.2%',
-      banRate: '5.4%',
+      // Sem dado fixo de ranqueada para este campeão: não inventa porcentagens
+      tier: rankedEntry?.tier || null,
+      winRate: rankedEntry?.winRate || null,
+      pickRate: rankedEntry?.pickRate || null,
+      banRate: null,
       difficulty: 'Média',
       damageType,
       spells,
@@ -1492,6 +1511,8 @@ function getChampionLanes(championId, roleText = '') {
 
 module.exports = {
   getChampionLanes,
+  getRankedMetaEntry,
+  META_POOL_BY_ROLE,
   RUNE_TEMPLATES,
   STARTER_PACKS,
   ITEM_BUILD_RECIPE_GUIDE,

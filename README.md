@@ -22,7 +22,9 @@ Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, c
 - **⚡ Auto-Import de Runas (1-Clique):** Exporta a página de runas da build escolhida direto para dentro do seu League of Legends.
 - **🧠 IA que observa a partida (sem chat, sem voz):** Lê a partida a cada 2s pela porta 2999 (ouro, KDA, CS, vida, itens, objetivos, mortes e eventos) e mostra popups curtos com o que fazer agora: recall com o item certo, dragão/Barão chegando, oponente de rota morto, vantagem ou desvantagem numérica, inimigo forte e como adaptar a build. A frequência é limitada para não poluir a tela. Na tela Partida Ao Vivo, o **Assistente Tático IA** mostra as dicas passando e tem perguntas prontas (o que comprar, recuar ou lutar, maior ameaça, próximo objetivo, farm e build), sem chat livre.
 - **🗂️ Telas por fase:** Draft e Partida Ao Vivo ficam desligados (OFF) fora de jogo e ligam sozinhos na Seleção de Campeões e na partida.
-- **🏆 Tier List com filtro por rota** (Top, Jungle, Mid, ADC, Suporte) e depois por estilo do campeão.
+- **🏠 Início estilo perfil do Blitz (sem anúncios):** elo Solo/Duo e Flex, histórico de PDL (guardado pelo app a cada abertura), últimas partidas lidas do cliente, desempenho por campeão nas ranqueadas e quem jogou com você.
+- **🧙 Campeões e 🏆 Tier List só de ranqueada Solo/Duo:** filtros por rota e estilo, faixas S/A/B/C. Campeões sem dado de ranqueada no app aparecem sem porcentagem.
+- **🧩 Overlays:** liga/desliga salvo para notificações de objetivos, benchmarking de CS, tela de carregamento, timers de inibidor, ordem de habilidades, lembrete de sentinela e diferença de valor de itens. Timers de selva, de ultimate e desenho por cima do jogo estão marcados como "em breve".
 
 ---
 

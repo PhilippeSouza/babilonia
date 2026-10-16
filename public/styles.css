@@ -1006,7 +1006,7 @@ body {
 
 .benchmark-meters {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
 }
 
@@ -2436,3 +2436,182 @@ body {
   }
 }
 
+
+/* ==========================================================================
+   INÍCIO: PERFIL DO JOGADOR (estilo Blitz, sem anúncios)
+   ========================================================================== */
+.page-head { margin-bottom: 16px; }
+.page-head h1 { font-size: 22px; margin: 0 0 4px; }
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.profile-avatar-wrap { position: relative; }
+.profile-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--bb-cyan);
+  object-fit: cover;
+}
+.profile-level {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bb-bg-deep);
+  border: 1px solid var(--bb-line);
+  border-radius: 999px;
+  padding: 1px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.profile-name { font-size: 26px; margin: 0 0 4px; }
+.profile-tag { color: var(--bb-comment); font-weight: 500; }
+.profile-refresh { margin-left: auto; }
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.profile-side { display: flex; flex-direction: column; gap: 14px; }
+.profile-box h3 { margin: 0 0 12px; font-size: 15px; }
+.profile-box h3 small { color: var(--bb-comment); font-weight: 500; font-size: 11px; }
+.profile-box h4 { margin: 0 0 8px; font-size: 13px; }
+.profile-subbox { border-top: 1px solid var(--bb-line); margin-top: 14px; padding-top: 12px; }
+
+.rank-row { display: flex; align-items: center; gap: 12px; }
+.rank-emblem { width: 48px; height: 48px; }
+.rank-info { flex: 1; }
+.rank-line { display: flex; justify-content: space-between; font-size: 13px; }
+.rank-line.small { font-size: 11px; color: var(--bb-comment); margin-top: 6px; }
+.rank-bar { height: 6px; border-radius: 4px; background: var(--bb-bg); margin-top: 8px; overflow: hidden; }
+.rank-bar span { display: block; height: 100%; background: var(--bb-cyan); }
+
+.queue-row { display: flex; justify-content: space-between; font-size: 13px; }
+.queue-row strong { color: var(--bb-cyan); }
+
+.lp-svg { width: 100%; height: 80px; }
+.lp-last { font-size: 12px; color: var(--bb-orange); font-weight: 700; margin-top: 4px; }
+
+.side-list { display: flex; flex-direction: column; gap: 10px; }
+.side-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.side-row img { width: 36px; height: 36px; border-radius: 8px; }
+.side-row-main, .side-row-end { display: flex; flex-direction: column; font-size: 12px; }
+.side-row-main { flex: 1; min-width: 0; }
+.side-row-main strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.side-row-main span, .side-row-end span { color: var(--bb-comment); font-size: 11px; }
+.side-row-end { text-align: right; }
+
+.empty-box { font-size: 12px; color: var(--bb-comment); padding: 6px 0; }
+
+.match-filter-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.match-list { display: flex; flex-direction: column; gap: 10px; }
+.match-card {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bb-line);
+  background: var(--bb-card);
+}
+.match-card.win { background: linear-gradient(90deg, rgba(139, 233, 253, 0.12), transparent 60%); border-left: 4px solid var(--bb-cyan); }
+.match-card.loss { background: linear-gradient(90deg, rgba(255, 85, 85, 0.12), transparent 60%); border-left: 4px solid var(--bb-red); }
+.match-card.remake { opacity: 0.7; }
+.match-champ { width: 56px; height: 56px; border-radius: 12px; }
+.match-body { flex: 1; min-width: 0; }
+.match-top { display: flex; gap: 10px; align-items: baseline; font-size: 12px; color: var(--bb-comment); flex-wrap: wrap; }
+.match-card.win .match-result { color: var(--bb-cyan); font-size: 16px; }
+.match-card.loss .match-result { color: var(--bb-red); font-size: 16px; }
+.match-stats { display: flex; gap: 18px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.match-stats > div { display: flex; flex-direction: column; font-size: 13px; }
+.match-stats span { font-size: 11px; color: var(--bb-comment); }
+.match-items { flex-direction: row !important; gap: 3px; }
+.match-items img, .item-empty { width: 24px; height: 24px; border-radius: 4px; background: var(--bb-bg); display: inline-block; }
+.match-teams { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; font-size: 11px; width: 240px; }
+.mp { display: flex; align-items: center; gap: 4px; color: var(--bb-comment); }
+.mp img { width: 16px; height: 16px; border-radius: 3px; }
+.mp span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px; }
+.mp.me span { color: var(--bb-fg); font-weight: 700; }
+
+/* ==========================================================================
+   TIER LIST: FAIXAS S / A / B / C
+   ========================================================================== */
+.filter-note { font-size: 11px; color: var(--bb-comment); margin: 10px 0 0; }
+.tier-bands { display: flex; flex-direction: column; gap: 12px; }
+.tier-band { display: grid; grid-template-columns: 90px 1fr; gap: 12px; }
+.tier-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34px;
+  font-weight: 800;
+  border-radius: 12px;
+}
+.band-S .tier-letter { background: rgba(255, 184, 108, 0.25); color: var(--bb-orange); }
+.band-A .tier-letter { background: rgba(139, 233, 253, 0.2); color: var(--bb-cyan); }
+.band-B .tier-letter { background: rgba(80, 250, 123, 0.18); color: var(--bb-green); }
+.band-C .tier-letter { background: rgba(98, 114, 164, 0.3); color: var(--bb-comment); }
+.tier-champs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--bb-line);
+  background: var(--bb-bg);
+}
+.tier-champ { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+.tier-champ img { width: 42px; height: 42px; border-radius: 8px; }
+.tier-champ div { display: flex; flex-direction: column; font-size: 13px; }
+.tier-champ span { font-size: 11px; color: var(--bb-green); }
+.badge-bb.muted { background: transparent; color: var(--bb-comment); border: 1px solid var(--bb-line); }
+
+/* ==========================================================================
+   OVERLAYS
+   ========================================================================== */
+.overlay-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.overlay-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bb-line);
+  border-radius: 12px;
+  background: var(--bb-bg);
+  padding: 14px;
+}
+.overlay-art {
+  height: 90px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  background: linear-gradient(135deg, rgba(189, 147, 249, 0.18), rgba(139, 233, 253, 0.12));
+  margin-bottom: 12px;
+}
+.overlay-card h3 { margin: 0 0 6px; font-size: 15px; }
+.overlay-card p { margin: 0 0 14px; font-size: 12px; color: var(--bb-comment); flex: 1; }
+.overlay-toggle {
+  border: 1px solid var(--bb-line);
+  background: var(--bb-bg-deep);
+  color: var(--bb-comment);
+  border-radius: 8px;
+  padding: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.overlay-toggle.on { background: rgba(80, 250, 123, 0.18); color: var(--bb-green); border-color: rgba(80, 250, 123, 0.4); }
+.overlay-card.soon { opacity: 0.75; }
+.soon-badge { text-align: center; padding: 9px; border-radius: 8px; border: 1px dashed var(--bb-line); color: var(--bb-orange); font-weight: 700; font-size: 12px; }
+
+@media (max-width: 1000px) {
+  .profile-grid { grid-template-columns: 1fr; }
+  .match-card { flex-wrap: wrap; }
+  .match-teams { width: 100%; }
+}

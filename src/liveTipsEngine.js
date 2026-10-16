@@ -49,8 +49,10 @@ class LiveTipsEngine {
    * @param {object} opts
    * @param {(champId: string, enemyIds: string[]) => object} opts.getGuide  guia do campeão (builds/itens)
    */
-  constructor({ getGuide } = {}) {
+  constructor({ getGuide, isOverlayEnabled } = {}) {
     this.getGuide = getGuide || (() => null);
+    // Dicas com `overlay` só aparecem se aquele overlay estiver ligado na tela Overlays
+    this.isOverlayEnabled = isOverlayEnabled || (() => true);
     this.nextTipId = 1;
     this.history = [];
     this.rawEvents = [];
@@ -67,6 +69,7 @@ class LiveTipsEngine {
     this.prevLevel = 0;
     this.fedAnnounced = new Set();
     this.inGame = false;
+    this.inhibRespawns = []; // { at, ours } — inibidores derrubados e quando voltam
   }
 
   getHistory() {
@@ -110,7 +113,9 @@ class LiveTipsEngine {
     this.pendingEvents = this.pendingEvents.filter((p) => t - p.createdAt <= EVENT_TIP_TTL_SEC);
 
     // 2) Dicas do estado atual
-    const candidates = [...this.pendingEvents, ...this.stateTips(ctx)].filter(Boolean);
+    const candidates = [...this.pendingEvents, ...this.stateTips(ctx)].filter(
+      (c) => c && (!c.overlay || this.isOverlayEnabled(c.overlay))
+    );
     this.prevLevel = ctx.me.level;
 
     // 3) Escolhe uma só, respeitando cooldowns e o intervalo global
@@ -119,6 +124,7 @@ class LiveTipsEngine {
       .filter((c) => {
         const last = this.keyLastShown.get(c.key);
         if (last !== undefined && t - last < (c.cooldown ?? Infinity)) return false;
+        if (c.bypassGap) return true; // lembretes curtos (ordem de habilidade) não ocupam a vez das outras dicas
         const gap = c.priority >= PRIORITY.URGENT ? GAP_URGENT_SEC : GAP_NORMAL_SEC;
         return sinceLast >= gap;
       })
@@ -129,7 +135,7 @@ class LiveTipsEngine {
 
     if (typeof chosen.onShow === 'function') chosen.onShow();
     this.keyLastShown.set(chosen.key, t);
-    this.lastShownAt = t;
+    if (!chosen.bypassGap) this.lastShownAt = t;
     this.pendingEvents = this.pendingEvents.filter((p) => p.key !== chosen.key);
 
     const tip = {
@@ -262,6 +268,7 @@ class LiveTipsEngine {
         if (ours === false) {
           return {
             key: `dragon-${ev.EventID}`,
+          overlay: 'objectives',
             priority: enemyDrakes >= 3 ? PRIORITY.URGENT : PRIORITY.NORMAL,
             badge: `🐉 DRAGÃO INIMIGO (${enemyDrakes})`,
             title: enemyDrakes >= 3 ? 'Inimigo perto da Alma!' : 'Eles pegaram o dragão',
@@ -274,6 +281,7 @@ class LiveTipsEngine {
         if (ours === true) {
           return {
             key: `dragon-${ev.EventID}`,
+          overlay: 'objectives',
             priority: PRIORITY.LOW,
             badge: '🐉 DRAGÃO NOSSO',
             title: stolen ? 'Roubo de dragão!' : 'Dragão garantido',
@@ -288,6 +296,7 @@ class LiveTipsEngine {
         return killer.isAlly
           ? {
               key: `baron-${ev.EventID}`,
+          overlay: 'objectives',
               priority: PRIORITY.URGENT,
               badge: '👑 BARÃO NOSSO',
               title: 'Empurre com o Barão',
@@ -295,6 +304,7 @@ class LiveTipsEngine {
             }
           : {
               key: `baron-${ev.EventID}`,
+          overlay: 'objectives',
               priority: PRIORITY.URGENT,
               badge: '👑 BARÃO INIMIGO',
               title: 'Defenda sem lutar aberto',
@@ -307,6 +317,7 @@ class LiveTipsEngine {
         if (!killer || killer.isAlly) return null;
         return {
           key: `pit-${ev.EventID}`,
+          overlay: 'objectives',
           priority: PRIORITY.LOW,
           badge: '👾 OBJETIVO INIMIGO',
           title: 'Eles foram no topo',
@@ -316,6 +327,7 @@ class LiveTipsEngine {
       case 'InhibKilled': {
         // Barracks_T1_* pertence ao time ORDER (azul), Barracks_T2_* ao CHAOS (vermelho)
         const ourInhibDown = /_T1_/.test(String(ev.InhibKilled || '')) === (ctx.myTeam === 'ORDER');
+        this.inhibRespawns.push({ at: ev.EventTime + 300, ours: ourInhibDown, id: ev.EventID });
         if (!ourInhibDown) return null;
         return {
           key: `inhib-${ev.EventID}`,
@@ -449,6 +461,7 @@ class LiveTipsEngine {
     if (drag.secondsRemaining > 0 && drag.secondsRemaining <= 60) {
       tips.push({
         key: `dragon-soon-${Math.round(t + drag.secondsRemaining)}`,
+          overlay: 'objectives',
         cooldown: Infinity,
         priority: PRIORITY.URGENT,
         badge: `🐉 DRAGÃO EM ${fmt(drag.secondsRemaining)}`,
@@ -462,6 +475,7 @@ class LiveTipsEngine {
     if (t >= 1080 && baron.secondsRemaining > 0 && baron.secondsRemaining <= 60) {
       tips.push({
         key: `baron-soon-${Math.round(t + baron.secondsRemaining)}`,
+          overlay: 'objectives',
         cooldown: Infinity,
         priority: PRIORITY.URGENT,
         badge: `👑 BARÃO EM ${fmt(baron.secondsRemaining)}`,
@@ -473,6 +487,7 @@ class LiveTipsEngine {
     if (t < 1200 && pit.secondsRemaining > 0 && pit.secondsRemaining <= 45 && ['TOP', 'JUNGLE', 'MIDDLE'].includes(me.position)) {
       tips.push({
         key: `pit-soon-${Math.round(t + pit.secondsRemaining)}`,
+          overlay: 'objectives',
         cooldown: Infinity,
         priority: PRIORITY.NORMAL,
         badge: `👾 ${String(pit.name).toUpperCase()} EM ${fmt(pit.secondsRemaining)}`,
@@ -496,6 +511,40 @@ class LiveTipsEngine {
         });
       }
     }
+
+    // ---------- Ordem de habilidades recomendada ----------
+    const order = ctx.guide?.skillOrder;
+    if (Array.isArray(order) && me.level > this.prevLevel && me.level <= order.length) {
+      const skill = order[me.level - 1];
+      this.pendingEvents.push({
+        key: `skill-${me.level}`,
+        overlay: 'skillOrder',
+        bypassGap: true,
+        cooldown: Infinity,
+        priority: PRIORITY.LOW,
+        createdAt: t,
+        badge: `📈 NÍVEL ${me.level}`,
+        title: `Suba o ${skill}`,
+        message: `Ordem recomendada para ${ctx.guide.name || 'seu campeão'}: ${ctx.guide.skillPriority || order.slice(0, 6).join(' > ')}.`
+      });
+    }
+
+    // ---------- Timers de inibidor ----------
+    this.inhibRespawns
+      .filter((i) => i.at - t > 0 && i.at - t <= 30)
+      .forEach((i) => {
+        tips.push({
+          key: `inhib-back-${i.id}`,
+          overlay: 'minimapTimers',
+          cooldown: Infinity,
+          priority: PRIORITY.NORMAL,
+          badge: `🏰 INIBIDOR EM ${fmt(i.at - t)}`,
+          title: i.ours ? 'Nosso inibidor vai voltar' : 'Inibidor deles vai voltar',
+          message: i.ours
+            ? 'Segure mais um pouco: os super minions param quando ele renascer.'
+            : 'Se quiserem fechar o jogo, a janela está acabando. Empurrem agora ou peguem outro objetivo.'
+        });
+      });
 
     // ---------- Pico de poder no nível ----------
     if ([6, 11, 16].includes(me.level) && this.prevLevel < me.level && !ctx.isDead) {
@@ -540,6 +589,7 @@ class LiveTipsEngine {
       if (msg) {
         tips.push({
           key: 'comp-read',
+          overlay: 'loadingScreen',
           cooldown: Infinity,
           priority: PRIORITY.LOW,
           type: 'BUILD',
@@ -555,6 +605,7 @@ class LiveTipsEngine {
     if (checkpoint && me.position !== 'UTILITY' && me.csPerMin < 6) {
       tips.push({
         key: `cs-${checkpoint}`,
+        overlay: 'benchmark',
         cooldown: Infinity,
         priority: PRIORITY.LOW,
         badge: `🌾 ${me.csPerMin} CS/MIN`,
@@ -567,6 +618,7 @@ class LiveTipsEngine {
     if (t >= 480 && !ctx.owned.has(CONTROL_WARD_ID) && ctx.isDead && me.currentGold >= 75) {
       tips.push({
         key: 'control-ward',
+        overlay: 'trinket',
         cooldown: 300,
         priority: PRIORITY.LOW,
         badge: '👁️ VISÃO',

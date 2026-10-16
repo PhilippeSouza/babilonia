@@ -9,22 +9,35 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const { getLCUState, exportRunePageToLCU } = require('./src/lcu');
+const { getLCUState, exportRunePageToLCU, getMatchHistory } = require('./src/lcu');
 const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
-const { getChampionGuide, getTop6MetaPicks, getChampionLanes } = require('./src/championsDb');
+const { getChampionGuide, getTop6MetaPicks, getChampionLanes, getRankedMetaEntry } = require('./src/championsDb');
 const { hasGeminiKey, refineTipWithGemini, answerQuickQuestion } = require('./src/coachEngine');
 const { LiveTipsEngine } = require('./src/liveTipsEngine');
 
 const PORT = process.env.PORT || 3000;
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
+// Overlays que o jogador liga/desliga na tela Overlays (salvos no config.json)
+const DEFAULT_OVERLAYS = {
+  objectives: true, // Notificações de objetivos
+  benchmark: true, // Benchmarking de CS
+  loadingScreen: true, // Resumo da tela de carregamento
+  minimapTimers: true, // Timers de inibidor
+  skillOrder: true, // Ordem de habilidades recomendada
+  trinket: true, // Lembrete de sentinela
+  itemValue: true // Diferença de valor de itens
+};
+
 let appConfig = {
-  geminiApiKey: ''
+  geminiApiKey: '',
+  overlays: { ...DEFAULT_OVERLAYS }
 };
 
 if (fs.existsSync(CONFIG_PATH)) {
   try {
-    appConfig = { ...appConfig, ...JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8')) };
+    const saved = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    appConfig = { ...appConfig, ...saved, overlays: { ...DEFAULT_OVERLAYS, ...(saved.overlays || {}) } };
   } catch (_) {}
 }
 
@@ -103,7 +116,110 @@ function getLiveGuide(champId, rawEnemyIds) {
   return guideCache.get(cacheKey);
 }
 
-const tipsEngine = new LiveTipsEngine({ getGuide: getLiveGuide });
+const tipsEngine = new LiveTipsEngine({
+  getGuide: getLiveGuide,
+  isOverlayEnabled: (key) => appConfig.overlays[key] !== false
+});
+
+// Diferença de valor de itens entre os times (preço oficial do Data Dragon)
+function computeItemValue(matchState) {
+  if (!matchState) return null;
+  const valueOf = (p) => (p.items || []).reduce((acc, it) => acc + (ddragonItems[String(it.itemID)]?.gold?.total || 0), 0);
+  const allies = (matchState.allies || []).reduce((acc, p) => acc + valueOf(p), 0);
+  const enemies = (matchState.enemies || []).reduce((acc, p) => acc + valueOf(p), 0);
+  const myPos = matchState.activePlayer?.position;
+  const meRow = (matchState.allies || []).find((p) => p.position === myPos);
+  const laner = (matchState.enemies || []).find((p) => p.position === myPos);
+  return {
+    allies,
+    enemies,
+    diff: allies - enemies,
+    lane: meRow && laner ? { me: valueOf(meRow), enemy: valueOf(laner), enemyChampion: laner.championName } : null
+  };
+}
+
+// =========================================================================
+// PERFIL (Início): elo, histórico de partidas e histórico de PDL salvo localmente
+// =========================================================================
+const LP_HISTORY_PATH = path.join(__dirname, 'lp-history.json');
+let lpHistory = [];
+try {
+  if (fs.existsSync(LP_HISTORY_PATH)) lpHistory = JSON.parse(fs.readFileSync(LP_HISTORY_PATH, 'utf8')) || [];
+} catch (_) {}
+
+function recordLpSnapshot(rankedSolo) {
+  if (!rankedSolo || !rankedSolo.tier || rankedSolo.tier === 'UNRANKED' || rankedSolo.tier === 'NONE') return;
+  const last = lpHistory[lpHistory.length - 1];
+  if (last && last.tier === rankedSolo.tier && last.division === rankedSolo.division && last.lp === rankedSolo.leaguePoints) return;
+  lpHistory.push({ at: Date.now(), tier: rankedSolo.tier, division: rankedSolo.division, lp: rankedSolo.leaguePoints });
+  if (lpHistory.length > 100) lpHistory = lpHistory.slice(-100);
+  try {
+    fs.writeFileSync(LP_HISTORY_PATH, JSON.stringify(lpHistory), 'utf8');
+  } catch (_) {}
+}
+
+let profileCache = { at: 0, data: null };
+async function buildProfile() {
+  if (profileCache.data && Date.now() - profileCache.at < 60 * 1000) return profileCache.data;
+  const [lcu, matches] = await Promise.all([getLCUState(championKeyMap), getMatchHistory(championKeyMap, 20)]);
+  if (!lcu?.connected || !lcu.summoner) return { connected: false };
+  recordLpSnapshot(lcu.summoner.rankedSolo);
+
+  const games = (matches || []).filter((m) => !m.remake);
+  const ranked = games.filter((m) => m.isRanked);
+
+  // Desempenho por campeão (só ranqueadas)
+  const byChamp = new Map();
+  ranked.forEach((m) => {
+    const c = byChamp.get(m.championId) || { championId: m.championId, games: 0, wins: 0, kills: 0, deaths: 0, assists: 0 };
+    c.games++;
+    if (m.win) c.wins++;
+    c.kills += m.kills;
+    c.deaths += m.deaths;
+    c.assists += m.assists;
+    byChamp.set(m.championId, c);
+  });
+  const championPerformance = [...byChamp.values()]
+    .sort((a, b) => b.games - a.games)
+    .map((c) => ({
+      ...c,
+      losses: c.games - c.wins,
+      winRate: Math.round((c.wins / c.games) * 100),
+      kda: Number(((c.kills + c.assists) / Math.max(1, c.deaths)).toFixed(1))
+    }));
+
+  // Jogou recentemente com (aliados que aparecem em 2+ partidas)
+  const myPuuid = lcu.summoner.puuid;
+  const mates = new Map();
+  games.forEach((m) => {
+    m.participants
+      .filter((p) => p.teamId === m.teamId && p.puuid && p.puuid !== myPuuid)
+      .forEach((p) => {
+        const key = p.puuid;
+        const e = mates.get(key) || { name: p.name, tag: p.tag, championId: p.championId, games: 0, wins: 0 };
+        e.games++;
+        if (m.win) e.wins++;
+        mates.set(key, e);
+      });
+  });
+  const recentlyPlayedWith = [...mates.values()]
+    .filter((e) => e.games >= 2)
+    .sort((a, b) => b.games - a.games)
+    .slice(0, 8)
+    .map((e) => ({ ...e, losses: e.games - e.wins, winRate: Math.round((e.wins / e.games) * 100) }));
+
+  const data = {
+    connected: true,
+    summoner: lcu.summoner,
+    matches: matches || [],
+    matchHistoryAvailable: Array.isArray(matches),
+    championPerformance,
+    recentlyPlayedWith,
+    lpHistory: lpHistory.slice(-20)
+  };
+  profileCache = { at: Date.now(), data };
+  return data;
+}
 const TIPS_POLL_MS = 2000;
 let liveTipFeed = []; // dicas prontas para o painel (já refinadas pelo Gemini quando houver chave)
 
@@ -286,7 +402,9 @@ const server = http.createServer(async (req, res) => {
       matchState,
       activeChampionId: activeChampId,
       coaching,
-      liveTips: liveTipFeed
+      liveTips: liveTipFeed,
+      overlays: appConfig.overlays,
+      itemValue: appConfig.overlays.itemValue ? computeItemValue(matchState) : null
     });
   }
 
@@ -343,6 +461,7 @@ const server = http.createServer(async (req, res) => {
         tags: c.tags,
         role: guide.role,
         lanes: getChampionLanes(c.id, guide.role),
+        ranked: getRankedMetaEntry(c.id), // null quando não há dado fixo de ranqueada
         tier: guide.tier,
         winRate: guide.winRate,
         difficulty: guide.difficulty,
@@ -417,7 +536,25 @@ const server = http.createServer(async (req, res) => {
     return sendJson(res, 200, { ok: true, title: answer.title, message: answer.message, source: answer.source || 'local' });
   }
 
-  // 7. Salvar Configurações
+  // 7. Perfil do jogador (Início)
+  if (pathname === '/api/profile' && req.method === 'GET') {
+    if (url.searchParams.get('refresh') === '1') profileCache.at = 0;
+    return sendJson(res, 200, { ddragonVersion, ...(await buildProfile()) });
+  }
+
+  // 8. Overlays: lê e salva o que o jogador ligou/desligou
+  if (pathname === '/api/overlays' && (req.method === 'GET' || req.method === 'POST')) {
+    if (req.method === 'POST') {
+      const body = await parseJsonBody(req);
+      Object.keys(DEFAULT_OVERLAYS).forEach((k) => {
+        if (typeof body[k] === 'boolean') appConfig.overlays[k] = body[k];
+      });
+      saveConfig();
+    }
+    return sendJson(res, 200, { overlays: appConfig.overlays });
+  }
+
+  // 9. Salvar Configurações
   if (pathname === '/api/config' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     if (typeof body.geminiApiKey === 'string') {

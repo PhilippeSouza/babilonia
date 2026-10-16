@@ -704,6 +704,7 @@ async function applyPhaseVisibility(rawPhase, isLiveMatchNow) {
     lastAutoImportedChamp = '';
     await refreshDraftAndBuilds();
     switchTab('home-tab');
+    setTimeout(() => loadProfile(true), 15000); // dá tempo do cliente registrar a partida no histórico
   }
   lastPhaseWasActive = isActive;
 }
@@ -729,14 +730,6 @@ async function pollStatus() {
     const lcuSub = document.getElementById('lcuStatusSub');
     const topPhaseLabel = document.getElementById('topPhaseLabel');
 
-    const homeClientBadge = document.getElementById('homeClientBadge');
-    const homePhaseBadge = document.getElementById('homePhaseBadge');
-    const homeSummonerName = document.getElementById('homeSummonerName');
-    const homeSummonerSub = document.getElementById('homeSummonerSub');
-    const homeProfileIcon = document.getElementById('homeProfileIcon');
-    const homeRankedTier = document.getElementById('homeRankedTier');
-    const homeRankedWL = document.getElementById('homeRankedWL');
-    const homeSummonerLevel = document.getElementById('homeSummonerLevel');
 
     const rawPhase = data.lcu?.phase || 'Disconnected';
     const isLiveMatchNow = Boolean(data.inLiveGame || rawPhase === 'InProgress' || rawPhase === 'GameStart');
@@ -764,36 +757,8 @@ async function pollStatus() {
     if (data.lcu && data.lcu.connected) {
       lcuBox.className = 'client-status-box connected';
       const sum = data.lcu.summoner;
-      const sumName = sum ? `${sum.gameName}#${sum.tagLine}` : 'Invocador';
       lcuTitle.textContent = `LoL Conectado: ${sum ? sum.gameName : 'Invocador'}`;
       lcuSub.textContent = isLiveMatchNow ? '🔥 Jogo em Andamento' : `Fase: ${data.lcu.phase}`;
-
-      // Atualiza Card de Perfil Real na Home
-      if (homeClientBadge) {
-        homeClientBadge.className = 'badge-bb green';
-        homeClientBadge.textContent = '🟢 CLIENTE DO LOL CONECTADO';
-      }
-      if (homePhaseBadge) homePhaseBadge.textContent = isLiveMatchNow ? '🔥 Em Partida Ao Vivo' : `Fase: ${data.lcu.phase}`;
-      if (homeSummonerName) homeSummonerName.textContent = sumName;
-      if (homeSummonerSub) {
-        homeSummonerSub.textContent = isLiveMatchNow
-          ? `Você está em partida de ${data.activeChampionId}! Veja seu Guia de Jogo em Andamento na aba Partida Ao Vivo.`
-          : 'Conectado em tempo real ao seu League of Legends! Quando achar partida, o Babilonia Buff muda de tela sozinho.';
-      }
-      if (homeProfileIcon && sum?.profileIconId) {
-        homeProfileIcon.src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${sum.profileIconId}.png`;
-      }
-      if (homeSummonerLevel && sum?.summonerLevel) {
-        homeSummonerLevel.textContent = `Nível ${sum.summonerLevel}`;
-      }
-      if (sum?.rankedSolo && sum.rankedSolo.tier && sum.rankedSolo.tier !== 'UNRANKED' && sum.rankedSolo.tier !== 'NONE') {
-        const r = sum.rankedSolo;
-        if (homeRankedTier) homeRankedTier.textContent = `${r.tier} ${r.division} (${r.leaguePoints} PDL)`;
-        if (homeRankedWL) homeRankedWL.textContent = `${r.wins}V / ${r.losses}D`;
-      } else {
-        if (homeRankedTier) homeRankedTier.textContent = 'Sem Ranque / MD5';
-        if (homeRankedWL) homeRankedWL.textContent = '-- / --';
-      }
 
       // 1) QUANDO ACHAR PARTIDA / ENTRAR NA SELEÇÃO DE CAMPEÕES -> MUDA SOZINHO PARA ABA DE DRAFT & BUILDS!
       const cs = data.lcu.champSelect;
@@ -863,12 +828,6 @@ async function pollStatus() {
       lcuTitle.textContent = 'Cliente LoL Offline';
       lcuSub.textContent = 'Aguardando abertura do jogo';
 
-      if (homeClientBadge) {
-        homeClientBadge.className = 'badge-bb cyan';
-        homeClientBadge.textContent = '🔌 AGUARDANDO CLIENTE DO LOL';
-      }
-      if (homePhaseBadge) homePhaseBadge.textContent = 'Fora de Jogo';
-      if (homeSummonerName) homeSummonerName.textContent = 'Abra o League of Legends';
     }
 
     // 2) QUANDO A PARTIDA COMEÇAR (PORTA 2999 OU FASE INPROGRESS) -> VIRA AUTOMATICAMENTE PARA O MODO JOGO EM ANDAMENTO!
@@ -921,6 +880,7 @@ async function pollStatus() {
     renderLiveMatchView(data);
     renderLiveInGameBuildPanel(data);
     processLiveTips(data.liveTips, isLiveMatchNow);
+    renderItemValue(isLiveMatchNow ? data.itemValue : null);
   } catch (err) {
     console.error('Erro ao atualizar status:', err);
   }
@@ -1199,26 +1159,6 @@ function processLiveTips(tips, isMatchActive) {
 function renderChampionsGrid() {
   const searchVal = (document.getElementById('champSearchInput')?.value || '').toLowerCase().trim();
   const grid = document.getElementById('championsGrid');
-  const homeGrid = document.getElementById('homeMetaHighlightsGrid');
-
-  if (homeGrid && allChampions.length > 0 && !homeGrid.innerHTML) {
-    const featuredIds = ['Darius', 'Aatrox', 'Yasuo', 'Ahri', 'Yone', 'Syndra', 'Viego', 'LeeSin', 'Jinx', 'Kaisa', 'Thresh', 'Lulu'];
-    const featured = featuredIds
-      .map((id) => allChampions.find((c) => c.id === id))
-      .filter(Boolean);
-    homeGrid.innerHTML = featured
-      .map(
-        (c) => `
-        <div class="champ-card" onclick="selectChampionFromAnywhere('${c.id}')">
-          <img src="${c.iconUrl}" alt="${c.name}" loading="lazy" />
-          <div class="champ-card-name">${c.name}</div>
-          <div class="champ-card-role">${c.role}</div>
-          <span class="badge-bb purple">Tier ${c.tier} • ${c.winRate}</span>
-        </div>
-      `
-      )
-      .join('');
-  }
 
   if (!grid) return;
 
@@ -1239,13 +1179,19 @@ function renderChampionsGrid() {
       <div class="champ-card" onclick="selectChampionFromAnywhere('${c.id}')">
         <img src="${c.iconUrl}" alt="${c.name}" loading="lazy" />
         <div class="champ-card-name">${c.name}</div>
-        <div class="champ-card-role">${c.role}</div>
-        <span class="badge-bb purple">Tier ${c.tier} • ${c.winRate}</span>
+        <div class="champ-card-role">${(c.lanes || []).map((l) => LANE_LABELS[l]).join(' • ') || c.role}</div>
+        ${
+          c.ranked
+            ? `<span class="badge-bb purple">Tier ${c.ranked.tier} • ${c.ranked.winRate} WR</span>`
+            : '<span class="badge-bb muted">Sem dados de ranqueada</span>'
+        }
       </div>
     `
     )
     .join('');
 }
+
+const LANE_LABELS = { TOP: 'Top', JUNGLE: 'Jungle', MID: 'Mid', ADC: 'ADC', SUPPORT: 'Suporte' };
 
 document.getElementById('champSearchInput')?.addEventListener('input', renderChampionsGrid);
 
@@ -1322,8 +1268,321 @@ document.getElementById('btnSaveSettings')?.addEventListener('click', async () =
   pollStatus();
 });
 
+// =========================================================================
+// INÍCIO: PERFIL DO JOGADOR (ELO, PDL, PARTIDAS, CAMPEÕES E QUEM JOGOU COM VOCÊ)
+// =========================================================================
+const TIER_PT = {
+  IRON: 'Ferro', BRONZE: 'Bronze', SILVER: 'Prata', GOLD: 'Ouro', PLATINUM: 'Platina', EMERALD: 'Esmeralda',
+  DIAMOND: 'Diamante', MASTER: 'Mestre', GRANDMASTER: 'Grão-Mestre', CHALLENGER: 'Desafiante'
+};
+let profileData = null;
+let matchFilter = 'ranked';
+
+function champIcon(id) {
+  return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${id}.png`;
+}
+function itemIcon(id) {
+  return `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${id}.png`;
+}
+function rankText(q) {
+  if (!q || !q.tier || q.tier === 'UNRANKED' || q.tier === 'NONE') return null;
+  const apex = ['MASTER', 'GRANDMASTER', 'CHALLENGER'].includes(q.tier);
+  return `${TIER_PT[q.tier] || q.tier}${apex ? '' : ` ${q.division}`}`;
+}
+function timeAgo(ts) {
+  const diff = Math.max(0, Date.now() - ts);
+  const h = Math.floor(diff / 3600000);
+  if (h < 1) return `há ${Math.max(1, Math.floor(diff / 60000))} min`;
+  if (h < 24) return `há ${h} h`;
+  const d = Math.floor(h / 24);
+  return d === 1 ? 'há 1 dia' : `há ${d} dias`;
+}
+function fmtDuration(sec) {
+  return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+}
+
+async function loadProfile(force = false) {
+  try {
+    const res = await fetch(`/api/profile${force ? '?refresh=1' : ''}`);
+    profileData = await res.json();
+    renderProfile();
+  } catch (_) {}
+}
+
+function renderProfile() {
+  const d = profileData;
+  const status = document.getElementById('profileStatus');
+  if (!d || !d.connected) {
+    document.getElementById('profileName').textContent = 'Abra o League of Legends';
+    document.getElementById('profileTag').textContent = '';
+    document.getElementById('profileLevel').textContent = '--';
+    status.textContent = 'Quando o cliente do LoL estiver aberto, seu perfil, elo e partidas aparecem aqui sozinhos.';
+    document.getElementById('matchHistoryList').innerHTML = '<div class="empty-box">Nenhuma partida para mostrar ainda.</div>';
+    ['champPerfList', 'playedWithList'].forEach((id) => (document.getElementById(id).innerHTML = ''));
+    document.getElementById('lpHistoryChart').innerHTML = '';
+    return;
+  }
+
+  const sum = d.summoner;
+  document.getElementById('profileName').textContent = sum.gameName;
+  document.getElementById('profileTag').textContent = `#${sum.tagLine}`;
+  document.getElementById('profileLevel').textContent = sum.summonerLevel;
+  document.getElementById('profileIcon').src = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/profileicon/${sum.profileIconId}.png`;
+  status.textContent = d.matchHistoryAvailable
+    ? `Últimas ${d.matches.length} partidas lidas do seu cliente do LoL.`
+    : 'Não foi possível ler o histórico de partidas do cliente agora.';
+
+  // Ranqueada Solo/Duo
+  const solo = sum.rankedSolo;
+  const soloName = rankText(solo);
+  document.getElementById('soloTier').textContent = soloName || 'Sem ranque';
+  document.getElementById('soloLp').textContent = soloName ? `${solo.leaguePoints} PDL` : '';
+  document.getElementById('soloLpBar').style.width = soloName ? `${Math.min(100, solo.leaguePoints)}%` : '0%';
+  const games = solo ? solo.wins + solo.losses : 0;
+  document.getElementById('soloWr').textContent = games ? `${((solo.wins / games) * 100).toFixed(1)}% de vitórias` : 'Sem partidas na temporada';
+  document.getElementById('soloWl').textContent = games ? `${solo.wins}V - ${solo.losses}D` : '';
+  const emblem = document.getElementById('soloEmblem');
+  if (soloName) {
+    emblem.src = `https://raw.communitydragon.org/latest/plugins/rcp-fe-lol-static-assets/global/default/images/ranked-mini-crests/${solo.tier.toLowerCase()}.svg`;
+    emblem.classList.remove('hidden');
+  } else {
+    emblem.classList.add('hidden');
+  }
+  const flex = sum.rankedFlex;
+  document.getElementById('flexRank').textContent = rankText(flex) ? `${rankText(flex)} • ${flex.leaguePoints} PDL` : 'Sem ranque';
+
+  renderLpHistory(d.lpHistory || []);
+
+  // Desempenho por campeão
+  document.getElementById('champPerfList').innerHTML = d.championPerformance.length
+    ? d.championPerformance
+        .slice(0, 6)
+        .map(
+          (c) => `
+      <div class="side-row" onclick="selectChampionFromAnywhere('${c.championId}')">
+        <img src="${champIcon(c.championId)}" alt="" />
+        <div class="side-row-main"><strong>${escapeHtml(c.championId)}</strong><span>${c.kda} KDA</span></div>
+        <div class="side-row-end"><strong class="${c.winRate >= 50 ? 'text-green' : 'text-red'}">${c.winRate}% WR</strong><span>${c.wins}V - ${c.losses}D</span></div>
+      </div>`
+        )
+        .join('')
+    : '<div class="empty-box">Nenhuma ranqueada nas partidas recentes.</div>';
+
+  // Jogou recentemente com
+  document.getElementById('playedWithList').innerHTML = d.recentlyPlayedWith.length
+    ? d.recentlyPlayedWith
+        .map(
+          (p) => `
+      <div class="side-row">
+        <img src="${champIcon(p.championId)}" alt="" />
+        <div class="side-row-main"><strong>${escapeHtml(p.name)}${p.tag ? `#${escapeHtml(p.tag)}` : ''}</strong><span>${p.games} partidas</span></div>
+        <div class="side-row-end"><strong class="${p.winRate >= 50 ? 'text-green' : 'text-red'}">${p.winRate}% WR</strong><span>${p.wins}V - ${p.losses}D</span></div>
+      </div>`
+        )
+        .join('')
+    : '<div class="empty-box">Ninguém repetiu com você nas partidas recentes.</div>';
+
+  renderMatchHistory();
+}
+
+function renderLpHistory(points) {
+  const box = document.getElementById('lpHistoryChart');
+  if (points.length < 2) {
+    box.innerHTML = '<div class="empty-box">O app guarda seu PDL a cada vez que abre. O gráfico aparece depois de algumas partidas.</div>';
+    return;
+  }
+  // Converte elo + PDL numa escala contínua para o gráfico
+  const order = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
+  const div = { IV: 0, III: 1, II: 2, I: 3 };
+  const val = (p) => order.indexOf(p.tier) * 400 + (div[p.division] ?? 0) * 100 + p.lp;
+  const vals = points.map(val);
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const w = 300;
+  const h = 80;
+  const xy = vals.map((v, i) => [10 + (i * (w - 20)) / (vals.length - 1), h - 10 - ((v - min) / Math.max(1, max - min)) * (h - 20)]);
+  const last = points[points.length - 1];
+  box.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" class="lp-svg" role="img" aria-label="Histórico de PDL">
+      <polyline points="${xy.map((p) => p.join(',')).join(' ')}" fill="none" stroke="var(--bb-cyan)" stroke-width="2" />
+      ${xy.map((p) => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--bb-cyan)" />`).join('')}
+    </svg>
+    <div class="lp-last">${rankText({ tier: last.tier, division: last.division })} • ${last.lp} PDL</div>`;
+}
+
+function renderMatchHistory() {
+  const list = document.getElementById('matchHistoryList');
+  const all = profileData?.matches || [];
+  const matches = matchFilter === 'ranked' ? all.filter((m) => m.isRanked) : all;
+  if (!matches.length) {
+    list.innerHTML = `<div class="empty-box">${matchFilter === 'ranked' ? 'Nenhuma ranqueada nas últimas partidas.' : 'Nenhuma partida encontrada.'}</div>`;
+    return;
+  }
+  const myPuuid = profileData.summoner.puuid;
+  list.innerHTML = matches
+    .map((m) => {
+      const result = m.remake ? 'Refeita' : m.win ? 'Vitória' : 'Derrota';
+      const cls = m.remake ? 'remake' : m.win ? 'win' : 'loss';
+      const kda = ((m.kills + m.assists) / Math.max(1, m.deaths)).toFixed(1);
+      const team = (id) =>
+        m.participants
+          .filter((p) => p.teamId === id)
+          .map(
+            (p) => `<div class="mp ${p.puuid && p.puuid === myPuuid ? 'me' : ''}"><img src="${champIcon(p.championId)}" alt="" /><span>${escapeHtml(p.name || p.championId)}</span></div>`
+          )
+          .join('');
+      const items = m.items
+        .map((id) => (id ? `<img src="${itemIcon(id)}" alt="" />` : '<span class="item-empty"></span>'))
+        .join('');
+      return `
+      <div class="match-card ${cls}">
+        <img class="match-champ" src="${champIcon(m.championId)}" alt="${escapeHtml(m.championId)}" />
+        <div class="match-body">
+          <div class="match-top"><strong class="match-result">${result}</strong><span>${m.queueName}</span><span>${fmtDuration(m.durationSec)}</span><span>${timeAgo(m.createdAt)}</span></div>
+          <div class="match-stats">
+            <div><strong>${kda} KDA</strong><span>${m.kills} / ${m.deaths} / ${m.assists}</span></div>
+            <div><strong>${m.csPerMin} CS/min</strong><span>${m.cs} CS</span></div>
+            <div><strong>${m.goldPerMin} ouro/min</strong></div>
+            <div class="match-items">${items}</div>
+          </div>
+        </div>
+        ${m.participants.length > 1 ? `<div class="match-teams"><div>${team(100)}</div><div>${team(200)}</div></div>` : ''}
+      </div>`;
+    })
+    .join('');
+}
+
+document.querySelectorAll('[data-match-filter]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('[data-match-filter]').forEach((b) => b.classList.toggle('active', b === btn));
+    matchFilter = btn.dataset.matchFilter;
+    renderMatchHistory();
+  });
+});
+document.getElementById('btnRefreshProfile')?.addEventListener('click', () => loadProfile(true));
+
+// =========================================================================
+// TIER LIST: SÓ RANQUEADA SOLO/DUO, FAIXAS S / A / B / C
+// =========================================================================
+let tlLane = 'ALL';
+let tlStyle = 'ALL';
+const TIER_BAND = { 'S+': 'S', S: 'S', 'A+': 'A', A: 'A', 'B+': 'B', B: 'B', C: 'C' };
+
+function renderTierList() {
+  const box = document.getElementById('tierBands');
+  if (!box) return;
+  const search = (document.getElementById('tlSearch')?.value || '').toLowerCase().trim();
+  const patch = document.getElementById('tlPatch');
+  if (patch) patch.textContent = ddragonVersion;
+
+  const rows = [];
+  allChampions.forEach((c) => {
+    if (!c.ranked) return;
+    if (tlStyle !== 'ALL' && !(c.tags || []).includes(tlStyle)) return;
+    if (search && !c.name.toLowerCase().includes(search) && !c.id.toLowerCase().includes(search)) return;
+    if (tlLane !== 'ALL' && !(c.ranked.lanes || []).includes(tlLane)) return;
+    rows.push(c);
+  });
+  rows.sort((a, b) => parseFloat(b.ranked.winRate) - parseFloat(a.ranked.winRate));
+
+  box.innerHTML = ['S', 'A', 'B', 'C']
+    .map((band) => {
+      const list = rows.filter((c) => TIER_BAND[c.ranked.tier] === band);
+      return `
+      <div class="tier-band band-${band}">
+        <div class="tier-letter">${band}</div>
+        <div class="tier-champs">
+          ${
+            list.length
+              ? list
+                  .map(
+                    (c) => `
+            <div class="tier-champ" onclick="selectChampionFromAnywhere('${c.id}')">
+              <img src="${c.iconUrl}" alt="" loading="lazy" />
+              <div><strong>${c.name}</strong><span>${c.ranked.winRate} • ${(c.ranked.lanes || []).map((l) => LANE_LABELS[l]).join('/')}</span></div>
+            </div>`
+                  )
+                  .join('')
+              : '<div class="empty-box">Nenhum campeão nesta faixa com os filtros atuais.</div>'
+          }
+        </div>
+      </div>`;
+    })
+    .join('');
+}
+
+document.getElementById('tlSearch')?.addEventListener('input', renderTierList);
+document.querySelectorAll('#tlLaneGroup .filter-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#tlLaneGroup .filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    tlLane = btn.dataset.lane;
+    renderTierList();
+  });
+});
+document.querySelectorAll('#tlStyleGroup .filter-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#tlStyleGroup .filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    tlStyle = btn.dataset.tag;
+    renderTierList();
+  });
+});
+
+// =========================================================================
+// OVERLAYS: O JOGADOR LIGA/DESLIGA CADA UM (SALVO NO SERVIDOR)
+// =========================================================================
+async function loadOverlays() {
+  try {
+    const res = await fetch('/api/overlays');
+    const data = await res.json();
+    renderOverlayToggles(data.overlays || {});
+  } catch (_) {}
+}
+
+function renderOverlayToggles(state) {
+  document.querySelectorAll('.overlay-card[data-overlay]').forEach((card) => {
+    const key = card.dataset.overlay;
+    const btn = card.querySelector('.overlay-toggle');
+    const on = state[key] !== false;
+    btn.textContent = on ? 'Ligado' : 'Desligado';
+    btn.classList.toggle('on', on);
+  });
+}
+
+document.querySelectorAll('.overlay-card[data-overlay] .overlay-toggle').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const key = btn.closest('.overlay-card').dataset.overlay;
+    const turnOn = !btn.classList.contains('on');
+    const res = await fetch('/api/overlays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [key]: turnOn })
+    });
+    const data = await res.json();
+    renderOverlayToggles(data.overlays || {});
+  });
+});
+
+// Diferença de valor de itens (Partida Ao Vivo)
+function renderItemValue(iv) {
+  const box = document.getElementById('itemValueBox');
+  if (!box) return;
+  box.classList.toggle('hidden', !iv);
+  if (!iv) return;
+  const sign = (n) => (n > 0 ? `+${n}` : `${n}`);
+  box.innerHTML = `
+    <span class="meter-label">⚖️ VALOR DOS ITENS</span>
+    <strong class="meter-val ${iv.diff >= 0 ? 'text-green' : 'text-red'}">${sign(iv.diff)}g</strong>
+    <span class="meter-sub">Seu time ${iv.allies}g x ${iv.enemies}g${
+      iv.lane ? ` • Rota: ${sign(iv.lane.me - iv.lane.enemy)}g vs ${escapeHtml(iv.lane.enemyChampion)}` : ''
+    }</span>`;
+}
+
 // Inicialização
 loadAllChampions().then(() => {
+  renderTierList();
   pollStatus();
   setInterval(pollStatus, 2500);
 });
+loadProfile();
+setInterval(loadProfile, 60 * 1000);
+loadOverlays();

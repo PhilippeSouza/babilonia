@@ -27,7 +27,7 @@
       <nav class="sidebar-nav">
         <button class="side-link active" data-tab="home-tab">
           <span class="side-icon">🏠</span>
-          <span>Início (Home)</span>
+          <span>Início (Perfil)</span>
         </button>
         <button class="side-link" data-tab="champ-build-tab">
           <span class="side-icon">⚡</span>
@@ -40,8 +40,16 @@
           <span id="sidebarLiveDot" class="live-mini-badge">OFF</span>
         </button>
         <button class="side-link" data-tab="tierlist-tab">
+          <span class="side-icon">🧙</span>
+          <span>Campeões (<span id="champCountBadge">173</span>)</span>
+        </button>
+        <button class="side-link" data-tab="tiers-tab">
           <span class="side-icon">🏆</span>
-          <span>Tier List (<span id="champCountBadge">173</span>)</span>
+          <span>Tier List</span>
+        </button>
+        <button class="side-link" data-tab="overlays-tab">
+          <span class="side-icon">🧩</span>
+          <span>Overlays</span>
         </button>
       </nav>
 
@@ -111,125 +119,61 @@
         <!-- ABA 0: HOME / VISÃO GERAL                                         -->
         <!-- =================================================================== -->
         <section id="home-tab" class="tab-pane active">
-          <!-- Hero Card: Conexão Real com Seu LoL + Perfil -->
-          <div class="home-hero-grid mb-18">
-            <div class="card-bb home-profile-card">
-              <div class="home-profile-top">
-                <img
-                  id="homeProfileIcon"
-                  src="/logo.png"
-                  alt="Babilonia Buff"
-                  class="home-summoner-avatar"
-                />
-                <div class="home-summoner-info">
-                  <div class="home-status-row">
-                    <span id="homeClientBadge" class="badge-bb cyan">🔌 AGUARDANDO CLIENTE DO LOL</span>
-                    <span id="homePhaseBadge" class="badge-bb purple">Fora de Jogo</span>
-                  </div>
-                  <h1 id="homeSummonerName">Abra o League of Legends</h1>
-                  <p id="homeSummonerSub" class="card-sub">
-                    Assim que você abrir o cliente do LoL no PC, seu Nome#TAG, Nível, Elo Ranqueado e Seleção de Campeões aparecerão aqui automaticamente.
-                  </p>
-                </div>
-              </div>
-
-              <div class="home-stats-strip">
-                <div class="home-stat-box">
-                  <span class="strip-label">Elo Solo/Duo</span>
-                  <strong id="homeRankedTier" class="text-purple">Aguardando LoL</strong>
-                </div>
-                <div class="home-stat-box">
-                  <span class="strip-label">Vitórias / Derrotas</span>
-                  <strong id="homeRankedWL" class="text-green">-- / --</strong>
-                </div>
-                <div class="home-stat-box">
-                  <span class="strip-label">Nível da Conta</span>
-                  <strong id="homeSummonerLevel" class="text-cyan">--</strong>
-                </div>
-                <div class="home-stat-box">
-                  <span class="strip-label">Auto-Import de Runas</span>
-                  <strong class="text-green">⚡ Ativo e Pronto</strong>
-                </div>
-              </div>
+          <!-- PERFIL DO JOGADOR (estilo Blitz, sem anúncios) -->
+          <div class="profile-header">
+            <div class="profile-avatar-wrap">
+              <img id="profileIcon" src="/logo.png" alt="Ícone do invocador" class="profile-avatar" />
+              <span id="profileLevel" class="profile-level">--</span>
             </div>
-
-            <!-- Card Explicativo: A IA Integrada que te ajuda na Partida -->
-            <div class="card-bb home-ai-overview-card">
-              <div class="card-head">
-                <div>
-                  <span class="step-pill">IA OBSERVANDO A PARTIDA • SEM CHAT</span>
-                  <h2>🧠 A IA olha o jogo e te avisa o que fazer</h2>
-                </div>
-                <button class="btn-bb btn-purple" onclick="switchTab('live-game-tab')">Ver Partida Ao Vivo →</button>
-              </div>
-              <div class="ai-features-grid">
-                <div class="ai-feat-item">
-                  <span class="ai-feat-icon">💰</span>
-                  <div>
-                    <strong>Ouro &amp; Recall</strong>
-                    <p>Quando seu ouro fecha o próximo componente ou item, avisa para empurrar a wave e voltar, dizendo o que comprar.</p>
-                  </div>
-                </div>
-                <div class="ai-feat-item">
-                  <span class="ai-feat-icon">🐉</span>
-                  <div>
-                    <strong>Objetivos &amp; Vantagem Numérica</strong>
-                    <p>Avisa 1 minuto antes de Dragão e Barão, e quando inimigos morrem e dá para pegar objetivo ou torre.</p>
-                  </div>
-                </div>
-                <div class="ai-feat-item">
-                  <span class="ai-feat-icon">🛡️</span>
-                  <div>
-                    <strong>Leitura dos Eventos</strong>
-                    <p>Reage a mortes, dragões, Barão, inibidores, vida baixa e inimigos fortes com uma dica curta na hora certa.</p>
-                  </div>
-                </div>
-                <div class="ai-feat-item">
-                  <span class="ai-feat-icon">🎯</span>
-                  <div>
-                    <strong>3 Counters + 3 Meta na Sua Lane</strong>
-                    <p>Reconhece a rota que você caiu no Draft e separa 3 Counters do seu rival + 3 Top Meta sem repetir.</p>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <h1 class="profile-name"><span id="profileName">Abra o League of Legends</span> <span id="profileTag" class="profile-tag"></span></h1>
+              <span id="profileStatus" class="card-sub">Quando o cliente do LoL estiver aberto, seu perfil, elo e partidas aparecem aqui sozinhos.</span>
             </div>
+            <button id="btnRefreshProfile" class="btn-bb btn-outline profile-refresh" title="Atualizar perfil">↻ Atualizar</button>
           </div>
 
-          <!-- Atalhos Rápidos dos Módulos do Aplicativo -->
-          <div class="home-shortcuts-grid mb-18">
-            <div class="shortcut-card" onclick="switchTab('champ-build-tab')">
-              <span class="sc-icon">⚡</span>
-              <div>
-                <strong>Draft (3 Counters + 3 Meta) &amp; 3 Builds</strong>
-                <p>Veja as 6 recomendações da sua rota e as 3 opções de build para qualquer campeão</p>
+          <div class="profile-grid">
+            <!-- Coluna esquerda: elo, PDL, campeões e quem jogou com você -->
+            <div class="profile-side">
+              <div class="card-bb profile-box">
+                <h3>Ranqueada Solo/Duo</h3>
+                <div class="rank-row">
+                  <img id="soloEmblem" class="rank-emblem hidden" alt="" onerror="this.classList.add('hidden')" />
+                  <div class="rank-info">
+                    <div class="rank-line"><strong id="soloTier" class="text-cyan">Sem ranque</strong><span id="soloLp">-- PDL</span></div>
+                    <div class="rank-bar"><span id="soloLpBar" style="width:0%"></span></div>
+                    <div class="rank-line small"><span id="soloWr">--% de vitórias</span><span id="soloWl">0V - 0D</span></div>
+                  </div>
+                </div>
+                <div class="profile-subbox">
+                  <h4>Histórico de PDL</h4>
+                  <div id="lpHistoryChart" class="lp-chart"></div>
+                </div>
               </div>
-            </div>
-            <div class="shortcut-card" onclick="switchTab('tierlist-tab')">
-              <span class="sc-icon">🏆</span>
-              <div>
-                <strong>Explorar Todos os 173 Campeões</strong>
-                <p>Consulte a Tier List completa do Patch 16.20.1 filtrada por classe ou função</p>
-              </div>
-            </div>
-            <div class="shortcut-card" onclick="switchTab('live-game-tab')">
-              <span class="sc-icon">🎯</span>
-              <div>
-                <strong>Monitor de Partida Ao Vivo</strong>
-                <p>Acompanhe CS/min, Ouro, Temporizadores de Objetivos e Placar dos 10 jogadores</p>
-              </div>
-            </div>
-          </div>
 
-          <!-- Destaques do Meta Atual por Rota (Clique em qualquer campeão para ver as 3 Builds!) -->
-          <div class="card-bb">
-            <div class="card-head">
-              <div>
-                <h2>🔥 Campeões Dominantes no Patch 16.20.1 (Clique para ver as 3 Builds e Runas)</h2>
-                <p class="card-sub">Consulte qualquer campeão livremente fora de partida</p>
+              <div class="card-bb profile-box">
+                <div class="queue-row"><span>Ranqueada Flex</span><strong id="flexRank">Sem ranque</strong></div>
               </div>
-              <button class="btn-bb btn-outline" onclick="switchTab('tierlist-tab')">Ver Todos os 173 Campeões →</button>
+
+              <div class="card-bb profile-box">
+                <h3>Desempenho por campeão <small>(ranqueadas recentes)</small></h3>
+                <div id="champPerfList" class="side-list"></div>
+              </div>
+
+              <div class="card-bb profile-box">
+                <h3>Jogou recentemente com</h3>
+                <div id="playedWithList" class="side-list"></div>
+              </div>
             </div>
-            <div id="homeMetaHighlightsGrid" class="blitz-champions-grid"></div>
+
+            <!-- Coluna principal: histórico de partidas -->
+            <div class="profile-main">
+              <div class="match-filter-row">
+                <button class="filter-btn active" data-match-filter="ranked">Ranqueadas</button>
+                <button class="filter-btn" data-match-filter="all">Todas as partidas</button>
+              </div>
+              <div id="matchHistoryList" class="match-list"></div>
+            </div>
           </div>
         </section>
 
@@ -540,6 +484,7 @@
                   <strong id="hudCsPerMin" class="meter-val text-green">0.0 /min</strong>
                   <span id="hudCsValue" class="meter-sub">Total: 0 CS (Meta: 7.5/m)</span>
                 </div>
+                <div id="itemValueBox" class="meter-card hidden"></div>
                 <div class="meter-card">
                   <span class="meter-label">⚔️ KDA &amp; PARTICIPAÇÃO</span>
                   <strong id="hudKdaValue" class="meter-val text-purple">0 / 0 / 0</strong>
@@ -671,6 +616,10 @@
         <!-- ABA 3: TIER LIST & TODOS OS 173 CAMPEÕES                            -->
         <!-- =================================================================== -->
         <section id="tierlist-tab" class="tab-pane">
+          <div class="page-head">
+            <h1>Campeões • Ranqueada Solo/Duo</h1>
+            <p class="card-sub">Só estatísticas de ranqueada. Campeões sem dado de ranqueada no app aparecem sem porcentagem.</p>
+          </div>
           <div class="card-bb mb-18">
             <div class="tierlist-toolbar">
               <input
@@ -702,6 +651,118 @@
           </div>
 
           <div id="championsGrid" class="blitz-champions-grid"></div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- TIER LIST: SÓ RANQUEADA SOLO/DUO                                    -->
+        <!-- =================================================================== -->
+        <section id="tiers-tab" class="tab-pane">
+          <div class="page-head">
+            <h1>Tier List • Melhores campeões por rota, Patch <span id="tlPatch">--</span></h1>
+            <p class="card-sub">Ranqueada Solo/Duo. Clique num campeão para ver as 3 builds.</p>
+          </div>
+          <div class="card-bb mb-18">
+            <div class="tierlist-toolbar">
+              <input type="text" id="tlSearch" class="bb-input" placeholder="🔍 Buscar campeão..." />
+              <div class="role-filter-group" id="tlLaneGroup">
+                <span class="filter-label">Rota:</span>
+                <button class="filter-btn active" data-lane="ALL">Todas</button>
+                <button class="filter-btn" data-lane="TOP">🛡️ Top</button>
+                <button class="filter-btn" data-lane="JUNGLE">🌲 Jungle</button>
+                <button class="filter-btn" data-lane="MID">⚡ Mid</button>
+                <button class="filter-btn" data-lane="ADC">🏹 ADC</button>
+                <button class="filter-btn" data-lane="SUPPORT">✨ Suporte</button>
+              </div>
+              <div class="role-filter-group" id="tlStyleGroup">
+                <span class="filter-label">Estilo:</span>
+                <button class="filter-btn active" data-tag="ALL">Todos</button>
+                <button class="filter-btn" data-tag="Fighter">⚔️ Lutadores</button>
+                <button class="filter-btn" data-tag="Mage">🔮 Magos</button>
+                <button class="filter-btn" data-tag="Assassin">🗡️ Assassinos</button>
+                <button class="filter-btn" data-tag="Marksman">🏹 Atiradores</button>
+                <button class="filter-btn" data-tag="Tank">🛡️ Tanques</button>
+                <button class="filter-btn" data-tag="Support">✨ Suportes</button>
+              </div>
+              <div class="role-filter-group">
+                <select class="bb-select-sm" disabled title="Ainda não há dados separados por elo"><option>Elo: todos</option></select>
+                <select class="bb-select-sm" disabled title="Ainda não há dados separados por região"><option>Região: mundo</option></select>
+              </div>
+            </div>
+            <p class="filter-note">Elo e região ficam travados porque o app ainda não tem dados separados por elo ou região. A lista usa as estatísticas fixas de ranqueada do app, sem números inventados.</p>
+          </div>
+          <div id="tierBands" class="tier-bands"></div>
+        </section>
+
+        <!-- =================================================================== -->
+        <!-- OVERLAYS: LIGA/DESLIGA CADA UM                                      -->
+        <!-- =================================================================== -->
+        <section id="overlays-tab" class="tab-pane">
+          <div class="page-head">
+            <h1>Overlays do League of Legends</h1>
+            <p class="card-sub">Escolha o que aparece durante a partida. As escolhas ficam salvas. Os overlays só mostram informação e nunca fazem nada no jogo por você.</p>
+          </div>
+          <div class="overlay-grid">
+            <div class="overlay-card" data-overlay="objectives">
+              <div class="overlay-art">🐉 👑</div>
+              <h3>Notificações de objetivos</h3>
+              <p>Avisa 1 minuto antes de Dragão, Barão, Vastilarvas e Arauto, e quando o inimigo pega um deles.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="benchmark">
+              <div class="overlay-art">🌾 📈</div>
+              <h3>Benchmarking de CS</h3>
+              <p>Compara seu CS por minuto com o ideal da rota aos 10, 15 e 20 minutos.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="loadingScreen">
+              <div class="overlay-art">🧩 👥</div>
+              <h3>Tela de carregamento</h3>
+              <p>No começo da partida, resume a composição inimiga (cura, AP, AD, controle de grupo) e o que adaptar.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="minimapTimers">
+              <div class="overlay-art">🏰 ⏱️</div>
+              <h3>Timers de inibidor</h3>
+              <p>Avisa 30 segundos antes de um inibidor derrubado (seu ou deles) renascer.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="skillOrder">
+              <div class="overlay-art">⬆️ Q W E</div>
+              <h3>Ordem de habilidades recomendada</h3>
+              <p>A cada nível, mostra qual habilidade subir segundo a build do seu campeão.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="trinket">
+              <div class="overlay-art">👁️</div>
+              <h3>Lembrete de sentinela</h3>
+              <p>Quando você está na base sem Sentinela de Controle, lembra de comprar uma.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="itemValue">
+              <div class="overlay-art">⚖️ 💰</div>
+              <h3>Diferença de valor de itens</h3>
+              <p>Mostra na Partida Ao Vivo quanto ouro em itens seu time e seu oponente de rota têm a mais ou a menos.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card soon">
+              <div class="overlay-art">🌲 🗺️</div>
+              <h3>Timers de acampamentos da selva</h3>
+              <p>O jogo não informa quando cada acampamento foi limpo, então ainda não dá para mostrar isso com segurança.</p>
+              <span class="soon-badge">Em breve</span>
+            </div>
+            <div class="overlay-card soon">
+              <div class="overlay-art">⚡ R</div>
+              <h3>Timers de ultimate</h3>
+              <p>O jogo não informa a recarga da ultimate dos outros jogadores, então ainda não dá para mostrar isso.</p>
+              <span class="soon-badge">Em breve</span>
+            </div>
+            <div class="overlay-card soon">
+              <div class="overlay-art">🖥️</div>
+              <h3>Desenho por cima do jogo</h3>
+              <p>Hoje as dicas aparecem na janela do Babilônia Buff (e na Mini Overlay). Mostrar por cima da tela do LoL precisa de uma janela especial no launcher.</p>
+              <span class="soon-badge">Em breve</span>
+            </div>
+          </div>
         </section>
 
       </main>

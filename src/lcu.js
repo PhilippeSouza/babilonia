@@ -158,17 +158,18 @@ async function getLCUState(championKeyMap = {}) {
       lcuRequest('GET', '/lol-ranked/v1/current-ranked-stats', null, creds).catch(() => null)
     ]);
 
-    let rankedSolo = null;
-    if (rankedRaw && rankedRaw.queueMap && rankedRaw.queueMap.RANKED_SOLO_5x5) {
-      const q = rankedRaw.queueMap.RANKED_SOLO_5x5;
-      rankedSolo = {
-        tier: q.tier || 'UNRANKED',
-        division: q.division || '',
-        leaguePoints: q.leaguePoints || 0,
-        wins: q.wins || 0,
-        losses: q.losses || 0
-      };
-    }
+    const readQueue = (q) =>
+      q
+        ? {
+            tier: q.tier || 'UNRANKED',
+            division: q.division || '',
+            leaguePoints: q.leaguePoints || 0,
+            wins: q.wins || 0,
+            losses: q.losses || 0
+          }
+        : null;
+    const rankedSolo = readQueue(rankedRaw?.queueMap?.RANKED_SOLO_5x5);
+    const rankedFlex = readQueue(rankedRaw?.queueMap?.RANKED_FLEX_SR);
 
     let champSelect = null;
     if (phase === 'ChampSelect') {
@@ -226,13 +227,86 @@ async function getLCUState(championKeyMap = {}) {
             tagLine: summoner.tagLine || 'BR1',
             summonerLevel: summoner.summonerLevel || 1,
             profileIconId: summoner.profileIconId || 29,
-            rankedSolo
+            puuid: summoner.puuid || '',
+            rankedSolo,
+            rankedFlex
           }
         : null,
       champSelect
     };
   } catch (_) {
     return { connected: false, phase: 'Disconnected' };
+  }
+}
+
+const QUEUE_NAMES = {
+  420: 'Ranqueada Solo/Duo',
+  440: 'Ranqueada Flex',
+  400: 'Normal (Escolha)',
+  430: 'Normal (Às Cegas)',
+  490: 'Partida Rápida',
+  450: 'ARAM',
+  1700: 'Arena',
+  1900: 'URF'
+};
+
+/**
+ * Histórico de partidas recentes do jogador logado (somente leitura, via LCU).
+ * Devolve as partidas já resumidas para a tela de perfil.
+ */
+async function getMatchHistory(championKeyMap = {}, count = 20) {
+  const creds = await discoverLCUCredentials();
+  if (!creds) return null;
+  try {
+    const summoner = await lcuRequest('GET', '/lol-summoner/v1/current-summoner', null, creds);
+    const raw = await lcuRequest(
+      'GET',
+      `/lol-match-history/v1/products/lol/current-summoner/matches?begIndex=0&endIndex=${count - 1}`,
+      null,
+      creds
+    );
+    const games = raw?.games?.games || [];
+    const myPuuid = summoner?.puuid;
+
+    return games.map((g) => {
+      const identities = g.participantIdentities || [];
+      const nameOf = (pid) => {
+        const pl = identities.find((i) => i.participantId === pid)?.player || {};
+        return { name: pl.gameName || pl.summonerName || '', tag: pl.tagLine || '', puuid: pl.puuid || '' };
+      };
+      const participants = (g.participants || []).map((p) => ({
+        ...nameOf(p.participantId),
+        teamId: p.teamId,
+        championId: championKeyMap[String(p.championId)] || String(p.championId)
+      }));
+      const myIdentity = identities.find((i) => i.player?.puuid === myPuuid) || identities[0];
+      const me = (g.participants || []).find((p) => p.participantId === myIdentity?.participantId) || g.participants?.[0] || {};
+      const st = me.stats || {};
+      const minutes = Math.max(1, (g.gameDuration || 0) / 60);
+      const cs = (st.totalMinionsKilled || 0) + (st.neutralMinionsKilled || 0);
+      return {
+        gameId: g.gameId,
+        queueId: g.queueId,
+        queueName: QUEUE_NAMES[g.queueId] || 'Outro modo',
+        isRanked: g.queueId === 420 || g.queueId === 440,
+        createdAt: g.gameCreation,
+        durationSec: g.gameDuration || 0,
+        remake: (g.gameDuration || 0) < 300,
+        win: Boolean(st.win),
+        championId: championKeyMap[String(me.championId)] || String(me.championId || ''),
+        teamId: me.teamId,
+        kills: st.kills || 0,
+        deaths: st.deaths || 0,
+        assists: st.assists || 0,
+        cs,
+        csPerMin: Number((cs / minutes).toFixed(1)),
+        goldPerMin: Math.round((st.goldEarned || 0) / minutes),
+        items: [st.item0, st.item1, st.item2, st.item3, st.item4, st.item5, st.item6].map((i) => i || 0),
+        participants
+      };
+    });
+  } catch (_) {
+    return null;
   }
 }
 
@@ -268,6 +342,7 @@ async function exportRunePageToLCU(runePageData) {
 }
 
 module.exports = {
+  getMatchHistory,
   discoverLCUCredentials,
   getLCUState,
   exportRunePageToLCU
