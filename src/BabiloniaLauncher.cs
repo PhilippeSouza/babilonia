@@ -13,17 +13,17 @@ namespace BabiloniaApp
 {
     public class BabiloniaLauncherForm : Form
     {
-        // Cores oficiais Dracula Dark Mode
+        // Cores oficiais modo escuro
         private static readonly Color BgDark = Color.FromArgb(24, 25, 34);
         private static readonly Color BgCard = Color.FromArgb(40, 42, 54);
         private static readonly Color BgHeader = Color.FromArgb(30, 31, 41);
-        private static readonly Color DraculaPurple = Color.FromArgb(189, 147, 249);
-        private static readonly Color DraculaPink = Color.FromArgb(255, 121, 198);
-        private static readonly Color DraculaCyan = Color.FromArgb(139, 233, 253);
-        private static readonly Color DraculaGreen = Color.FromArgb(80, 250, 123);
-        private static readonly Color DraculaRed = Color.FromArgb(255, 85, 85);
-        private static readonly Color DraculaFg = Color.FromArgb(248, 248, 242);
-        private static readonly Color DraculaComment = Color.FromArgb(148, 163, 204);
+        private static readonly Color TemaPurple = Color.FromArgb(189, 147, 249);
+        private static readonly Color TemaPink = Color.FromArgb(255, 121, 198);
+        private static readonly Color TemaCyan = Color.FromArgb(139, 233, 253);
+        private static readonly Color TemaGreen = Color.FromArgb(80, 250, 123);
+        private static readonly Color TemaRed = Color.FromArgb(255, 85, 85);
+        private static readonly Color TemaFg = Color.FromArgb(248, 248, 242);
+        private static readonly Color TemaComment = Color.FromArgb(148, 163, 204);
 
         private NotifyIcon trayIcon;
         private ContextMenuStrip trayMenu;
@@ -57,7 +57,7 @@ namespace BabiloniaApp
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = BgDark;
-            this.ForeColor = DraculaFg;
+            this.ForeColor = TemaFg;
             this.DoubleBuffered = true;
             this.ShowInTaskbar = true; // Garante o ícone na Barra de Tarefas do Sistema Operacional
 
@@ -73,7 +73,7 @@ namespace BabiloniaApp
             // ====================================================================
             trayMenu = new ContextMenuStrip();
             trayMenu.BackColor = BgCard;
-            trayMenu.ForeColor = DraculaFg;
+            trayMenu.ForeColor = TemaFg;
 
             var itemOpenMain = new ToolStripMenuItem("⚡ Abrir Painel Babilonia Buff", null, (s, e) => OpenAppWindow(false));
             var itemOpenOverlay = new ToolStripMenuItem("🪟 Abrir Mini Overlay Compacto", null, (s, e) => OpenAppWindow(true));
@@ -94,7 +94,7 @@ namespace BabiloniaApp
             trayIcon.DoubleClick += (s, e) => RestoreFromTray();
 
             // ====================================================================
-            // 2. BARRA DE TÍTULO CUSTOMIZADA DRACULA (ARRASTÁVEL)
+            // 2. BARRA DE TÍTULO CUSTOMIZADA (ARRASTÁVEL)
             // ====================================================================
             Panel titleBar = new Panel
             {
@@ -106,18 +106,18 @@ namespace BabiloniaApp
 
             Label titleLabel = new Label
             {
-                Text = "⚡ BABILONIA BUFF • DRACULA EDITION",
+                Text = "⚡ BABILONIA BUFF",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                ForeColor = DraculaPurple,
+                ForeColor = TemaPurple,
                 AutoSize = true,
                 Location = new Point(16, 13)
             };
             titleLabel.MouseDown += DragWindow_MouseDown;
 
-            Button btnMinTaskbar = CreateHeaderButton("—", new Point(388, 7), BgCard, DraculaFg);
+            Button btnMinTaskbar = CreateHeaderButton("—", new Point(388, 7), BgCard, TemaFg);
             btnMinTaskbar.Click += (s, e) => { this.WindowState = FormWindowState.Minimized; };
 
-            Button btnCloseToTray = CreateHeaderButton("✕", new Point(432, 7), DraculaRed, Color.White);
+            Button btnCloseToTray = CreateHeaderButton("✕", new Point(432, 7), TemaRed, Color.White);
             btnCloseToTray.Click += (s, e) => MinimizeToTray();
 
             titleBar.Controls.Add(titleLabel);
@@ -149,7 +149,7 @@ namespace BabiloniaApp
             {
                 Text = "BABILONIA BUFF",
                 Font = new Font("Segoe UI", 17f, FontStyle.Bold),
-                ForeColor = DraculaFg,
+                ForeColor = TemaFg,
                 AutoSize = true,
                 Location = new Point(180, 68)
             };
@@ -159,7 +159,7 @@ namespace BabiloniaApp
             {
                 Text = "LoL Companion • 6 Meta Picks • 3 Builds\nCoach Visual Silencioso (100% Seguro)",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Regular),
-                ForeColor = DraculaCyan,
+                ForeColor = TemaCyan,
                 AutoSize = true,
                 Location = new Point(184, 112)
             };
@@ -169,7 +169,7 @@ namespace BabiloniaApp
             {
                 Text = "🟢 ÍCONE ATIVO NA BARRA DO SISTEMA",
                 Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
-                ForeColor = DraculaGreen,
+                ForeColor = TemaGreen,
                 BackColor = Color.FromArgb(30, 55, 45),
                 AutoSize = false,
                 Size = new Size(255, 26),
@@ -199,7 +199,7 @@ namespace BabiloniaApp
             {
                 Text = "⚡ Servidor Local: Iniciando na porta 3000...",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                ForeColor = DraculaGreen,
+                ForeColor = TemaGreen,
                 AutoSize = true,
                 Location = new Point(16, 16)
             };
@@ -208,7 +208,7 @@ namespace BabiloniaApp
             {
                 Text = "🔌 Cliente LoL (LCU): Verificando conexão...",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Regular),
-                ForeColor = DraculaFg,
+                ForeColor = TemaFg,
                 AutoSize = true,
                 Location = new Point(16, 48)
             };
@@ -217,7 +217,7 @@ namespace BabiloniaApp
             {
                 Text = "🎯 Estado: Na Tela Inicial (Home)",
                 Font = new Font("Segoe UI", 9.5f, FontStyle.Regular),
-                ForeColor = DraculaComment,
+                ForeColor = TemaComment,
                 AutoSize = true,
                 Location = new Point(16, 80)
             };
@@ -228,13 +228,13 @@ namespace BabiloniaApp
             this.Controls.Add(statusCard);
 
             // ====================================================================
-            // 5. BOTÕES DE AÇÃO ESTILO DRACULA NEON
+            // 5. BOTÕES DE AÇÃO ESTILO NEON
             // ====================================================================
             Button btnOpenMain = CreateActionButton(
                 "⚡ ABRIR PAINEL BABILONIA BUFF",
                 new Point(28, 354),
                 new Size(424, 50),
-                DraculaPurple,
+                TemaPurple,
                 Color.FromArgb(20, 20, 30),
                 11f
             );
@@ -246,7 +246,7 @@ namespace BabiloniaApp
                 new Point(28, 416),
                 new Size(424, 44),
                 BgCard,
-                DraculaCyan,
+                TemaCyan,
                 9f
             );
             btnOpenMini.Click += (s, e) => OpenAppWindow(true);
@@ -257,7 +257,7 @@ namespace BabiloniaApp
                 new Point(28, 474),
                 new Size(424, 40),
                 Color.FromArgb(33, 35, 48),
-                DraculaComment,
+                TemaComment,
                 9f
             );
             btnHideTray.Click += (s, e) => MinimizeToTray();
@@ -268,7 +268,7 @@ namespace BabiloniaApp
                 new Point(28, 526),
                 new Size(424, 40),
                 Color.FromArgb(55, 28, 36),
-                DraculaRed,
+                TemaRed,
                 9.5f
             );
             btnQuitAll.Click += (s, e) => ExitApplication();
@@ -278,7 +278,7 @@ namespace BabiloniaApp
             {
                 Text = "Babilonia Buff v2.0 • Popups Visuais • API Oficial Local Riot LCU",
                 Font = new Font("Segoe UI", 8f, FontStyle.Regular),
-                ForeColor = DraculaComment,
+                ForeColor = TemaComment,
                 AutoSize = false,
                 Size = new Size(424, 22),
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -289,7 +289,7 @@ namespace BabiloniaApp
             // Borda Neon ao redor da janela
             this.Paint += (s, e) =>
             {
-                using (Pen borderPen = new Pen(DraculaPurple, 2))
+                using (Pen borderPen = new Pen(TemaPurple, 2))
                 {
                     e.Graphics.DrawRectangle(borderPen, 1, 1, this.Width - 2, this.Height - 2);
                 }
@@ -399,6 +399,8 @@ namespace BabiloniaApp
                             UseShellExecute = false,
                             WindowStyle = ProcessWindowStyle.Hidden
                         };
+                        // O servidor encerra sozinho quando a janela do app fica fechada por alguns minutos
+                        psi.EnvironmentVariables["BB_AUTO_EXIT"] = "1";
                         nodeProcess = Process.Start(psi);
                         Thread.Sleep(1200);
                     }
@@ -406,12 +408,29 @@ namespace BabiloniaApp
                     {
                     }
                 }
+                // Espera o servidor responder antes de abrir a janela do app
+                for (int i = 0; i < 20 && !IsBackendOnline(); i++)
+                {
+                    Thread.Sleep(500);
+                }
                 this.BeginInvoke((MethodInvoker)delegate
                 {
-                    PollBackendStatus();
                     OpenAppWindow(false);
+                    CloseLauncherKeepServer();
                 });
             });
+        }
+
+        // Fecha o launcher depois de abrir o app, deixando o servidor rodando em segundo plano
+        private void CloseLauncherKeepServer()
+        {
+            statusTimer.Stop();
+            if (trayIcon != null)
+            {
+                trayIcon.Visible = false;
+                trayIcon.Dispose();
+            }
+            Application.Exit();
         }
 
         private void PollBackendStatus()
@@ -432,28 +451,28 @@ namespace BabiloniaApp
                         this.BeginInvoke((MethodInvoker)delegate
                         {
                             lblServerStatus.Text = "🟢 Servidor Babilonia Buff: ONLINE (localhost:3000)";
-                            lblServerStatus.ForeColor = DraculaGreen;
+                            lblServerStatus.ForeColor = TemaGreen;
 
                             if (lcuConnected)
                             {
                                 lblLcuStatus.Text = "⚡ Cliente LoL: CONECTADO AUTOMATICAMENTE";
-                                lblLcuStatus.ForeColor = DraculaCyan;
+                                lblLcuStatus.ForeColor = TemaCyan;
                             }
                             else
                             {
                                 lblLcuStatus.Text = "🔌 Cliente LoL: Aguardando abertura do jogo";
-                                lblLcuStatus.ForeColor = DraculaFg;
+                                lblLcuStatus.ForeColor = TemaFg;
                             }
 
                             if (liveOn)
                             {
                                 lblMatchStatus.Text = "🔥 Partida Ao Vivo Detectada (Monitorando Porta 2999)";
-                                lblMatchStatus.ForeColor = DraculaGreen;
+                                lblMatchStatus.ForeColor = TemaGreen;
                             }
                             else
                             {
                                 lblMatchStatus.Text = "🏠 Pronto, aguardando partida";
-                                lblMatchStatus.ForeColor = DraculaComment;
+                                lblMatchStatus.ForeColor = TemaComment;
                             }
                         });
                     }
@@ -463,7 +482,7 @@ namespace BabiloniaApp
                     this.BeginInvoke((MethodInvoker)delegate
                     {
                         lblServerStatus.Text = "🔴 Servidor Local: Reconectando...";
-                        lblServerStatus.ForeColor = DraculaRed;
+                        lblServerStatus.ForeColor = TemaRed;
                     });
                 }
             });

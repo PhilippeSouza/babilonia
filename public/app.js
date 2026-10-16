@@ -8,13 +8,15 @@
 
 let ddragonVersion = '16.20.1';
 let allChampions = [];
-let selectedChampionId = 'Darius';
+// Tudo começa vazio: só é preenchido pela Seleção de Campeões, pela partida ao vivo ou quando você escolhe um campeão
+let selectedChampionId = '';
 let currentRole = 'TOP';
-let bannedChampions = ['Jax', 'Garen', 'Zed'];
-let enemyTeam = ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona'];
+let bannedChampions = [];
+let enemyTeam = [];
 let currentGuide = null;
 let activeBuildIndex = 0; // 0 = Maior Winrate | 1 = Alternativa | 2 = Anti-Time Inimigo
 let activeTagFilter = 'ALL';
+let activeLaneFilter = 'ALL';
 let shownPopupIds = new Set();
 let lastSeenTipId = null; // null = ainda não sincronizou com o servidor
 let lastAutoImportedChamp = '';
@@ -192,9 +194,10 @@ async function refreshDraftAndBuilds() {
     renderEnemySlots();
     renderSplitSixRecommendations(data.recommendations);
 
-    if (data.guide) {
-      currentGuide = data.guide;
-      renderChampionAndThreeBuilds(data.guide);
+    currentGuide = data.guide || null;
+    document.getElementById('champBuildSection')?.classList.toggle('hidden', !currentGuide);
+    if (currentGuide) {
+      renderChampionAndThreeBuilds(currentGuide);
     }
   } catch (err) {
     console.error('Erro ao atualizar draft e builds:', err);
@@ -246,16 +249,18 @@ function renderEnemySlots() {
 
   container.innerHTML = [0, 1, 2, 3, 4]
     .map((slotIdx) => {
-      const currentEnemy = enemyTeam[slotIdx] || 'Aatrox';
+      const currentEnemy = enemyTeam[slotIdx] || '';
       const isMyLaneOpponent = roleCodes[slotIdx] === currentRole;
-      const optionsHtml = allChampions
-        .map((c) => `<option value="${c.id}" ${c.id === currentEnemy ? 'selected' : ''}>${c.name}</option>`)
-        .join('');
+      const optionsHtml =
+        `<option value="" ${currentEnemy ? '' : 'selected'}>Ainda não escolheu</option>` +
+        allChampions
+          .map((c) => `<option value="${c.id}" ${c.id === currentEnemy ? 'selected' : ''}>${c.name}</option>`)
+          .join('');
 
       return `
         <div class="enemy-slot ${isMyLaneOpponent ? 'active-lane-slot' : ''}">
           <span class="slot-role-tag">${isMyLaneOpponent ? `🎯 ${roleLabels[slotIdx]} (SEU RIVAL)` : roleLabels[slotIdx]}</span>
-          <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${currentEnemy}.png" alt="${currentEnemy}" />
+          <img src="${currentEnemy ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${currentEnemy}.png` : 'logo.png'}" alt="${currentEnemy || 'A definir'}" />
           <select onchange="updateEnemySlot(${slotIdx}, this.value)" title="Inimigo ${roleLabels[slotIdx]}">
             ${optionsHtml}
           </select>
@@ -266,7 +271,8 @@ function renderEnemySlots() {
 }
 
 window.updateEnemySlot = async function (slotIdx, newChampId) {
-  enemyTeam[slotIdx] = newChampId;
+  enemyTeam[slotIdx] = newChampId || '';
+  if (!newChampId) return refreshDraftAndBuilds();
   await refreshDraftAndBuilds();
   showTacticalPopup({
     type: 'BUILD',
@@ -292,7 +298,7 @@ function renderSplitSixRecommendations(rec) {
 
   const enemyLanerTitle = document.getElementById('enemyLanerTitle');
   const metaLaneTitle = document.getElementById('metaLaneTitle');
-  if (enemyLanerTitle) enemyLanerTitle.textContent = `vs ${rec.enemyLanerName || 'Oponente'}`;
+  if (enemyLanerTitle) enemyLanerTitle.textContent = rec.enemyLanerName ? `vs ${rec.enemyLanerName}` : 'oponente ainda não escolheu';
   if (metaLaneTitle) metaLaneTitle.textContent = rec.detectedRole || currentRole;
 
   const renderThreeCards = (list, isCounterGroup) =>
@@ -315,7 +321,11 @@ function renderSplitSixRecommendations(rec) {
 
   const countersGrid = document.getElementById('top3CountersGrid');
   const metaGrid = document.getElementById('top3MetaGrid');
-  if (countersGrid) countersGrid.innerHTML = renderThreeCards(rec.counterPicks, true);
+  if (countersGrid) {
+    countersGrid.innerHTML = rec.counterPicks?.length
+      ? renderThreeCards(rec.counterPicks, true)
+      : '<div class="meta-pick-reason">Os counters aparecem assim que o seu oponente de rota escolher o campeão.</div>';
+  }
   if (metaGrid) metaGrid.innerHTML = renderThreeCards(rec.metaPicks, false);
 }
 
@@ -426,7 +436,7 @@ function renderStarterPackHtml(starterPack, ownedItemIds = new Set()) {
   return `
     <div class="starter-pack-header">
       <strong>🎒 ${starterPack.title}</strong>
-      <span class="badge-dracula green">Saída Nível 1 (500g)</span>
+      <span class="badge-bb green">Saída Nível 1 (500g)</span>
     </div>
     <p class="starter-pack-desc">${starterPack.summary}</p>
     <div class="starter-items-row">${itemsHtml}</div>
@@ -477,7 +487,7 @@ function renderCoreItemsWithComponentsHtml(items, ownedItemIds = new Set()) {
               <div class="fc-title">
                 <span class="fc-badge">🔨 QUAL FAZER PRIMEIRO:</span>
                 <strong>${fc.name} (${fc.cost})</strong>
-                ${isFirstCompOwned || isCompleted ? '<span class="badge-dracula green">✅ JÁ COMPRADO</span>' : ''}
+                ${isFirstCompOwned || isCompleted ? '<span class="badge-bb green">✅ JÁ COMPRADO</span>' : ''}
               </div>
               <div class="fc-reason">${fc.reason || ''}</div>
             </div>
@@ -493,8 +503,8 @@ function renderCoreItemsWithComponentsHtml(items, ownedItemIds = new Set()) {
               <div class="blitz-item-title">
                 <span>${idx + 1}º Item Grande: <strong>${item.name}</strong> ${isCompleted ? '✅ FECHADO' : ''}</span>
                 <div class="item-badges-right">
-                  <span class="badge-dracula cyan">💰 ${item.totalCost || '3000g'}</span>
-                  <span class="badge-dracula purple">⏱️ ${item.timing || `${(idx + 1) * 5} min`}</span>
+                  <span class="badge-bb cyan">💰 ${item.totalCost || '3000g'}</span>
+                  <span class="badge-bb purple">⏱️ ${item.timing || `${(idx + 1) * 5} min`}</span>
                 </div>
               </div>
               <div class="blitz-item-note">${item.note}</div>
@@ -669,6 +679,36 @@ document.getElementById('btnExportRunes')?.addEventListener('click', () => {
 });
 
 // =========================================================================
+// TELAS POR FASE: Draft só na Seleção de Campeões, Partida Ao Vivo só em partida
+// =========================================================================
+let lastPhaseWasActive = false;
+
+async function applyPhaseVisibility(rawPhase, isLiveMatchNow) {
+  const inChampSelect = rawPhase === 'ChampSelect';
+  const isActive = inChampSelect || isLiveMatchNow || rawPhase === 'ReadyCheck';
+
+  const draftDot = document.getElementById('sidebarDraftDot');
+  if (draftDot) {
+    draftDot.className = inChampSelect ? 'live-mini-badge on' : 'live-mini-badge';
+    draftDot.textContent = inChampSelect ? 'ON' : 'OFF';
+  }
+  document.getElementById('draftIdleBanner')?.classList.toggle('hidden', inChampSelect);
+  document.getElementById('draftLiveSection')?.classList.toggle('hidden', !inChampSelect);
+  document.getElementById('liveMatchContent')?.classList.toggle('hidden', !isLiveMatchNow);
+
+  // A partida acabou (ou o lobby foi desfeito): limpa tudo para não parecer que ainda está em jogo
+  if (lastPhaseWasActive && !isActive) {
+    selectedChampionId = '';
+    bannedChampions = [];
+    enemyTeam = [];
+    lastAutoImportedChamp = '';
+    await refreshDraftAndBuilds();
+    switchTab('home-tab');
+  }
+  lastPhaseWasActive = isActive;
+}
+
+// =========================================================================
 // MONITORAMENTO EM TEMPO REAL + TRANSIÇÃO AUTOMÁTICA PARA JOGO EM ANDAMENTO
 // =========================================================================
 let lastAutoPhaseState = 'INIT';
@@ -700,6 +740,7 @@ async function pollStatus() {
 
     const rawPhase = data.lcu?.phase || 'Disconnected';
     const isLiveMatchNow = Boolean(data.inLiveGame || rawPhase === 'InProgress' || rawPhase === 'GameStart');
+    await applyPhaseVisibility(rawPhase, isLiveMatchNow);
 
     if (topPhaseLabel) {
       if (isLiveMatchNow) {
@@ -729,7 +770,7 @@ async function pollStatus() {
 
       // Atualiza Card de Perfil Real na Home
       if (homeClientBadge) {
-        homeClientBadge.className = 'badge-dracula green';
+        homeClientBadge.className = 'badge-bb green';
         homeClientBadge.textContent = '🟢 CLIENTE DO LOL CONECTADO';
       }
       if (homePhaseBadge) homePhaseBadge.textContent = isLiveMatchNow ? '🔥 Em Partida Ao Vivo' : `Fase: ${data.lcu.phase}`;
@@ -823,7 +864,7 @@ async function pollStatus() {
       lcuSub.textContent = 'Aguardando abertura do jogo';
 
       if (homeClientBadge) {
-        homeClientBadge.className = 'badge-dracula cyan';
+        homeClientBadge.className = 'badge-bb cyan';
         homeClientBadge.textContent = '🔌 AGUARDANDO CLIENTE DO LOL';
       }
       if (homePhaseBadge) homePhaseBadge.textContent = 'Fora de Jogo';
@@ -886,7 +927,8 @@ async function pollStatus() {
 }
 
 function renderLiveInGameBuildPanel(data) {
-  const guideToUse = data.coaching?.championGuide || currentGuide;
+  if (!data.matchState) return;
+  const guideToUse = data.coaching?.championGuide;
   if (!guideToUse || !Array.isArray(guideToUse.builds)) return;
 
   const b = guideToUse.builds[activeBuildIndex] || guideToUse.builds[0];
@@ -932,7 +974,7 @@ function renderLiveInGameBuildPanel(data) {
         </div>
       </div>
       <div class="next-buy-right">
-        <span class="badge-dracula ${canAffordNow ? 'green' : 'purple'}">
+        <span class="badge-bb ${canAffordNow ? 'green' : 'purple'}">
           ${canAffordNow ? '⚡ DÊ RECALL APÓS EMPURRAR A WAVE!' : `Farme mais ~${Math.ceil(missingGold / 21)} minions`}
         </span>
       </div>
@@ -993,6 +1035,7 @@ function renderLiveInGameBuildPanel(data) {
 
 function renderLiveMatchView(data) {
   const m = data.matchState;
+  if (!m) return; // fora de partida a tela fica vazia (só o aviso de aguardando)
   const g = data.coaching?.championGuide || currentGuide;
   const champId = m?.activePlayer?.championId || data.activeChampionId || selectedChampionId;
 
@@ -1170,7 +1213,7 @@ function renderChampionsGrid() {
           <img src="${c.iconUrl}" alt="${c.name}" loading="lazy" />
           <div class="champ-card-name">${c.name}</div>
           <div class="champ-card-role">${c.role}</div>
-          <span class="badge-dracula purple">Tier ${c.tier} • ${c.winRate}</span>
+          <span class="badge-bb purple">Tier ${c.tier} • ${c.winRate}</span>
         </div>
       `
       )
@@ -1185,8 +1228,9 @@ function renderChampionsGrid() {
       c.name.toLowerCase().includes(searchVal) ||
       c.id.toLowerCase().includes(searchVal) ||
       c.role.toLowerCase().includes(searchVal);
+    const matchesLane = activeLaneFilter === 'ALL' || (c.lanes || []).includes(activeLaneFilter);
     const matchesTag = activeTagFilter === 'ALL' || (c.tags && c.tags.includes(activeTagFilter));
-    return matchesSearch && matchesTag;
+    return matchesSearch && matchesLane && matchesTag;
   });
 
   grid.innerHTML = filtered
@@ -1196,7 +1240,7 @@ function renderChampionsGrid() {
         <img src="${c.iconUrl}" alt="${c.name}" loading="lazy" />
         <div class="champ-card-name">${c.name}</div>
         <div class="champ-card-role">${c.role}</div>
-        <span class="badge-dracula purple">Tier ${c.tier} • ${c.winRate}</span>
+        <span class="badge-bb purple">Tier ${c.tier} • ${c.winRate}</span>
       </div>
     `
     )
@@ -1205,12 +1249,43 @@ function renderChampionsGrid() {
 
 document.getElementById('champSearchInput')?.addEventListener('input', renderChampionsGrid);
 
-document.querySelectorAll('.filter-btn').forEach((btn) => {
+// Filtro 1: Rota | Filtro 2: Estilo do campeão (cada grupo tem seu próprio botão ativo)
+document.querySelectorAll('#laneFilterGroup .filter-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
+    document.querySelectorAll('#laneFilterGroup .filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    activeLaneFilter = btn.dataset.lane;
+    renderChampionsGrid();
+  });
+});
+
+document.querySelectorAll('#styleFilterGroup .filter-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#styleFilterGroup .filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
     activeTagFilter = btn.dataset.tag;
     renderChampionsGrid();
+  });
+});
+
+// =========================================================================
+// ASSISTENTE TÁTICO IA: PERGUNTAS PRONTAS (SEM CHAT LIVRE)
+// =========================================================================
+document.querySelectorAll('.quick-q-btn').forEach((btn) => {
+  btn.addEventListener('click', async () => {
+    const box = document.getElementById('quickAnswerBox');
+    document.querySelectorAll('.quick-q-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    box.classList.remove('hidden');
+    box.textContent = '⏳ Lendo a partida...';
+    try {
+      const res = await fetch('/api/coach/quick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questionId: btn.dataset.q })
+      });
+      const data = await res.json();
+      box.innerHTML = `<strong>${escapeHtml(data.title || btn.textContent)}</strong><br />${escapeHtml(data.message || '')}`;
+    } catch (_) {
+      box.textContent = '⚠️ Não foi possível ler a partida agora.';
+    }
   });
 });
 
@@ -1218,7 +1293,7 @@ document.querySelectorAll('.filter-btn').forEach((btn) => {
 document.getElementById('btnFloatingOverlay')?.addEventListener('click', () => {
   window.open(
     window.location.origin + '/?overlay=1',
-    'BlitzDraculaOverlay',
+    'BabiloniaBuffOverlay',
     'width=460,height=780,menubar=no,toolbar=no,location=no,status=no,resizable=yes'
   );
 });

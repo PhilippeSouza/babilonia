@@ -8,12 +8,12 @@
 
 ## 📌 1. Visão Geral e Identidade do Projeto
 - **Nome Oficial do Aplicativo:** **Babilonia Buff** (sem acento)
-- **Estilo Visual:** Cópia inspirada no **Blitz.gg / Buff Baron**, porém 100% estilizada na paleta **Dracula Dark Mode**:
+- **Estilo Visual:** Cópia inspirada no **Blitz.gg / Buff Baron**, porém 100% estilizada na paleta **modo escuro**:
   - Background principal: `#191a24` / `#282a36`
   - Cards / Superfícies: `#44475a` / `#1e1f29`
   - Destaques Neon: Roxo (`#bd93f9`), Rosa (`#ff79c6`), Ciano (`#8be9fd`), Verde (`#50fa7b`), Laranja (`#ffb86c`), Vermelho (`#ff5555`).
 - **Ícone / Logo Oficial (`public/logo.png`, `Babilônia Buff-icone.ico`, `public/favicon.ico`, `public/logo.svg`):**
-  - Ilustração estilo quadrinhos realista traçada e hachurada (comic-book ink line-art com iluminação neon Dracula) de um jogador com headset meio em pé/agachado em cima de uma cadeira gamer com as calças jeans abaixadas até os joelhos mostrando a bunda.
+  - Ilustração estilo quadrinhos realista traçada e hachurada (comic-book ink line-art com iluminação neon) de um jogador com headset meio em pé/agachado em cima de uma cadeira gamer com as calças jeans abaixadas até os joelhos mostrando a bunda.
 - **Executável Nativo Windows (`Babilônia Buff.exe` & `src/BabiloniaLauncher.cs`):**
   - Aplicativo Windows Forms nativo compilado com `.NET Framework csc.exe` (`/target:winexe /win32icon:"Babilônia Buff-icone.ico"`).
   - Quando aberto, exibe o ícone oficial tanto na **Barra de Tarefas do Sistema Operacional (Taskbar)** quanto na **Bandeja do Sistema (System Tray / Área de Notificação perto do relógio)** com menu de contexto.
@@ -42,7 +42,10 @@
    - **Opção 2 — Build Alternativa (`alternative`):** Estilo alternativo (splitpush, pico rápido ou variação de runas).
    - **Opção 3 — Build Melhor Contra o Time Inimigo (`anti_enemy`):** Calculada dinamicamente analisando os 5 campeões do time inimigo (proporção AD vs AP, quantidade de Tanques, Campeões de Cura/Sustain e Controle de Grupo/CC), trocando botas, corta-cura, penetração e item defensivo automaticamente.
 5. **IA Integrada (Motor Híbrido Local + Gemini Opcional):**
-   - **Sem chat.** O usuário não quer conversar com a IA: ela observa a partida e avisa sozinha.
+   - **Sem chat livre.** A IA observa a partida e avisa sozinha. Dentro de "Partida Ao Vivo" existe o Assistente Tático IA com as dicas passando e perguntas prontas em botões (`/api/coach/quick`, respostas do motor local, Gemini opcional).
+   - Draft e Partida Ao Vivo ficam vazios e OFF fora de Seleção de Campeões/partida; nada de campeão padrão (ex: Darius) aparecendo fora de jogo.
+   - O launcher (`Babilônia Buff.exe`) fecha sozinho depois de abrir o app; o servidor encerra 5 min após a janela do app fechar (`BB_AUTO_EXIT=1`). Recompilar com `Recompilar-Launcher.bat`.
+   - Não usar o nome "Dracula" em nenhum lugar. Não automatizar teclado/ações dentro do jogo.
    - `src/liveTipsEngine.js` é o motor local que lê a porta 2999 a cada 2s (loop no `server.js`) e decide quando mostrar uma dica: recall/compra, objetivos 60s antes, oponente de rota morto, vantagem/desvantagem numérica, eventos (morte, dragão, Barão, inibidor, ace), vida baixa, nível 6/11/16, inimigo forte, composição inimiga e farm.
    - Frequência limitada: 1 dica por vez, 25s entre dicas normais e 6s para urgentes, cada situação aparece uma vez só.
    - `src/coachEngine.js` só refina o texto da dica com o **Google Gemini 2.5 Flash** quando há chave configurada (timeout de 2,5s, senão usa o texto local).
@@ -62,5 +65,5 @@
 - `src/championsDb.js` — Integração Data Dragon (`pt_BR`) + algoritmo dos `3 Counters + 3 Meta` sem repetição + gerador das `3 Builds` (`best_wr`, `alternative`, `anti_enemy`).
 - `src/liveTipsEngine.js` — Motor de dicas proativas (observa a partida e decide quando avisar).
 - `src/coachEngine.js` — Refinamento opcional do texto das dicas com Gemini 2.5 Flash.
-- `public/index.html`, `public/styles.css`, `public/app.js` — Interface completa Babilonia Buff em Dracula Dark Mode.
+- `public/index.html`, `public/styles.css`, `public/app.js` — Interface completa Babilonia Buff em modo escuro.
 - `public/logo.png`, `public/favicon.ico`, `public/logo.svg` — Arte oficial do Babilonia Buff.

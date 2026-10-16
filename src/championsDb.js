@@ -1,5 +1,5 @@
 /**
- * Banco de Dados Tático Blitz Dracula:
+ * Banco de Dados Tático Blitz:
  * 1. Recomendador Pós-Banimentos (6 Opções Únicas na Sua Rota Detectada):
  *    - 3 Campeões Fortes Contra o Oponente da Sua Rota (Counter Direto de Lane)
  *    - 3 Campeões Mais Fortes do Meta Atual na Sua Rota (Pulando automaticamente qualquer repetição!)
@@ -200,7 +200,7 @@ function resolveEnemyLanerForRole(role, enemyTeam = [], ddragonChampions = {}) {
   if (enemyTeam[idx]) {
     return enemyTeam[idx];
   }
-  return enemyTeam.find(Boolean) || 'Darius';
+  return enemyTeam.find(Boolean) || null;
 }
 
 /**
@@ -224,7 +224,7 @@ function getTop6MetaPicks({
 
   const rolePool = META_POOL_BY_ROLE[normalizedRole] || META_POOL_BY_ROLE.TOP;
   const targetEnemyLaner = enemyLanerId || resolveEnemyLanerForRole(normalizedRole, enemyTeam, ddragonChampions);
-  const enemyLanerName = ddragonChampions[targetEnemyLaner]?.name || targetEnemyLaner;
+  const enemyLanerName = targetEnemyLaner ? ddragonChampions[targetEnemyLaner]?.name || targetEnemyLaner : null;
 
   // Conjunto de campeões indisponíveis (banidos ou já escolhidos no time inimigo)
   const unavailableSet = new Set([
@@ -239,27 +239,29 @@ function getTop6MetaPicks({
   // GRUPO 1: 3 CAMPEÕES FORTES CONTRA O OPONENTE DA SUA ROTA
   // =========================================================================
   const counterCandidatesIds = [];
+  // Sem oponente de rota conhecido ainda (inimigo não escolheu): não inventa counters
+  if (targetEnemyLaner) {
+    // 1a. Verifica na tabela direta de counters do oponente
+    if (DIRECT_COUNTERS_AGAINST_ENEMY[targetEnemyLaner]) {
+      counterCandidatesIds.push(...DIRECT_COUNTERS_AGAINST_ENEMY[targetEnemyLaner]);
+    }
 
-  // 1a. Verifica na tabela direta de counters do oponente
-  if (DIRECT_COUNTERS_AGAINST_ENEMY[targetEnemyLaner]) {
-    counterCandidatesIds.push(...DIRECT_COUNTERS_AGAINST_ENEMY[targetEnemyLaner]);
-  }
+    // 1b. Verifica na pool da rota quem tem `goodVs` contendo o oponente
+    rolePool.forEach((champ) => {
+      if ((champ.goodVs || []).some((v) => v.toLowerCase() === targetEnemyLaner.toLowerCase())) {
+        if (!counterCandidatesIds.includes(champ.id)) {
+          counterCandidatesIds.push(champ.id);
+        }
+      }
+    });
 
-  // 1b. Verifica na pool da rota quem tem `goodVs` contendo o oponente
-  rolePool.forEach((champ) => {
-    if ((champ.goodVs || []).some((v) => v.toLowerCase() === targetEnemyLaner.toLowerCase())) {
+    // 1c. Fallback: Completa com os melhores duelistas/counters da própria rota se muitos estiverem banidos
+    rolePool.forEach((champ) => {
       if (!counterCandidatesIds.includes(champ.id)) {
         counterCandidatesIds.push(champ.id);
       }
-    }
-  });
-
-  // 1c. Fallback: Completa com os melhores duelistas/counters da própria rota se muitos estiverem banidos
-  rolePool.forEach((champ) => {
-    if (!counterCandidatesIds.includes(champ.id)) {
-      counterCandidatesIds.push(champ.id);
-    }
-  });
+    });
+  }
 
   const threeLaneCounters = [];
   for (const cid of counterCandidatesIds) {
@@ -1470,7 +1472,26 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
   };
 }
 
+/**
+ * Rotas de um campeão para o filtro da Tier List: as pools fixas de meta de cada rota
+ * mais as rotas escritas no guia do campeão (ex: "Top / Mid", "ADC (Bot)").
+ */
+function getChampionLanes(championId, roleText = '') {
+  const lanes = new Set();
+  Object.entries(META_POOL_BY_ROLE).forEach(([lane, pool]) => {
+    if (pool.some((c) => c.id.toLowerCase() === String(championId).toLowerCase())) lanes.add(lane);
+  });
+  const text = String(roleText).toLowerCase();
+  if (text.includes('top')) lanes.add('TOP');
+  if (text.includes('jungle') || text.includes('selva')) lanes.add('JUNGLE');
+  if (text.includes('mid')) lanes.add('MID');
+  if (text.includes('adc') || text.includes('bot')) lanes.add('ADC');
+  if (text.includes('sup')) lanes.add('SUPPORT');
+  return ['TOP', 'JUNGLE', 'MID', 'ADC', 'SUPPORT'].filter((l) => lanes.has(l));
+}
+
 module.exports = {
+  getChampionLanes,
   RUNE_TEMPLATES,
   STARTER_PACKS,
   ITEM_BUILD_RECIPE_GUIDE,

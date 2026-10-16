@@ -13,13 +13,13 @@
 </head>
 <body>
   <div class="blitz-layout">
-    <!-- BARRA LATERAL BABILONIA BUFF (DRACULA THEME) -->
+    <!-- BARRA LATERAL BABILONIA BUFF -->
     <aside class="blitz-sidebar">
       <div class="sidebar-brand">
         <img src="/logo.png" alt="Babilonia Buff" class="babilonia-logo-img" />
         <div class="brand-text">
           <span class="brand-name">BABILONIA BUFF</span>
-          <span class="brand-tag">DRACULA LOL</span>
+          <span class="brand-tag">LOL COMPANION</span>
         </div>
       </div>
 
@@ -32,6 +32,7 @@
         <button class="side-link" data-tab="champ-build-tab">
           <span class="side-icon">⚡</span>
           <span>Draft (6 Picks) &amp; 3 Builds</span>
+          <span id="sidebarDraftDot" class="live-mini-badge">OFF</span>
         </button>
         <button class="side-link" data-tab="live-game-tab">
           <span class="side-icon">🎯</span>
@@ -93,11 +94,11 @@
 
           <div class="patch-pill">Patch <strong id="patchVersionLabel">16.20.1</strong></div>
 
-          <button id="btnFloatingOverlay" class="btn-dracula btn-outline" title="Abrir em janela compacta estilo Overlay">
+          <button id="btnFloatingOverlay" class="btn-bb btn-outline" title="Abrir em janela compacta estilo Overlay">
             🪟 Mini Overlay
           </button>
 
-          <button id="btnOpenSettings" class="btn-dracula btn-icon" title="Configurações da IA">
+          <button id="btnOpenSettings" class="btn-bb btn-icon" title="Configurações da IA">
             ⚙️
           </button>
         </div>
@@ -112,7 +113,7 @@
         <section id="home-tab" class="tab-pane active">
           <!-- Hero Card: Conexão Real com Seu LoL + Perfil -->
           <div class="home-hero-grid mb-18">
-            <div class="card-dracula home-profile-card">
+            <div class="card-bb home-profile-card">
               <div class="home-profile-top">
                 <img
                   id="homeProfileIcon"
@@ -122,8 +123,8 @@
                 />
                 <div class="home-summoner-info">
                   <div class="home-status-row">
-                    <span id="homeClientBadge" class="badge-dracula cyan">🔌 AGUARDANDO CLIENTE DO LOL</span>
-                    <span id="homePhaseBadge" class="badge-dracula purple">Fora de Jogo</span>
+                    <span id="homeClientBadge" class="badge-bb cyan">🔌 AGUARDANDO CLIENTE DO LOL</span>
+                    <span id="homePhaseBadge" class="badge-bb purple">Fora de Jogo</span>
                   </div>
                   <h1 id="homeSummonerName">Abra o League of Legends</h1>
                   <p id="homeSummonerSub" class="card-sub">
@@ -153,13 +154,13 @@
             </div>
 
             <!-- Card Explicativo: A IA Integrada que te ajuda na Partida -->
-            <div class="card-dracula home-ai-overview-card">
+            <div class="card-bb home-ai-overview-card">
               <div class="card-head">
                 <div>
                   <span class="step-pill">IA OBSERVANDO A PARTIDA • SEM CHAT</span>
                   <h2>🧠 A IA olha o jogo e te avisa o que fazer</h2>
                 </div>
-                <button class="btn-dracula btn-purple" onclick="switchTab('live-game-tab')">Ver Partida Ao Vivo →</button>
+                <button class="btn-bb btn-purple" onclick="switchTab('live-game-tab')">Ver Partida Ao Vivo →</button>
               </div>
               <div class="ai-features-grid">
                 <div class="ai-feat-item">
@@ -220,13 +221,13 @@
           </div>
 
           <!-- Destaques do Meta Atual por Rota (Clique em qualquer campeão para ver as 3 Builds!) -->
-          <div class="card-dracula">
+          <div class="card-bb">
             <div class="card-head">
               <div>
                 <h2>🔥 Campeões Dominantes no Patch 16.20.1 (Clique para ver as 3 Builds e Runas)</h2>
                 <p class="card-sub">Consulte qualquer campeão livremente fora de partida</p>
               </div>
-              <button class="btn-dracula btn-outline" onclick="switchTab('tierlist-tab')">Ver Todos os 173 Campeões →</button>
+              <button class="btn-bb btn-outline" onclick="switchTab('tierlist-tab')">Ver Todos os 173 Campeões →</button>
             </div>
             <div id="homeMetaHighlightsGrid" class="blitz-champions-grid"></div>
           </div>
@@ -236,9 +237,19 @@
         <!-- ABA 1: DRAFT PÓS-BANS (6 SUGESTÕES DO META) + 3 OPÇÕES DE BUILDS    -->
         <!-- =================================================================== -->
         <section id="champ-build-tab" class="tab-pane">
+          <div id="draftIdleBanner" class="bb-banner">
+            <div>
+              <h3>⚡ Draft desligado: nenhuma Seleção de Campeões agora</h3>
+              <p>
+                Quando você achar partida, esta tela liga sozinha com sua rota, os banimentos, o time inimigo e as 6 sugestões.
+                Fora disso, você pode buscar um campeão no topo ou na Tier List para ver as 3 builds.
+              </p>
+            </div>
+            <span class="badge-bb cyan">🔌 Aguardando partida...</span>
+          </div>
 
           <!-- ETAPA 1: PAINEL DE BANIMENTOS, TIME INIMIGO & 6 ESCOLHAS DO META -->
-          <div class="card-dracula draft-recommender-card mb-18">
+          <div id="draftLiveSection" class="card-bb draft-recommender-card mb-18 hidden">
             <div class="draft-top-bar">
               <div>
                 <div class="auto-lane-row">
@@ -269,7 +280,7 @@
               <div class="draft-box">
                 <div class="draft-box-header">
                   <span class="text-red">🚫 Banimentos da Partida (Excluídos das Sugestões)</span>
-                  <select id="addBanSelect" class="dracula-select-sm">
+                  <select id="addBanSelect" class="bb-select-sm">
                     <option value="">+ Banir Campeão...</option>
                   </select>
                 </div>
@@ -306,8 +317,9 @@
             </div>
           </div>
 
-          <!-- ETAPA 2: MEU CAMPEÃO ESCOLHIDO + AS 3 OPÇÕES DE BUILD -->
-          <div class="champ-header-banner card-dracula">
+          <!-- ETAPA 2: MEU CAMPEÃO ESCOLHIDO + AS 3 OPÇÕES DE BUILD (só aparece com um campeão escolhido) -->
+          <div id="champBuildSection" class="hidden">
+          <div class="champ-header-banner card-bb">
             <div class="champ-banner-left">
               <div class="champ-avatar-wrap">
                 <img id="guideChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Yasuo.png" alt="Campeão" />
@@ -346,11 +358,11 @@
               <div class="matchup-selectors">
                 <div class="sel-box">
                   <label>Trocar Meu Campeão</label>
-                  <select id="selectMyChamp" class="dracula-select-lg"></select>
+                  <select id="selectMyChamp" class="bb-select-lg"></select>
                 </div>
               </div>
               <div class="import-actions-row">
-                <button id="btnExportRunes" class="btn-dracula btn-import-blitz">
+                <button id="btnExportRunes" class="btn-bb btn-import-blitz">
                   ⚡ Exportar Runas da Build Selecionada para o LoL
                 </button>
               </div>
@@ -392,13 +404,13 @@
           <div class="blitz-build-grid">
             <!-- Coluna Esquerda: Runas da Build Selecionada + Ordem de Skills + Matchups -->
             <div class="build-col-left">
-              <div class="card-dracula">
+              <div class="card-bb">
                 <div class="card-head">
                   <div>
                     <h2 id="activeBuildRuneTitle">🔮 Página de Runas desta Build</h2>
                     <p id="guideRuneName" class="card-sub">Precisão + Inspiração</p>
                   </div>
-                  <span id="activeBuildBadge" class="badge-dracula purple">Opção 1</span>
+                  <span id="activeBuildBadge" class="badge-bb purple">Opção 1</span>
                 </div>
 
                 <div id="visualRuneTree" class="rune-tree-box"></div>
@@ -411,19 +423,19 @@
               </div>
 
               <!-- Ordem de Habilidades 1-18 -->
-              <div class="card-dracula">
+              <div class="card-bb">
                 <div class="card-head">
                   <div>
                     <h2>📈 Ordem de Habilidades (Nível 1 ao 18)</h2>
                     <p class="card-sub">Sequência de maximização</p>
                   </div>
-                  <span id="guideSkillPriority" class="badge-dracula cyan">Q &gt; E &gt; W</span>
+                  <span id="guideSkillPriority" class="badge-bb cyan">Q &gt; E &gt; W</span>
                 </div>
                 <div id="blitzSkillMatrix" class="skill-matrix"></div>
               </div>
 
               <!-- Counters Diretos -->
-              <div class="card-dracula">
+              <div class="card-bb">
                 <div class="card-head">
                   <h2>🛡️ Confrontos Diretos de Rota</h2>
                 </div>
@@ -442,13 +454,13 @@
 
             <!-- Coluna Direita: Itens Iniciais + Os 6 Itens Grandes com Receita de Componentes + Explicação Tática -->
             <div class="build-col-right">
-              <div class="card-dracula build-showcase-card">
+              <div class="card-bb build-showcase-card">
                 <div class="card-head">
                   <div>
                     <h2 id="activeBuildMainTitle">🛒 Build 1: Maior Taxa de Vitória</h2>
                     <p id="activeBuildDescription" class="card-sub"></p>
                   </div>
-                  <span id="activeBuildWinrateBadge" class="badge-dracula green">53.4% WR</span>
+                  <span id="activeBuildWinrateBadge" class="badge-bb green">53.4% WR</span>
                 </div>
 
                 <!-- SEÇÃO 1: ITENS INICIAIS (SAÍDA DA BASE - 500G) -->
@@ -461,7 +473,7 @@
               </div>
 
               <!-- Plano de Jogo por Fase -->
-              <div class="card-dracula">
+              <div class="card-bb">
                 <div class="card-head">
                   <h2>🎯 O que fazer em cada fase da partida</h2>
                 </div>
@@ -482,13 +494,14 @@
               </div>
             </div>
           </div>
+          </div>
         </section>
 
         <!-- =================================================================== -->
         <!-- ABA 2: PARTIDA AO VIVO (MODO JOGO EM ANDAMENTO AUTOMÁTICO)          -->
         <!-- =================================================================== -->
         <section id="live-game-tab" class="tab-pane">
-          <div id="idleLiveBanner" class="dracula-banner">
+          <div id="idleLiveBanner" class="bb-banner">
             <div>
               <h3>⚡ Modo Jogo em Andamento Automático (Porta 2999)</h3>
               <p>
@@ -496,16 +509,17 @@
                 carregando seu campeão, os 5 inimigos da partida, seus <strong>Itens Iniciais</strong>, <strong>qual componente comprar primeiro</strong> com seu ouro atual e temporizadores ao vivo!
               </p>
             </div>
-            <span class="badge-dracula cyan">🔌 Aguardando início da partida no LoL...</span>
+            <span class="badge-bb cyan">🔌 Aguardando início da partida no LoL...</span>
           </div>
 
+          <div id="liveMatchContent" class="hidden">
           <div class="live-benchmarks-grid">
-            <div class="card-dracula">
+            <div class="card-bb">
               <div class="card-head">
                 <div class="live-me-header">
-                  <img id="hudChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Renekton.png" alt="Champ" class="live-me-avatar" />
+                  <img id="hudChampIcon" src="logo.png" alt="Campeão" class="live-me-avatar" />
                   <div>
-                    <h2 id="hudChampName">Renekton</h2>
+                    <h2 id="hudChampName">--</h2>
                     <span id="hudSummonerName" class="card-sub">Aguardando partida...</span>
                   </div>
                 </div>
@@ -534,10 +548,10 @@
               </div>
             </div>
 
-            <div class="card-dracula">
+            <div class="card-bb">
               <div class="card-head">
                 <h2>🐉 Temporizadores de Objetivos</h2>
-                <span id="teamScoreBadge" class="badge-dracula cyan">Placar: 0 x 0</span>
+                <span id="teamScoreBadge" class="badge-bb cyan">Placar: 0 x 0</span>
               </div>
               <div class="objectives-row">
                 <div id="objDragonCard" class="obj-box">
@@ -562,19 +576,42 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class="active-alerts-header">
-                <span>🧠 ÚLTIMAS DICAS DA IA NESTA PARTIDA</span>
-                <span id="aiModeLabel" class="badge-dracula purple">Motor Tático Local</span>
+          <!-- ASSISTENTE TÁTICO IA: dicas da partida passando + perguntas prontas (sem chat livre) -->
+          <div class="card-bb mb-18 live-assistant-card">
+            <div class="card-head">
+              <div>
+                <h2>🧠 Assistente Tático IA</h2>
+                <span class="card-sub">A IA observa a partida e avisa sozinha. Toque numa pergunta pronta para uma resposta com os dados de agora.</span>
               </div>
-              <div id="coachPriorityCards" class="live-alerts-stack"></div>
+              <span id="aiModeLabel" class="badge-bb purple">Motor Tático Local</span>
+            </div>
+            <div class="live-assistant-grid">
+              <div>
+                <div class="active-alerts-header"><span>📡 DICAS DA PARTIDA (MAIS RECENTES PRIMEIRO)</span></div>
+                <div id="coachPriorityCards" class="live-alerts-stack"></div>
+              </div>
+              <div>
+                <div class="active-alerts-header"><span>❓ PERGUNTAS PRONTAS</span></div>
+                <div class="quick-questions">
+                  <button class="quick-q-btn" data-q="comprar">🛒 O que comprar agora?</button>
+                  <button class="quick-q-btn" data-q="recuar">🛡️ Devo recuar ou lutar?</button>
+                  <button class="quick-q-btn" data-q="ameaca">⚠️ Quem é a maior ameaça?</button>
+                  <button class="quick-q-btn" data-q="objetivo">🐉 Qual o próximo objetivo?</button>
+                  <button class="quick-q-btn" data-q="farm">🌾 Como está meu farm?</button>
+                  <button class="quick-q-btn" data-q="build">🧩 Como adaptar a build?</button>
+                </div>
+                <div id="quickAnswerBox" class="quick-answer hidden"></div>
+              </div>
             </div>
           </div>
 
           <!-- =============================================================== -->
           <!-- PAINEL DE CONFIGURAÇÃO DE JOGO EM ANDAMENTO (BUILD + SKILLS)    -->
           <!-- =============================================================== -->
-          <div class="card-dracula mb-18 live-ingame-build-panel">
+          <div class="card-bb mb-18 live-ingame-build-panel">
             <div class="live-build-top">
               <div>
                 <span class="step-pill">MODO JOGO EM ANDAMENTO • GUIA DE COMPRA PASSO A PASSO</span>
@@ -582,9 +619,9 @@
                 <p id="liveBuildEnemySummary" class="card-sub">Sincronizado automaticamente com os 5 inimigos da sua partida atual</p>
               </div>
               <div class="live-build-Import-btns" id="liveThreeBuildsSwitch">
-                <button class="btn-dracula btn-outline active" data-live-build="0">🏆 Build 1: Maior WR</button>
-                <button class="btn-dracula btn-outline" data-live-build="1">⚡ Build 2: Alternativa</button>
-                <button class="btn-dracula btn-outline" data-live-build="2">🛡️ Build 3: Anti-Inimigos</button>
+                <button class="btn-bb btn-outline active" data-live-build="0">🏆 Build 1: Maior WR</button>
+                <button class="btn-bb btn-outline" data-live-build="1">⚡ Build 2: Alternativa</button>
+                <button class="btn-bb btn-outline" data-live-build="2">🛡️ Build 3: Anti-Inimigos</button>
               </div>
             </div>
 
@@ -613,19 +650,20 @@
           </div>
 
           <div class="blitz-teams-grid">
-            <div class="card-dracula">
+            <div class="card-bb">
               <div class="card-head">
                 <h3 class="text-cyan">🟦 SUA EQUIPE</h3>
               </div>
               <div id="allyTeamList" class="blitz-player-table"></div>
             </div>
 
-            <div class="card-dracula">
+            <div class="card-bb">
               <div class="card-head">
                 <h3 class="text-pink">🟥 EQUIPE INIMIGA (RADAR DE AMEAÇAS)</h3>
               </div>
               <div id="enemyTeamList" class="blitz-player-table"></div>
             </div>
+          </div>
           </div>
         </section>
 
@@ -633,15 +671,25 @@
         <!-- ABA 3: TIER LIST & TODOS OS 173 CAMPEÕES                            -->
         <!-- =================================================================== -->
         <section id="tierlist-tab" class="tab-pane">
-          <div class="card-dracula mb-18">
+          <div class="card-bb mb-18">
             <div class="tierlist-toolbar">
               <input
                 type="text"
                 id="champSearchInput"
-                class="dracula-input"
+                class="bb-input"
                 placeholder="🔍 Filtrar campeão na Tier List..."
               />
-              <div class="role-filter-group">
+              <div class="role-filter-group" id="laneFilterGroup">
+                <span class="filter-label">Rota:</span>
+                <button class="lane-filter-btn filter-btn active" data-lane="ALL">Todas</button>
+                <button class="lane-filter-btn filter-btn" data-lane="TOP">🛡️ Top</button>
+                <button class="lane-filter-btn filter-btn" data-lane="JUNGLE">🌲 Jungle</button>
+                <button class="lane-filter-btn filter-btn" data-lane="MID">⚡ Mid</button>
+                <button class="lane-filter-btn filter-btn" data-lane="ADC">🏹 ADC</button>
+                <button class="lane-filter-btn filter-btn" data-lane="SUPPORT">✨ Suporte</button>
+              </div>
+              <div class="role-filter-group" id="styleFilterGroup">
+                <span class="filter-label">Estilo:</span>
                 <button class="filter-btn active" data-tag="ALL">Todos</button>
                 <button class="filter-btn" data-tag="Fighter">⚔️ Lutadores</button>
                 <button class="filter-btn" data-tag="Mage">🔮 Magos</button>
@@ -665,7 +713,7 @@
 
   <!-- MODAL DE CONFIGURAÇÕES -->
   <div id="settingsModal" class="modal-backdrop hidden">
-    <div class="modal-dracula">
+    <div class="modal-bb">
       <div class="modal-header">
         <h3>⚙️ Configurações do Babilonia Buff</h3>
         <button id="btnCloseSettings" class="btn-close">✕</button>
@@ -676,12 +724,12 @@
           Se quiser, conecte sua chave gratuita do <strong>Google Gemini AI</strong> para deixar o texto das dicas mais natural (o momento e o conteúdo continuam vindo do motor local):
         </p>
         <label class="modal-label" for="inputGeminiKey">🔑 Chave da API Google Gemini (Opcional):</label>
-        <input type="password" id="inputGeminiKey" class="dracula-input full-w" placeholder="AIzaSy..." />
+        <input type="password" id="inputGeminiKey" class="bb-input full-w" placeholder="AIzaSy..." />
         <small class="modal-hint">Obtenha gratuitamente em: aistudio.google.com/apikey</small>
         <div id="settingsSavedMsg" class="save-banner hidden">✅ Configurações salvas!</div>
       </div>
       <div class="modal-footer">
-        <button id="btnSaveSettings" class="btn-dracula btn-import-blitz">Salvar</button>
+        <button id="btnSaveSettings" class="btn-bb btn-import-blitz">Salvar</button>
       </div>
     </div>
   </div>

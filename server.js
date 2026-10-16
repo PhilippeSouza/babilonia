@@ -11,8 +11,8 @@ const path = require('path');
 
 const { getLCUState, exportRunePageToLCU } = require('./src/lcu');
 const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
-const { getChampionGuide, getTop6MetaPicks } = require('./src/championsDb');
-const { hasGeminiKey, refineTipWithGemini } = require('./src/coachEngine');
+const { getChampionGuide, getTop6MetaPicks, getChampionLanes } = require('./src/championsDb');
+const { hasGeminiKey, refineTipWithGemini, answerQuickQuestion } = require('./src/coachEngine');
 const { LiveTipsEngine } = require('./src/liveTipsEngine');
 
 const PORT = process.env.PORT || 3000;
@@ -41,12 +41,13 @@ let championKeyMap = {};
 let championNameMap = {};
 
 // Estado atual do Draft (Ordem dos 5 slots do time inimigo: [0]=TOP, [1]=JUNGLE, [2]=MID, [3]=ADC, [4]=SUPPORT)
+// Começa vazio: só é preenchido pela Seleção de Campeões, pela partida ao vivo ou quando você escolhe um campeão
 let draftState = {
   role: 'TOP',
   autoDetectedLane: true,
-  myChampionId: 'Renekton',
-  bannedChampions: ['Jax', 'Garen', 'Zed'],
-  enemyTeam: ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona']
+  myChampionId: '',
+  bannedChampions: [],
+  enemyTeam: []
 };
 
 async function initDataDragon() {
@@ -184,12 +185,27 @@ function serveStaticFile(req, res) {
   });
 }
 
+// Aberto pelo launcher (que fecha sozinho), o servidor encerra quando a janela do app
+// fica fechada por alguns minutos, para não ficar rodando escondido para sempre.
+const AUTO_EXIT = process.env.BB_AUTO_EXIT === '1';
+const AUTO_EXIT_IDLE_MS = 5 * 60 * 1000;
+let lastAppPollAt = Date.now();
+if (AUTO_EXIT) {
+  setInterval(() => {
+    if (Date.now() - lastAppPollAt > AUTO_EXIT_IDLE_MS) {
+      console.log('[Babilonia Buff] Janela do app fechada há 5 minutos. Encerrando o servidor.');
+      process.exit(0);
+    }
+  }, 30 * 1000).unref();
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
 
   // 1. Status em Tempo Real (LCU + Detecção Automática de Lane + Live Client 2999)
   if ((pathname === '/api/status' || pathname === '/api/state') && req.method === 'GET') {
+    if (pathname === '/api/status') lastAppPollAt = Date.now();
     const [lcuState, liveRaw] = await Promise.all([
       getLCUState(championKeyMap),
       fetchLiveGameData()
@@ -215,6 +231,13 @@ const server = http.createServer(async (req, res) => {
     }
 
     const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+
+    // Fora de Seleção de Campeões e de partida: limpa o draft da partida anterior
+    const phase = lcuState?.phase || 'Disconnected';
+    if (!liveRaw && !['ChampSelect', 'GameStart', 'InProgress', 'ReadyCheck'].includes(phase)) {
+      draftState.bannedChampions = [];
+      draftState.enemyTeam = [];
+    }
 
     // Quando a partida ao vivo começa (porta 2999), sincroniza automaticamente seu Campeão, Rota e os 5 Inimigos!
     if (matchState?.activePlayer) {
@@ -244,10 +267,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     const activeChampId =
-      matchState?.activePlayer?.championId ||
-      lcuState?.champSelect?.myChampionId ||
-      draftState.myChampionId ||
-      'Renekton';
+      matchState?.activePlayer?.championId || lcuState?.champSelect?.myChampionId || draftState.myChampionId || null;
 
     const liveEnemyIds = (matchState?.enemies || [])
       .map((e) => championNameMap[(e.championName || '').toLowerCase()] || (e.championName || '').replace(/[^a-zA-Z]/g, ''))
@@ -275,14 +295,14 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST') {
       const body = await parseJsonBody(req);
       if (body.role) draftState.role = body.role;
-      if (body.myChampionId) {
+      if (typeof body.myChampionId === 'string') {
         draftState.myChampionId = body.myChampionId;
       }
       if (Array.isArray(body.bannedChampions)) {
         draftState.bannedChampions = body.bannedChampions.filter(Boolean);
       }
       if (Array.isArray(body.enemyTeam)) {
-        draftState.enemyTeam = body.enemyTeam.filter(Boolean);
+        draftState.enemyTeam = body.enemyTeam.map((c) => c || ''); // mantém a posição de cada rota
       }
     }
 
@@ -294,19 +314,20 @@ const server = http.createServer(async (req, res) => {
       ddragonChampions
     });
 
-    const resolvedId = championNameMap[draftState.myChampionId.toLowerCase()] || draftState.myChampionId;
-    const ddragonChamp = ddragonChampions[resolvedId] || null;
-    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
+    const myId = draftState.myChampionId || '';
+    const resolvedId = championNameMap[myId.toLowerCase()] || myId;
+    const guide = resolvedId
+      ? getChampionGuide(resolvedId, ddragonChampions[resolvedId] || null, draftState.enemyTeam, ddragonChampions, ddragonItems)
+      : null;
 
     return sendJson(res, 200, {
       ddragonVersion,
       draftState,
       recommendations, // { detectedRole, enemyLanerId, enemyLanerName, counterPicks (3), metaPicks (3), allSix (6) }
       top6MetaPicks: recommendations.allSix,
-      guide: {
-        ...guide,
-        iconUrl: `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${guide.id}.png`
-      }
+      guide: guide
+        ? { ...guide, iconUrl: `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${guide.id}.png` }
+        : null
     });
   }
 
@@ -321,6 +342,7 @@ const server = http.createServer(async (req, res) => {
         title: c.title,
         tags: c.tags,
         role: guide.role,
+        lanes: getChampionLanes(c.id, guide.role),
         tier: guide.tier,
         winRate: guide.winRate,
         difficulty: guide.difficulty,
@@ -351,7 +373,10 @@ const server = http.createServer(async (req, res) => {
   // 5. Exportar Página de Runas Direto para o Cliente do LoL
   if (pathname === '/api/lcu/export-runes' && req.method === 'POST') {
     const body = await parseJsonBody(req);
-    const champId = body.championId || draftState.myChampionId || 'Renekton';
+    const champId = body.championId || draftState.myChampionId;
+    if (!champId) {
+      return sendJson(res, 400, { ok: false, message: 'Escolha um campeão antes de exportar as runas.' });
+    }
     const buildIdx = Number(body.buildIndex || 0);
     const ddragonChamp = ddragonChampions[champId] || null;
     const guide = getChampionGuide(champId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
@@ -377,7 +402,22 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 6. Salvar Configurações
+  // 6. Assistente Tático: perguntas prontas (botões) respondidas com os dados da partida
+  if (pathname === '/api/coach/quick' && req.method === 'POST') {
+    const body = await parseJsonBody(req);
+    const liveRaw = await fetchLiveGameData();
+    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+    const enemyIds = (matchState?.enemies || []).map(
+      (e) => championNameMap[(e.championName || '').toLowerCase()] || (e.championName || '').replace(/[^a-zA-Z]/g, '')
+    );
+    const guide = matchState ? getLiveGuide(matchState.activePlayer.championId, enemyIds) : null;
+    const local = answerQuickQuestion(String(body.questionId || ''), matchState, guide);
+    if (!local) return sendJson(res, 400, { ok: false, message: 'Pergunta desconhecida.' });
+    const answer = matchState ? await refineTipWithGemini(local, matchState, appConfig.geminiApiKey) : local;
+    return sendJson(res, 200, { ok: true, title: answer.title, message: answer.message, source: answer.source || 'local' });
+  }
+
+  // 7. Salvar Configurações
   if (pathname === '/api/config' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     if (typeof body.geminiApiKey === 'string') {
