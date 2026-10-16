@@ -4,13 +4,13 @@
   <img src="public/logo.png" width="180" alt="Babilônia Logo Oficial" />
 </p>
 
-Assistente desktop e web em tempo real para **League of Legends** inspirado no **Blitz.gg**, com tema **Dracula Dark Mode**, executável nativo para Windows (**`Babilonia.exe`**) com ícone na Barra de Tarefas e na Bandeja do Sistema (System Tray), e conexão 100% automática ao cliente do jogo (sem precisar de chave da Riot API e 100% seguro contra banimentos do Vanguard).
+Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, com tema **Dracula Dark Mode**, executável nativo para Windows (**`Babilonia.exe`**) com ícone na Barra de Tarefas e na Bandeja do Sistema (System Tray), e conexão 100% automática ao cliente do jogo (sem precisar de chave da Riot API e 100% seguro contra banimentos do Vanguard).
 
 ## 🚀 Funcionalidades Principais
 
-- **🖥️ Executável Nativo (`Babilonia.exe`) + Ícone na Barra do Sistema:**
-  - Possui central de controle própria em **Dracula Dark Mode** que sobe o servidor em segundo plano (sem janela preta de CMD).
-  - Exibe a logo oficial detalhada tanto na **Barra de Tarefas do Windows (Taskbar)** quanto na **Bandeja do Sistema (System Tray, perto do relógio)** com menu de acesso rápido ao clicar com o botão direito.
+- **🖥️ Executável Nativo (`Babilonia.exe`):**
+  - Abre uma central desktop em **Dracula Dark Mode** com o ícone oficial do **Babilônia** visível tanto na **Barra de Tarefas do Windows** quanto na **Bandeja do Sistema (System Tray, perto do relógio)**.
+  - Inicia o servidor Node.js automaticamente em segundo plano (sem janela preta de CMD) e abre o painel do aplicativo em modo janela dedicada (`--app`).
 - **🏠 Home & Perfil Real do LoL:** Conecta sozinho ao cliente aberto e exibe seu `Nome#TAG`, Nível, Elo Ranqueado Solo/Duo, PDL e Vitórias/Derrotas.
 - **📍 Detecção Automática de Lane + 6 Sugestões Pós-Ban (3 + 3 Sem Repetição):**
   - Reconhece em qual rota você caiu na Seleção de Campeões (`Top`, `Jungle`, `Mid`, `ADC`, `Suporte`).
@@ -32,12 +32,15 @@ Assistente desktop e web em tempo real para **League of Legends** inspirado no *
    git clone https://github.com/PhilippeSouza/babilonia.git
    cd babilonia
    ```
-3. Dê dois cliques diretamente no executável **`Babilonia.exe`**!
-   - Ele iniciará o servidor silenciosamente, ficará com o ícone na **Barra de Tarefas** e na **Bandeja do Sistema** do Windows, e abrirá o aplicativo automaticamente.
+3. **Para abrir com o Executável e Ícone na Barra do Windows:**
+   - Dê dois cliques diretamente em **`Babilonia.exe`** (ou em **`Iniciar-Babilonia.bat`**).
+4. Caso queira recompilar o executável no Windows a qualquer momento:
+   ```powershell
+   & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:Babilonia.ico /out:Babilonia.exe /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll src\BabiloniaLauncher.cs
+   ```
 
 ---
 
 ## 🔄 Como continuar o desenvolvimento no Antigravity em outro PC
 
-Ao abrir esta pasta no **Antigravity** no seu computador pessoal, basta enviar na primeira mensagem do chat:
-> *"Leia o arquivo `CONTEXTO_PROJETO.md` para carregar todo o histórico e continuar o projeto Babilônia de onde paramos."*
+Ao abrir esta pasta no **Antigravity** no seu computador pessoal, basta enviar na primeira mensagem do chat o texto indicado no arquivo `CONTEXTO_PROJETO.md`.
