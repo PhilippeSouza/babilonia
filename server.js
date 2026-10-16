@@ -12,7 +12,8 @@ const path = require('path');
 const { getLCUState, exportRunePageToLCU } = require('./src/lcu');
 const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
 const { getChampionGuide, getTop6MetaPicks } = require('./src/championsDb');
-const { generateLocalTacticalCoaching, answerPlayerQuestion } = require('./src/coachEngine');
+const { hasGeminiKey, refineTipWithGemini } = require('./src/coachEngine');
+const { LiveTipsEngine } = require('./src/liveTipsEngine');
 
 const PORT = process.env.PORT || 3000;
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -81,6 +82,50 @@ async function initDataDragon() {
     }
   } catch (err) {
     console.warn('[Data Dragon] Aviso:', err.message);
+  }
+}
+
+// =========================================================================
+// DICAS PROATIVAS: observa a partida (porta 2999) e gera dicas sozinho
+// =========================================================================
+const guideCache = new Map();
+function getLiveGuide(champId, rawEnemyIds) {
+  const enemyIds = rawEnemyIds.map((id) => championNameMap[String(id).toLowerCase()] || id);
+  const cacheKey = `${champId}|${enemyIds.join(',')}|${Object.keys(ddragonItems).length}`;
+  if (!guideCache.has(cacheKey)) {
+    if (guideCache.size > 20) guideCache.clear();
+    guideCache.set(
+      cacheKey,
+      getChampionGuide(champId, ddragonChampions[champId] || null, enemyIds, ddragonChampions, ddragonItems)
+    );
+  }
+  return guideCache.get(cacheKey);
+}
+
+const tipsEngine = new LiveTipsEngine({ getGuide: getLiveGuide });
+const TIPS_POLL_MS = 2000;
+let liveTipFeed = []; // dicas prontas para o painel (já refinadas pelo Gemini quando houver chave)
+
+async function tipsLoopTick() {
+  try {
+    const liveRaw = await fetchLiveGameData();
+    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+    if (!matchState) {
+      tipsEngine.update(null, null);
+      return;
+    }
+    if (!tipsEngine.inGame) liveTipFeed = []; // partida nova: limpa as dicas da anterior
+    const tip = tipsEngine.update(liveRaw, matchState);
+    if (tip) {
+      const finalTip = await refineTipWithGemini(tip, matchState, appConfig.geminiApiKey);
+      liveTipFeed.push(finalTip);
+      if (liveTipFeed.length > 20) liveTipFeed.shift();
+      console.log(`[Dica ${finalTip.formattedTime}] ${finalTip.title}: ${finalTip.message}`);
+    }
+  } catch (err) {
+    console.warn('[Dicas] Aviso:', err.message);
+  } finally {
+    setTimeout(tipsLoopTick, TIPS_POLL_MS);
   }
 }
 
@@ -204,25 +249,24 @@ const server = http.createServer(async (req, res) => {
       draftState.myChampionId ||
       'Renekton';
 
-    const ddragonChamp = ddragonChampions[activeChampId] || null;
-    const coaching = generateLocalTacticalCoaching(
-      matchState,
-      ddragonChamp,
-      draftState.enemyTeam,
-      ddragonChampions,
-      ddragonItems
-    );
+    const liveEnemyIds = (matchState?.enemies || [])
+      .map((e) => championNameMap[(e.championName || '').toLowerCase()] || (e.championName || '').replace(/[^a-zA-Z]/g, ''))
+      .filter(Boolean);
+    const coaching = {
+      championGuide: matchState ? getLiveGuide(activeChampId, liveEnemyIds.length ? liveEnemyIds : draftState.enemyTeam) : null
+    };
 
     return sendJson(res, 200, {
       timestamp: Date.now(),
       ddragonVersion,
-      hasGeminiKey: Boolean(appConfig.geminiApiKey && appConfig.geminiApiKey.trim().length > 10),
+      hasGeminiKey: hasGeminiKey(appConfig.geminiApiKey),
       lcu: lcuState,
       inLiveGame: Boolean(liveRaw),
       draftState,
       matchState,
       activeChampionId: activeChampId,
-      coaching
+      coaching,
+      liveTips: liveTipFeed
     });
   }
 
@@ -333,28 +377,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 6. Perguntar ao Assistente Tático IA
-  if (pathname === '/api/coach/ask' && req.method === 'POST') {
-    const body = await parseJsonBody(req);
-    const liveRaw = await fetchLiveGameData();
-    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
-
-    const champId = body.championId || draftState.myChampionId || 'Darius';
-    const ddragonChamp = ddragonChampions[champId] || null;
-
-    const response = await answerPlayerQuestion({
-      question: body.question,
-      matchState,
-      selectedChampionId: champId,
-      enemyChampionId: draftState.enemyTeam[0],
-      geminiApiKey: appConfig.geminiApiKey,
-      ddragonChampData: ddragonChamp
-    });
-
-    return sendJson(res, 200, response);
-  }
-
-  // 7. Salvar Configurações
+  // 6. Salvar Configurações
   if (pathname === '/api/config' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     if (typeof body.geminiApiKey === 'string') {
@@ -363,7 +386,7 @@ const server = http.createServer(async (req, res) => {
     saveConfig();
     return sendJson(res, 200, {
       ok: true,
-      hasGeminiKey: Boolean(appConfig.geminiApiKey && appConfig.geminiApiKey.length > 10)
+      hasGeminiKey: hasGeminiKey(appConfig.geminiApiKey)
     });
   }
 
@@ -376,4 +399,5 @@ initDataDragon().then(() => {
     console.log(`⚡ Babilonia Buff rodando em: http://localhost:${PORT}`);
     console.log('==============================================================');
   });
+  tipsLoopTick();
 });

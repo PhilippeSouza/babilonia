@@ -20,7 +20,7 @@ Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, c
   2. **⚡ Build Alternativa:** Variação tática de estilo de jogo.
   3. **🛡️ Build Anti-Time Inimigo:** Analisa os 5 campeões adversários (% AD vs AP, Tanques, Cura e Controle de Grupo) e adapta suas Botas, Corta-Cura, Penetração e Defesa automaticamente.
 - **⚡ Auto-Import de Runas (1-Clique):** Exporta a página de runas da build escolhida direto para dentro do seu League of Legends.
-- **🔔 Popups Táticos Visuais (Sem Voz):** Alertas visuais silenciosos em tempo real durante a partida para Recall/Ouro no bolso (`1300g+`), Objetivos (`60s` antes de Dragão/Barão) e Ameaças Inimigas.
+- **🧠 IA que observa a partida (sem chat, sem voz):** Lê a partida a cada 2s pela porta 2999 (ouro, KDA, CS, vida, itens, objetivos, mortes e eventos) e mostra popups curtos com o que fazer agora: recall com o item certo, dragão/Barão chegando, oponente de rota morto, vantagem ou desvantagem numérica, inimigo forte e como adaptar a build. A frequência é limitada para não poluir a tela.
 
 ---
 

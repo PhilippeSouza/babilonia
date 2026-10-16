@@ -42,7 +42,10 @@
    - **Opção 2 — Build Alternativa (`alternative`):** Estilo alternativo (splitpush, pico rápido ou variação de runas).
    - **Opção 3 — Build Melhor Contra o Time Inimigo (`anti_enemy`):** Calculada dinamicamente analisando os 5 campeões do time inimigo (proporção AD vs AP, quantidade de Tanques, Campeões de Cura/Sustain e Controle de Grupo/CC), trocando botas, corta-cura, penetração e item defensivo automaticamente.
 5. **IA Integrada (Motor Híbrido Local + Gemini Opcional):**
-   - `src/coachEngine.js` possui o Motor Tático Local (100% gratuito e instantâneo) que analisa ouro no bolso (`1300g+`), objetivos (`60s` antes de Dragão/Arauto/Vastilarvas/Barão), farm (`CS/min`) e inimigos feedados (`3+ kills`), além de suporte opcional à API do **Google Gemini 2.5 Flash**.
+   - **Sem chat.** O usuário não quer conversar com a IA: ela observa a partida e avisa sozinha.
+   - `src/liveTipsEngine.js` é o motor local que lê a porta 2999 a cada 2s (loop no `server.js`) e decide quando mostrar uma dica: recall/compra, objetivos 60s antes, oponente de rota morto, vantagem/desvantagem numérica, eventos (morte, dragão, Barão, inibidor, ace), vida baixa, nível 6/11/16, inimigo forte, composição inimiga e farm.
+   - Frequência limitada: 1 dica por vez, 25s entre dicas normais e 6s para urgentes, cada situação aparece uma vez só.
+   - `src/coachEngine.js` só refina o texto da dica com o **Google Gemini 2.5 Flash** quando há chave configurada (timeout de 2,5s, senão usa o texto local).
 6. **100% Seguro contra Banimentos (Riot Vanguard Safe):**
    - Não lê memória RAM, não injeta DLL no `League of Legends.exe` e não simula cliques/macros. Usa apenas as APIs locais oficiais da Riot: **LCU API** (cliente) e **Live Client Data API** (`https://127.0.0.1:2999/liveclientdata/allgamedata`).
 
@@ -57,6 +60,7 @@
 - `src/lcu.js` — Conector automático LCU (`lockfile` + processo `LeagueClientUx.exe`), leitura de perfil/elo, champ select, bans, lane automática e exportação de runas (`/lol-perks/v1/pages`).
 - `src/liveClient.js` — Leitor da partida ao vivo na porta `2999`.
 - `src/championsDb.js` — Integração Data Dragon (`pt_BR`) + algoritmo dos `3 Counters + 3 Meta` sem repetição + gerador das `3 Builds` (`best_wr`, `alternative`, `anti_enemy`).
-- `src/coachEngine.js` — Motor de IA local (Popups Táticos e Chat) + integração opcional Gemini 2.5 Flash.
+- `src/liveTipsEngine.js` — Motor de dicas proativas (observa a partida e decide quando avisar).
+- `src/coachEngine.js` — Refinamento opcional do texto das dicas com Gemini 2.5 Flash.
 - `public/index.html`, `public/styles.css`, `public/app.js` — Interface completa Babilonia Buff em Dracula Dark Mode.
 - `public/logo.png`, `public/favicon.ico`, `public/logo.svg` — Arte oficial do Babilonia Buff.

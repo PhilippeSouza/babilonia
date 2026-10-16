@@ -42,10 +42,6 @@
           <span class="side-icon">🏆</span>
           <span>Tier List (<span id="champCountBadge">173</span>)</span>
         </button>
-        <button class="side-link" data-tab="coach-ai-tab">
-          <span class="side-icon">🧠</span>
-          <span>Assistente Tático IA</span>
-        </button>
       </nav>
 
       <!-- Auto-Import Toggles estilo Blitz -->
@@ -56,8 +52,8 @@
           <input type="checkbox" id="chkAutoImportRunes" checked />
           <span class="toggle-slider"></span>
         </label>
-        <label class="toggle-row" title="Exibe Popups visuais silenciosos no canto da tela com dicas do que fazer na partida">
-          <span>Popups Táticos</span>
+        <label class="toggle-row" title="A IA observa a partida e mostra popups curtos com o que fazer agora">
+          <span>Dicas em Popup</span>
           <input type="checkbox" id="chkPopupsEnabled" checked />
           <span class="toggle-slider"></span>
         </label>
@@ -160,31 +156,31 @@
             <div class="card-dracula home-ai-overview-card">
               <div class="card-head">
                 <div>
-                  <span class="step-pill">IA INTEGRADA • 100% ATIVA</span>
-                  <h2>🧠 Como a IA te ajuda durante a Partida</h2>
+                  <span class="step-pill">IA OBSERVANDO A PARTIDA • SEM CHAT</span>
+                  <h2>🧠 A IA olha o jogo e te avisa o que fazer</h2>
                 </div>
-                <button class="btn-dracula btn-purple" onclick="switchTab('coach-ai-tab')">Abrir Chat IA →</button>
+                <button class="btn-dracula btn-purple" onclick="switchTab('live-game-tab')">Ver Partida Ao Vivo →</button>
               </div>
               <div class="ai-features-grid">
                 <div class="ai-feat-item">
                   <span class="ai-feat-icon">💰</span>
                   <div>
-                    <strong>Detector de Ouro &amp; Recall</strong>
-                    <p>Avisa por Popup silencioso quando você acumula 1300+ de ouro e diz qual item comprar.</p>
+                    <strong>Ouro &amp; Recall</strong>
+                    <p>Quando seu ouro fecha o próximo componente ou item, avisa para empurrar a wave e voltar, dizendo o que comprar.</p>
                   </div>
                 </div>
                 <div class="ai-feat-item">
                   <span class="ai-feat-icon">🐉</span>
                   <div>
-                    <strong>Radar de Objetivos (60s antes)</strong>
-                    <p>Dispara alerta 1 minuto antes de Dragão, Vastilarvas, Arauto e Barão para você puxar a wave.</p>
+                    <strong>Objetivos &amp; Vantagem Numérica</strong>
+                    <p>Avisa 1 minuto antes de Dragão e Barão, e quando inimigos morrem e dá para pegar objetivo ou torre.</p>
                   </div>
                 </div>
                 <div class="ai-feat-item">
                   <span class="ai-feat-icon">🛡️</span>
                   <div>
-                    <strong>Counter-Build Anti-Feedado</strong>
-                    <p>Identifica quem está forte no time inimigo (3+ kills) e recomenda o item defensivo/corta-cura exato.</p>
+                    <strong>Leitura dos Eventos</strong>
+                    <p>Reage a mortes, dragões, Barão, inibidores, vida baixa e inimigos fortes com uma dica curta na hora certa.</p>
                   </div>
                 </div>
                 <div class="ai-feat-item">
@@ -568,7 +564,8 @@
               </div>
 
               <div class="active-alerts-header">
-                <span>📌 RECOMENDAÇÕES ATIVAS AGORA</span>
+                <span>🧠 ÚLTIMAS DICAS DA IA NESTA PARTIDA</span>
+                <span id="aiModeLabel" class="badge-dracula purple">Motor Tático Local</span>
               </div>
               <div id="coachPriorityCards" class="live-alerts-stack"></div>
             </div>
@@ -659,48 +656,6 @@
           <div id="championsGrid" class="blitz-champions-grid"></div>
         </section>
 
-        <!-- =================================================================== -->
-        <!-- ABA 4: ASSISTENTE TÁTICO IA                                         -->
-        <!-- =================================================================== -->
-        <section id="coach-ai-tab" class="tab-pane">
-          <div class="card-dracula">
-            <div class="card-head">
-              <div>
-                <h2>🧠 Consultor Tático IA (Silencioso — Sem Voz)</h2>
-                <p class="card-sub">Pergunte sobre itens situacionais, como ganhar sua rota ou o que fazer contra um inimigo feedado</p>
-              </div>
-              <span id="aiModeLabel" class="badge-dracula purple">Motor Híbrido Ativo</span>
-            </div>
-
-            <div class="quick-prompts">
-              <button class="chip-dracula" data-prompt="Qual item devo comprar agora com meu ouro atual?">🛒 O que comprar agora?</button>
-              <button class="chip-dracula" data-prompt="Como jogar essa matchup na rota sem morrer?">🛡️ Como jogar a rota?</button>
-              <button class="chip-dracula" data-prompt="Qual deve ser minha jogada de macro nos próximos 2 minutos?">🗺️ O que fazer no mapa agora?</button>
-              <button class="chip-dracula" data-prompt="Como parar o jogador mais forte do time inimigo?">⚠️ Counterar inimigo feedado</button>
-            </div>
-
-            <div id="chatMessages" class="dracula-chat-box">
-              <div class="chat-bubble assistant">
-                <div class="bubble-author">⚡ Babilonia Buff AI</div>
-                <div class="bubble-text">
-                  Pronto! As análises durante a partida aparecem automaticamente em <strong>Popups visuais silenciosos</strong> no canto da tela. Você também pode tirar qualquer dúvida tática aqui abaixo!
-                </div>
-              </div>
-            </div>
-
-            <form id="chatForm" class="chat-form-row">
-              <input
-                type="text"
-                id="chatInput"
-                class="dracula-input"
-                placeholder="Ex: Contra time full AD de Yasuo, qual bota e item defensivo eu faço?"
-                autocomplete="off"
-              />
-              <button type="submit" class="btn-dracula btn-import-blitz">Perguntar</button>
-            </form>
-          </div>
-        </section>
-
       </main>
     </div>
   </div>
@@ -717,8 +672,8 @@
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          O motor local já gera todos os <strong>Popups Táticos</strong>, as 6 sugestões pós-ban e as 3 builds gratuitamente.
-          Se quiser conectar sua chave gratuita do <strong>Google Gemini AI</strong> para análises no chat, insira abaixo:
+          O motor local já observa a partida e gera as <strong>dicas em popup</strong>, as 6 sugestões pós-ban e as 3 builds gratuitamente.
+          Se quiser, conecte sua chave gratuita do <strong>Google Gemini AI</strong> para deixar o texto das dicas mais natural (o momento e o conteúdo continuam vindo do motor local):
         </p>
         <label class="modal-label" for="inputGeminiKey">🔑 Chave da API Google Gemini (Opcional):</label>
         <input type="password" id="inputGeminiKey" class="dracula-input full-w" placeholder="AIzaSy..." />

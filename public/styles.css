@@ -1069,6 +1069,10 @@ body {
 .obj-clock { font-family: 'JetBrains Mono', monospace; font-size: 15px; color: var(--dracula-yellow); }
 
 .active-alerts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   font-size: 10px;
   font-weight: 700;
   color: var(--dracula-comment);
@@ -1091,6 +1095,10 @@ body {
 
 .live-alert-item.URGENT {
   border-left-color: var(--dracula-orange);
+}
+
+.live-alert-item.BUILD {
+  border-left-color: var(--dracula-green);
 }
 
 /* Placar 5v5 */
@@ -1234,75 +1242,6 @@ body {
 
 .champ-card-name { font-weight: 700; font-size: 13px; }
 .champ-card-role { font-size: 11px; color: var(--dracula-comment); margin-bottom: 6px; }
-
-/* ==========================================================================
-   ABA 4: ASSISTENTE IA (SILENCIOSO)
-   ========================================================================== */
-.quick-prompts {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.chip-dracula {
-  background-color: var(--dracula-bg);
-  border: 1px solid var(--dracula-purple);
-  color: var(--dracula-purple);
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.chip-dracula:hover {
-  background-color: var(--dracula-purple);
-  color: #191a21;
-}
-
-.dracula-chat-box {
-  background-color: var(--dracula-bg);
-  border: 1px solid var(--dracula-line);
-  border-radius: 10px;
-  padding: 14px;
-  max-height: 360px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.chat-bubble {
-  padding: 10px 14px;
-  border-radius: 9px;
-  font-size: 13px;
-}
-
-.chat-bubble.user {
-  align-self: flex-end;
-  background-color: rgba(189, 147, 249, 0.2);
-  border: 1px solid var(--dracula-purple);
-}
-
-.chat-bubble.assistant {
-  background-color: var(--dracula-card);
-  border: 1px solid var(--dracula-line);
-}
-
-.bubble-author {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--dracula-pink);
-  margin-bottom: 4px;
-}
-
-.chat-form-row {
-  display: flex;
-  gap: 8px;
-}
-
-.chat-form-row input { flex: 1; }
 
 /* ==========================================================================
    SISTEMA DE POPUPS TÁTICOS EM TEMPO REAL (ESTILO OVERLAY BLITZ)

@@ -3,7 +3,7 @@
  * Inclui:
  * 1) Recomendador Pós-Banimentos com 6 Opções de Campeões Fortes no Meta Atual
  * 2) Gerador de 3 Opções de Build (Maior Winrate, Alternativa e Anti-Time Inimigo)
- * 3) Popups Táticos Silenciosos em Tempo Real (Sem Voz)
+ * 3) Dicas Proativas em Popup: a IA observa a partida (porta 2999) e avisa o que fazer, sem chat e sem voz
  */
 
 let ddragonVersion = '16.20.1';
@@ -16,6 +16,7 @@ let currentGuide = null;
 let activeBuildIndex = 0; // 0 = Maior Winrate | 1 = Alternativa | 2 = Anti-Time Inimigo
 let activeTagFilter = 'ALL';
 let shownPopupIds = new Set();
+let lastSeenTipId = null; // null = ainda não sincronizou com o servidor
 let lastAutoImportedChamp = '';
 
 const PERK_NAMES_PT = {
@@ -94,7 +95,7 @@ function showTacticalPopup({ id, type = 'MACRO', badge = 'DICA TÁTICA', title, 
 
   setTimeout(() => {
     if (popup.parentNode) popup.remove();
-  }, 7000);
+  }, 9000);
 }
 
 // =========================================================================
@@ -678,9 +679,10 @@ async function pollStatus() {
     const data = await res.json();
     window.latestLiveStatusData = data;
 
-    document.getElementById('aiModeLabel').textContent = data.hasGeminiKey
-      ? 'Google Gemini AI Ativo'
-      : 'Motor Tático Local Ativo';
+    const aiModeLabel = document.getElementById('aiModeLabel');
+    if (aiModeLabel) {
+      aiModeLabel.textContent = data.hasGeminiKey ? 'Motor Local + Gemini' : 'Motor Tático Local';
+    }
 
     const lcuBox = document.getElementById('lcuStatusCard');
     const lcuTitle = document.getElementById('lcuStatusTitle');
@@ -877,7 +879,7 @@ async function pollStatus() {
 
     renderLiveMatchView(data);
     renderLiveInGameBuildPanel(data);
-    processCoachingPopups(data.coaching, isLiveMatchNow);
+    processLiveTips(data.liveTips, isLiveMatchNow);
   } catch (err) {
     console.error('Erro ao atualizar status:', err);
   }
@@ -1093,28 +1095,59 @@ function renderEmptyTables() {
   document.getElementById('enemyTeamList').innerHTML = msg;
 }
 
-function processCoachingPopups(coaching, isMatchActive) {
-  if (!coaching) return;
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Dicas geradas pelo servidor observando a partida. Cada dica nova vira um popup;
+// o servidor já controla a frequência para não poluir a tela.
+function processLiveTips(tips, isMatchActive) {
+  const list = Array.isArray(tips) ? tips : [];
   const stack = document.getElementById('coachPriorityCards');
   if (stack) {
-    stack.innerHTML = (coaching.priorityCards || [])
-      .map(
-        (c) => `
-        <div class="live-alert-item ${c.type}">
-          <strong>[${c.badge}] ${c.title}:</strong> ${c.message}
+    stack.innerHTML = list.length
+      ? list
+          .slice()
+          .reverse()
+          .slice(0, 6)
+          .map(
+            (t) => `
+        <div class="live-alert-item ${escapeHtml(t.type)}">
+          <strong>[${escapeHtml(t.formattedTime)}] ${escapeHtml(t.title)}:</strong> ${escapeHtml(t.message)}
         </div>
       `
-      )
-      .join('');
+          )
+          .join('')
+      : `<div class="live-alert-item MACRO">${
+          isMatchActive
+            ? 'A IA está observando a partida. As dicas aparecem aqui e em popup quando algo importante acontecer.'
+            : 'Quando a partida começar, a IA passa a observar ouro, objetivos, mortes e itens e avisa o que fazer.'
+        }</div>`;
   }
 
-  if (isMatchActive && Array.isArray(coaching.priorityCards)) {
-    coaching.priorityCards.forEach((card) => {
-      if (card.type === 'URGENT' || card.type === 'BUILD') {
-        showTacticalPopup(card);
-      }
-    });
+  const maxId = list.reduce((acc, t) => Math.max(acc, t.id || 0), 0);
+  // Primeira leitura (ou servidor reiniciado): não mostra dicas antigas de uma vez
+  if (lastSeenTipId === null || maxId < lastSeenTipId) {
+    lastSeenTipId = maxId;
+    return;
   }
+  if (!isMatchActive) return;
+
+  list
+    .filter((t) => t.id > lastSeenTipId)
+    .forEach((t) =>
+      showTacticalPopup({
+        id: `tip-${t.id}`,
+        type: t.type,
+        badge: escapeHtml(t.badge),
+        title: escapeHtml(t.title),
+        message: escapeHtml(t.message)
+      })
+    );
+  lastSeenTipId = Math.max(lastSeenTipId, maxId);
 }
 
 // =========================================================================
@@ -1178,71 +1211,6 @@ document.querySelectorAll('.filter-btn').forEach((btn) => {
     btn.classList.add('active');
     activeTagFilter = btn.dataset.tag;
     renderChampionsGrid();
-  });
-});
-
-// =========================================================================
-// ASSISTENTE TÁTICO IA (CHAT SILENCIOSO)
-// =========================================================================
-async function askCoachQuestion(questionText) {
-  if (!questionText.trim()) return;
-  const chatBox = document.getElementById('chatMessages');
-
-  const userDiv = document.createElement('div');
-  userDiv.className = 'chat-bubble user';
-  userDiv.textContent = questionText;
-  chatBox.appendChild(userDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  const loadingDiv = document.createElement('div');
-  loadingDiv.className = 'chat-bubble assistant';
-  loadingDiv.innerHTML = `<div class="bubble-author">⚡ Babilonia Buff AI</div><div class="bubble-text">⏳ Analisando dados...</div>`;
-  chatBox.appendChild(loadingDiv);
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  try {
-    const res = await fetch('/api/coach/ask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        question: questionText,
-        championId: selectedChampionId,
-        enemyChampionId: enemyTeam[0] || 'Malzahar'
-      })
-    });
-    const data = await res.json();
-
-    loadingDiv.innerHTML = `
-      <div class="bubble-author">⚡ ${data.source || 'Babilonia Buff AI'}</div>
-      <div class="bubble-text">${formatSimpleMarkdown(data.answer || '')}</div>
-    `;
-    chatBox.scrollTop = chatBox.scrollHeight;
-  } catch (err) {
-    loadingDiv.innerHTML = `<div class="bubble-author">⚠️ Erro</div><div class="bubble-text">Falha ao consultar o assistente.</div>`;
-  }
-}
-
-function formatSimpleMarkdown(text) {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/^### (.*$)/gim, '<strong>$1</strong>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');
-}
-
-document.getElementById('chatForm')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const input = document.getElementById('chatInput');
-  const q = input.value;
-  input.value = '';
-  askCoachQuestion(q);
-});
-
-document.querySelectorAll('.chip-dracula').forEach((chip) => {
-  chip.addEventListener('click', () => {
-    askCoachQuestion(chip.dataset.prompt);
   });
 });
 
