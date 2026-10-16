@@ -403,9 +403,11 @@ namespace BabiloniaApp
                 {
                     try
                     {
+                        string defaultNode = @"C:\Program Files\nodejs\node.exe";
+                        string nodeExe = File.Exists(defaultNode) ? defaultNode : "node";
                         ProcessStartInfo psi = new ProcessStartInfo
                         {
-                            FileName = "node",
+                            FileName = nodeExe,
                             Arguments = "server.js",
                             WorkingDirectory = appDir,
                             CreateNoWindow = true,

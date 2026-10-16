@@ -91,18 +91,11 @@
         </div>
 
         <div class="topbar-controls">
-          <div class="patch-pill">Patch <strong id="patchVersionLabel">16.20.1</strong></div>
-
-          <div class="sim-bar">
-            <button id="btnToggleSim" class="btn-dracula btn-sim-toggle">
-              🎮 Simular Partida: <strong id="simStateLabel">OFF</strong>
-            </button>
-            <select id="simScenarioSelect" class="dracula-select">
-              <option value="dragon_gold">🔥 09:20 • Dragão 45s + 1550g</option>
-              <option value="early_lane">⚔️ 03:30 • Nível 3 + Gank</option>
-              <option value="late_baron">👑 19:10 • Barão + Zed 5/1</option>
-            </select>
+          <div id="liveGameStatusPill" class="patch-pill">
+            Estado LoL: <strong id="topPhaseLabel">Monitorando Cliente...</strong>
           </div>
+
+          <div class="patch-pill">Patch <strong id="patchVersionLabel">16.20.1</strong></div>
 
           <button id="btnTestPopup" class="btn-dracula btn-purple" title="Disparar um Popup Tático de demonstração">
             🔔 Testar Popup
@@ -461,7 +454,7 @@
               </div>
             </div>
 
-            <!-- Coluna Direita: Os 6 Itens da Build Selecionada + Explicação Tática -->
+            <!-- Coluna Direita: Itens Iniciais + Os 6 Itens Grandes com Receita de Componentes + Explicação Tática -->
             <div class="build-col-right">
               <div class="card-dracula build-showcase-card">
                 <div class="card-head">
@@ -472,7 +465,12 @@
                   <span id="activeBuildWinrateBadge" class="badge-dracula green">53.4% WR</span>
                 </div>
 
-                <div class="build-stage-label">ORDEM COMPLETA DE COMPRA (1º AO 6º ITEM)</div>
+                <!-- SEÇÃO 1: ITENS INICIAIS (SAÍDA DA BASE - 500G) -->
+                <div class="build-stage-label">🏁 1. ITENS INICIAIS (SAÍDA DA BASE — 500 OURO NÍVEL 1)</div>
+                <div id="guideStarterPack" class="starter-pack-box mb-18"></div>
+
+                <!-- SEÇÃO 2: ORDEM DOS 6 ITENS GRANDES + QUAL COMPONENTE FAZER PRIMEIRO -->
+                <div class="build-stage-label">🛒 2. ORDEM DOS 6 ITENS GRANDES + QUAL ITEM FAZER PRIMEIRO DE CADA UM</div>
                 <div id="guideCoreItems" class="blitz-items-timeline"></div>
               </div>
 
@@ -501,34 +499,32 @@
         </section>
 
         <!-- =================================================================== -->
-        <!-- ABA 2: PARTIDA AO VIVO (BLITZ LIVE SCOUT + BENCHMARKS + POPUPS)     -->
+        <!-- ABA 2: PARTIDA AO VIVO (MODO JOGO EM ANDAMENTO AUTOMÁTICO)          -->
         <!-- =================================================================== -->
         <section id="live-game-tab" class="tab-pane">
           <div id="idleLiveBanner" class="dracula-banner">
             <div>
-              <h3>⚡ Monitor de Partida Ao Vivo (Porta 2999)</h3>
+              <h3>⚡ Modo Jogo em Andamento Automático (Porta 2999)</h3>
               <p>
-                Quando sua partida começar, esta tela mostra seus <strong>Benchmarks em tempo real (CS/min, Ouro no Bolso, KDA)</strong>,
-                os <strong>Temporizadores de Objetivos</strong> e dispara <strong>Popups Táticos</strong> silenciosos no canto da tela!
+                Assim que sua partida do League of Legends começar, o Babilônia muda <strong>automaticamente</strong> para esta tela,
+                carregando seu campeão, os 5 inimigos da partida, seus <strong>Itens Iniciais</strong>, <strong>qual componente comprar primeiro</strong> com seu ouro atual e temporizadores ao vivo!
               </p>
             </div>
-            <button id="btnStartSimBanner" class="btn-dracula btn-import-blitz">
-              ▶️ Ativar Simulação de Partida Agora
-            </button>
+            <span class="badge-dracula cyan">🔌 Aguardando início da partida no LoL...</span>
           </div>
 
           <div class="live-benchmarks-grid">
             <div class="card-dracula">
               <div class="card-head">
                 <div class="live-me-header">
-                  <img id="hudChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Yasuo.png" alt="Champ" class="live-me-avatar" />
+                  <img id="hudChampIcon" src="https://ddragon.leagueoflegends.com/cdn/16.20.1/img/champion/Renekton.png" alt="Champ" class="live-me-avatar" />
                   <div>
-                    <h2 id="hudChampName">Yasuo</h2>
+                    <h2 id="hudChampName">Renekton</h2>
                     <span id="hudSummonerName" class="card-sub">Aguardando partida...</span>
                   </div>
                 </div>
                 <div class="live-clock-pill">
-                  <span>TEMPO</span>
+                  <span>TEMPO DE JOGO</span>
                   <strong id="hudGameTime">00:00</strong>
                 </div>
               </div>
@@ -585,6 +581,47 @@
                 <span>📌 RECOMENDAÇÕES ATIVAS AGORA</span>
               </div>
               <div id="coachPriorityCards" class="live-alerts-stack"></div>
+            </div>
+          </div>
+
+          <!-- =============================================================== -->
+          <!-- PAINEL DE CONFIGURAÇÃO DE JOGO EM ANDAMENTO (BUILD + SKILLS)    -->
+          <!-- =============================================================== -->
+          <div class="card-dracula mb-18 live-ingame-build-panel">
+            <div class="live-build-top">
+              <div>
+                <span class="step-pill">MODO JOGO EM ANDAMENTO • GUIA DE COMPRA PASSO A PASSO</span>
+                <h2 id="liveBuildHeaderTitle">⚔️ Sua Build &amp; Ordem de Componentes na Partida</h2>
+                <p id="liveBuildEnemySummary" class="card-sub">Sincronizado automaticamente com os 5 inimigos da sua partida atual</p>
+              </div>
+              <div class="live-build-Import-btns" id="liveThreeBuildsSwitch">
+                <button class="btn-dracula btn-outline active" data-live-build="0">🏆 Build 1: Maior WR</button>
+                <button class="btn-dracula btn-outline" data-live-build="1">⚡ Build 2: Alternativa</button>
+                <button class="btn-dracula btn-outline" data-live-build="2">🛡️ Build 3: Anti-Inimigos</button>
+              </div>
+            </div>
+
+            <!-- Destaque: O que comprar agora na próxima volta à base -->
+            <div id="liveNextBuyBanner" class="live-next-buy-banner"></div>
+
+            <div class="live-build-columns">
+              <!-- Esquerda: Itens Iniciais (500g) + Skills Nível a Nível -->
+              <div class="live-build-left">
+                <div class="build-stage-label">🏁 ITENS INICIAIS (SAÍDA DA BASE — 500 OURO)</div>
+                <div id="liveStarterPackBox" class="starter-pack-box mb-18"></div>
+
+                <div class="build-stage-label">📈 QUAL HABILIDADE UPAR EM CADA NÍVEL (<span id="liveSkillPriorityText">Q &gt; E &gt; W</span>)</div>
+                <div id="liveSkillMatrix" class="skill-matrix mb-18"></div>
+
+                <div class="build-stage-label">🔮 RUNAS &amp; FEITIÇOS ATIVOS</div>
+                <div id="liveRunesCompactBox" class="rune-tree-box"></div>
+              </div>
+
+              <!-- Direita: Os 6 Itens Grandes + Qual Componente Fazer Primeiro de cada um -->
+              <div class="live-build-right">
+                <div class="build-stage-label">🛒 ORDEM DOS 6 ITENS GRANDES (E QUAL ITEM FAZER PRIMEIRO DE CADA UM)</div>
+                <div id="liveCoreItemsTimeline" class="blitz-items-timeline"></div>
+              </div>
             </div>
           </div>
 

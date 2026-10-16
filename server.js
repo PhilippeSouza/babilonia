@@ -35,6 +35,7 @@ function saveConfig() {
 
 let ddragonVersion = '16.20.1';
 let ddragonChampions = {};
+let ddragonItems = {};
 let championKeyMap = {};
 let championNameMap = {};
 
@@ -42,7 +43,7 @@ let championNameMap = {};
 let draftState = {
   role: 'TOP',
   autoDetectedLane: true,
-  myChampionId: 'Darius',
+  myChampionId: 'Renekton',
   bannedChampions: ['Jax', 'Garen', 'Zed'],
   enemyTeam: ['Aatrox', 'LeeSin', 'Malzahar', 'Jinx', 'Leona']
 };
@@ -50,7 +51,7 @@ let draftState = {
 let simulatorState = {
   enabled: false,
   scenario: 'dragon_gold',
-  championId: 'Darius',
+  championId: 'Renekton',
   enemyChampionId: 'Aatrox',
   gameTime: 560,
   level: 8,
@@ -71,8 +72,11 @@ async function initDataDragon() {
       }
     }
 
-    const champUrl = `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/pt_BR/champion.json`;
-    const champRes = await fetch(champUrl);
+    const [champRes, itemRes] = await Promise.all([
+      fetch(`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/pt_BR/champion.json`),
+      fetch(`https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/data/pt_BR/item.json`)
+    ]);
+
     if (champRes.ok) {
       const champJson = await champRes.json();
       ddragonChampions = champJson.data || {};
@@ -82,6 +86,12 @@ async function initDataDragon() {
         championNameMap[c.name.toLowerCase()] = id;
       }
       console.log(`[Data Dragon] Carregados ${Object.keys(ddragonChampions).length} campeões (Patch ${ddragonVersion} pt_BR).`);
+    }
+
+    if (itemRes.ok) {
+      const itemJson = await itemRes.json();
+      ddragonItems = itemJson.data || {};
+      console.log(`[Data Dragon] Carregados ${Object.keys(ddragonItems).length} itens e componentes (Patch ${ddragonVersion} pt_BR).`);
     }
   } catch (err) {
     console.warn('[Data Dragon] Aviso:', err.message);
@@ -148,7 +158,7 @@ const server = http.createServer(async (req, res) => {
   const pathname = url.pathname;
 
   // 1. Status em Tempo Real (LCU + Detecção Automática de Lane + Live Client 2999)
-  if (pathname === '/api/status' && req.method === 'GET') {
+  if ((pathname === '/api/status' || pathname === '/api/state') && req.method === 'GET') {
     const [lcuState, liveRaw] = await Promise.all([
       getLCUState(championKeyMap),
       fetchLiveGameData()
@@ -157,7 +167,6 @@ const server = http.createServer(async (req, res) => {
     // Sincronização Automática com o Cliente do LoL na Seleção de Campeões
     if (lcuState?.champSelect) {
       const cs = lcuState.champSelect;
-      // Reconhece automaticamente qual Lane o jogador caiu!
       if (cs.detectedRole) {
         draftState.role = cs.detectedRole;
         draftState.autoDetectedLane = true;
@@ -174,22 +183,34 @@ const server = http.createServer(async (req, res) => {
       }
     }
 
-    let activeRawGame = liveRaw;
-    let isSimulated = false;
+    // Modo 100% Real (Sem Simulador)
+    simulatorState.enabled = false;
+    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
 
-    if (!activeRawGame && simulatorState.enabled) {
-      simulatorState.gameTime += 2;
-      activeRawGame = createSimulatedRawGame(simulatorState);
-      isSimulated = true;
-    }
-
-    const matchState = activeRawGame ? parseLiveMatchState(activeRawGame, championNameMap) : null;
-    // Se estiver dentro da partida ao vivo e ela informar sua posição, também sincroniza a Lane!
-    if (matchState?.activePlayer?.position) {
-      const pPos = matchState.activePlayer.position.toUpperCase();
+    // Quando a partida ao vivo começa (porta 2999), sincroniza automaticamente seu Campeão, Rota e os 5 Inimigos!
+    if (matchState?.activePlayer) {
+      const pPos = (matchState.activePlayer.position || '').toUpperCase();
       if (['TOP', 'JUNGLE', 'MIDDLE', 'BOTTOM', 'UTILITY'].includes(pPos)) {
         draftState.role =
           pPos === 'MIDDLE' ? 'MID' : pPos === 'BOTTOM' ? 'ADC' : pPos === 'UTILITY' ? 'SUPPORT' : pPos;
+      }
+      if (matchState.activePlayer.championId) {
+        draftState.myChampionId = matchState.activePlayer.championId;
+      }
+      if (Array.isArray(matchState.enemies) && matchState.enemies.length > 0) {
+        const posOrder = { TOP: 0, JUNGLE: 1, MIDDLE: 2, BOTTOM: 3, UTILITY: 4 };
+        const orderedEnemies = [...matchState.enemies].sort(
+          (a, b) => (posOrder[a.position] ?? 9) - (posOrder[b.position] ?? 9)
+        );
+        const realEnemyIds = orderedEnemies
+          .map((e) => {
+            const raw = (e.championName || '').toLowerCase();
+            return championNameMap[raw] || (e.championName || '').replace(/[^a-zA-Z]/g, '');
+          })
+          .filter(Boolean);
+        if (realEnemyIds.length > 0) {
+          draftState.enemyTeam = realEnemyIds;
+        }
       }
     }
 
@@ -197,10 +218,16 @@ const server = http.createServer(async (req, res) => {
       matchState?.activePlayer?.championId ||
       lcuState?.champSelect?.myChampionId ||
       draftState.myChampionId ||
-      'Darius';
+      'Renekton';
 
     const ddragonChamp = ddragonChampions[activeChampId] || null;
-    const coaching = generateLocalTacticalCoaching(matchState, ddragonChamp);
+    const coaching = generateLocalTacticalCoaching(
+      matchState,
+      ddragonChamp,
+      draftState.enemyTeam,
+      ddragonChampions,
+      ddragonItems
+    );
 
     return sendJson(res, 200, {
       timestamp: Date.now(),
@@ -208,7 +235,7 @@ const server = http.createServer(async (req, res) => {
       hasGeminiKey: Boolean(appConfig.geminiApiKey && appConfig.geminiApiKey.trim().length > 10),
       lcu: lcuState,
       inLiveGame: Boolean(liveRaw),
-      isSimulated,
+      isSimulated: false,
       simulatorState,
       draftState,
       matchState,
@@ -224,7 +251,6 @@ const server = http.createServer(async (req, res) => {
       if (body.role) draftState.role = body.role;
       if (body.myChampionId) {
         draftState.myChampionId = body.myChampionId;
-        simulatorState.championId = body.myChampionId;
       }
       if (Array.isArray(body.bannedChampions)) {
         draftState.bannedChampions = body.bannedChampions.filter(Boolean);
@@ -244,7 +270,7 @@ const server = http.createServer(async (req, res) => {
 
     const resolvedId = championNameMap[draftState.myChampionId.toLowerCase()] || draftState.myChampionId;
     const ddragonChamp = ddragonChampions[resolvedId] || null;
-    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions);
+    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
 
     return sendJson(res, 200, {
       ddragonVersion,
@@ -261,7 +287,7 @@ const server = http.createServer(async (req, res) => {
   // 3. Lista de todos os Campeões
   if (pathname === '/api/champions' && req.method === 'GET') {
     const list = Object.values(ddragonChampions).map((c) => {
-      const guide = getChampionGuide(c.id, c, draftState.enemyTeam, ddragonChampions);
+      const guide = getChampionGuide(c.id, c, draftState.enemyTeam, ddragonChampions, ddragonItems);
       return {
         id: c.id,
         key: c.key,
@@ -285,7 +311,7 @@ const server = http.createServer(async (req, res) => {
     const champId = decodeURIComponent(pathname.replace('/api/champion/', '').trim());
     const resolvedId = championNameMap[champId.toLowerCase()] || champId;
     const ddragonChamp = ddragonChampions[resolvedId] || null;
-    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions);
+    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
 
     return sendJson(res, 200, {
       ddragonVersion,
@@ -299,10 +325,10 @@ const server = http.createServer(async (req, res) => {
   // 5. Exportar Página de Runas Direto para o Cliente do LoL
   if (pathname === '/api/lcu/export-runes' && req.method === 'POST') {
     const body = await parseJsonBody(req);
-    const champId = body.championId || draftState.myChampionId || 'Darius';
+    const champId = body.championId || draftState.myChampionId || 'Renekton';
     const buildIdx = Number(body.buildIndex || 0);
     const ddragonChamp = ddragonChampions[champId] || null;
-    const guide = getChampionGuide(champId, ddragonChamp, draftState.enemyTeam, ddragonChampions);
+    const guide = getChampionGuide(champId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
     const chosenBuild = (guide.builds && guide.builds[buildIdx]) || guide.builds[0];
 
     try {
@@ -348,7 +374,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 7. Controlar o Simulador
-  if (pathname === '/api/simulator' && req.method === 'POST') {
+  if ((pathname === '/api/simulator' || pathname === '/api/simulate') && req.method === 'POST') {
     const body = await parseJsonBody(req);
     if (typeof body.enabled === 'boolean') simulatorState.enabled = body.enabled;
     if (body.championId) {
