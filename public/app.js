@@ -351,12 +351,12 @@ function renderChampionAndThreeBuilds(g) {
   document.getElementById('guideChampIcon').src = g.iconUrl;
   document.getElementById('guideChampName').textContent = g.name;
   document.getElementById('guideChampTitle').textContent = g.title;
-  document.getElementById('guideTierBadge').textContent = g.tier;
+  document.getElementById('guideTierBadge').textContent = g.tier || '—';
   document.getElementById('guideRoleBadge').textContent = g.role;
   document.getElementById('guideDamageBadge').textContent = g.damageType;
-  document.getElementById('guideWinRate').textContent = g.winRate;
-  document.getElementById('guidePickRate').textContent = g.pickRate || '9.5%';
-  document.getElementById('guideBanRate').textContent = g.banRate || '6.2%';
+  document.getElementById('guideWinRate').textContent = g.winRate || 'Sem dados';
+  document.getElementById('guidePickRate').textContent = g.pickRate || 'Sem dados';
+  document.getElementById('guideBanRate').textContent = g.banRate || 'Sem dados';
   document.getElementById('guideDifficulty').textContent = g.difficulty || 'Média';
 
   const mySelect = document.getElementById('selectMyChamp');
@@ -370,10 +370,11 @@ function renderChampionAndThreeBuilds(g) {
 
   // Atualiza os cabeçalhos das 3 Abas de Build
   const builds = g.builds || [];
-  if (builds[0]) document.getElementById('tab0Wr').textContent = builds[0].winRate;
-  if (builds[1]) document.getElementById('tab1Wr').textContent = builds[1].winRate;
+  const wrLabel = (b) => (b.winRate ? `${String(b.winRate).replace(/ WR$/, '')} WR` : '');
+  if (builds[0]) document.getElementById('tab0Wr').textContent = wrLabel(builds[0]);
+  if (builds[1]) document.getElementById('tab1Wr').textContent = wrLabel(builds[1]);
   if (builds[2]) {
-    document.getElementById('tab2Wr').textContent = builds[2].winRate;
+    document.getElementById('tab2Wr').textContent = wrLabel(builds[2]);
     document.getElementById('tab2Sub').textContent = `Contra: ${enemyTeam.join(', ')}`;
   }
 
@@ -552,7 +553,7 @@ function renderActiveBuildOption() {
   // Atualiza Card de Itens Iniciais (500g) + 6 Itens Grandes com Componentes
   document.getElementById('activeBuildMainTitle').textContent = `🛒 ${b.title}`;
   document.getElementById('activeBuildDescription').textContent = b.description;
-  document.getElementById('activeBuildWinrateBadge').textContent = b.winRate;
+  document.getElementById('activeBuildWinrateBadge').textContent = b.winRate || 'Sem dados de WR';
 
   const starterEl = document.getElementById('guideStarterPack');
   if (starterEl) {
@@ -609,7 +610,7 @@ globalSearch?.addEventListener('input', (e) => {
         <img src="${c.iconUrl}" alt="${c.name}" />
         <div>
           <strong>${c.name}</strong>
-          <div style="font-size:11px;color:#6272a4;">${c.role} • Tier ${c.tier} (${c.winRate})</div>
+          <div style="font-size:11px;color:#6272a4;">${c.role}${c.ranked ? ` • Tier ${c.ranked.tier} (${c.ranked.winRate})` : ''}</div>
         </div>
       </div>
     `
