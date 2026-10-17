@@ -14,7 +14,8 @@ const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
 const { getChampionGuide, getTop6MetaPicks, getChampionLanes, getRankedMetaEntry } = require('./src/championsDb');
 const { hasGeminiKey, refineTipWithGemini, answerQuickQuestion } = require('./src/coachEngine');
 const { LiveTipsEngine } = require('./src/liveTipsEngine');
-const { LANES, initLaneRates, assignEnemyLanes } = require('./src/laneAssigner');
+const { LANES, initLaneRates, assignEnemyLanes, getLaneRates } = require('./src/laneAssigner');
+const { initBuildAssets, peekRealBuild, fetchRealBuild, toGuideBuild } = require('./src/realBuilds');
 
 const PORT = process.env.PORT || 3000;
 // Muda a cada vez que o servidor sobe: a tela recarrega sozinha quando o app é atualizado
@@ -142,18 +143,52 @@ function readMatchState(liveRaw) {
   if (lastChampSelectRole && !(me && me.position) && matchState.activePlayer) {
     matchState.activePlayer.position = LANE_TO_RIOT[lastChampSelectRole];
   }
+  const myRiotPos = me?.position || matchState.activePlayer?.position;
+  currentLiveLane = Object.keys(LANE_TO_RIOT).find((l) => LANE_TO_RIOT[l] === myRiotPos) || lastChampSelectRole || null;
   return matchState;
 }
+
+// Rota em que o campeão vai jogar: a pedida, ou a rota mais comum dele
+function laneForChampion(champId, preferred) {
+  if (LANES.includes(preferred)) return preferred;
+  const rates = getLaneRates(champId, ddragonChampions);
+  return LANES.reduce((best, l) => (rates[l] > rates[best] ? l : best), 'TOP');
+}
+
+// Build real do patch atual (op.gg) do campeão na rota, esperando a busca
+async function realBuildFor(champId, lane) {
+  const champ = ddragonChampions[champId];
+  if (!champ) return null;
+  return toGuideBuild(await fetchRealBuild(champ.key, lane), champ.name, ddragonItems);
+}
+
+// Mesma build, mas só do cache (busca em segundo plano se faltar): usado na leitura da partida a cada 2s
+function realBuildCached(champId, lane) {
+  const champ = ddragonChampions[champId];
+  if (!champ) return null;
+  return toGuideBuild(peekRealBuild(champ.key, lane), champ.name, ddragonItems);
+}
+
+async function guideWithRealBuild(champId, enemyIds, preferredLane) {
+  const lane = laneForChampion(champId, preferredLane);
+  const real = await realBuildFor(champId, lane);
+  return getChampionGuide(champId, ddragonChampions[champId] || null, enemyIds, ddragonChampions, ddragonItems, real);
+}
+
+// Sua rota na partida ao vivo (atualizada a cada leitura da porta 2999)
+let currentLiveLane = null;
 
 const guideCache = new Map();
 function getLiveGuide(champId, rawEnemyIds) {
   const enemyIds = rawEnemyIds.map((id) => championNameMap[String(id).toLowerCase()] || id);
-  const cacheKey = `${champId}|${enemyIds.join(',')}|${Object.keys(ddragonItems).length}`;
+  const lane = laneForChampion(champId, currentLiveLane);
+  const realSync = champId ? realBuildCached(champId, lane) : null;
+  const cacheKey = `${champId}|${lane}|${realSync ? 'real' : 'fixa'}|${enemyIds.join(',')}|${Object.keys(ddragonItems).length}`;
   if (!guideCache.has(cacheKey)) {
     if (guideCache.size > 20) guideCache.clear();
     guideCache.set(
       cacheKey,
-      getChampionGuide(champId, ddragonChampions[champId] || null, enemyIds, ddragonChampions, ddragonItems)
+      getChampionGuide(champId, ddragonChampions[champId] || null, enemyIds, ddragonChampions, ddragonItems, realSync)
     );
   }
   return guideCache.get(cacheKey);
@@ -467,7 +502,7 @@ const server = http.createServer(async (req, res) => {
     const myId = draftState.myChampionId || '';
     const resolvedId = championNameMap[myId.toLowerCase()] || myId;
     const guide = resolvedId
-      ? getChampionGuide(resolvedId, ddragonChampions[resolvedId] || null, draftState.enemyTeam, ddragonChampions, ddragonItems)
+      ? await guideWithRealBuild(resolvedId, draftState.enemyTeam, draftState.role)
       : null;
 
     return sendJson(res, 200, {
@@ -510,7 +545,9 @@ const server = http.createServer(async (req, res) => {
     const champId = decodeURIComponent(pathname.replace('/api/champion/', '').trim());
     const resolvedId = championNameMap[champId.toLowerCase()] || champId;
     const ddragonChamp = ddragonChampions[resolvedId] || null;
-    const guide = getChampionGuide(resolvedId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
+    const askedLane = String(url.searchParams.get('lane') || '').toUpperCase();
+    const myLane = resolvedId === draftState.myChampionId ? currentLiveLane || draftState.role : null;
+    const guide = await guideWithRealBuild(resolvedId, draftState.enemyTeam, askedLane || myLane);
 
     return sendJson(res, 200, {
       ddragonVersion,
@@ -530,7 +567,8 @@ const server = http.createServer(async (req, res) => {
     }
     const buildIdx = Number(body.buildIndex || 0);
     const ddragonChamp = ddragonChampions[champId] || null;
-    const guide = getChampionGuide(champId, ddragonChamp, draftState.enemyTeam, ddragonChampions, ddragonItems);
+    const myLane = champId === draftState.myChampionId ? currentLiveLane || draftState.role : null;
+    const guide = await guideWithRealBuild(champId, draftState.enemyTeam, myLane);
     const chosenBuild = (guide.builds && guide.builds[buildIdx]) || guide.builds[0];
 
     try {
@@ -602,7 +640,8 @@ const server = http.createServer(async (req, res) => {
   serveStaticFile(req, res);
 });
 
-Promise.all([initDataDragon(), initLaneRates()]).then(() => {
+Promise.all([initDataDragon(), initLaneRates()]).then(async () => {
+  await initBuildAssets(ddragonVersion);
   server.listen(PORT, () => {
     console.log('==============================================================');
     console.log(`⚡ Babilonia Buff rodando em: http://localhost:${PORT}`);

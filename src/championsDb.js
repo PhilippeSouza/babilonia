@@ -1352,7 +1352,7 @@ function getRankedMetaEntry(championId) {
   return { ...found[0], lanes: found.map((f) => f.lane) };
 }
 
-function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = [], ddragonChampions = {}, ddragonItems = {}) {
+function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = [], ddragonChampions = {}, ddragonItems = {}, realBuild = null) {
   let base;
   const rankedEntry = getRankedMetaEntry(championId);
   if (CURATED_CHAMPIONS[championId]) {
@@ -1473,6 +1473,24 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
     };
   }
 
+  // Build real do patch atual para a rota (op.gg): substitui feitiços, runas, habilidades e itens fixos
+  if (realBuild && Array.isArray(realBuild.coreItems) && realBuild.coreItems.length >= 3) {
+    const laneLabel = { TOP: 'Top', JUNGLE: 'Jungle (Selva)', MID: 'Mid', ADC: 'ADC (Bot)', SUPPORT: 'Support' }[realBuild.lane] || base.role;
+    base = {
+      ...base,
+      role: laneLabel,
+      buildLane: realBuild.lane,
+      buildSource: realBuild.source,
+      buildPatch: realBuild.version,
+      winRate: realBuild.laneWinRate || base.winRate,
+      spells: realBuild.spells.length ? realBuild.spells : base.spells,
+      skillOrder: realBuild.skillOrder,
+      skillPriority: realBuild.skillPriority || base.skillPriority,
+      runes: realBuild.runes || base.runes,
+      coreItems: realBuild.coreItems
+    };
+  }
+
   const { enemyCompAnalysis, builds } = buildThreeOptionsForChampion(
     championId,
     base,
@@ -1481,6 +1499,37 @@ function getChampionGuide(championId, ddragonChampData = null, enemyTeamIds = []
     ddragonChampions,
     ddragonItems
   );
+
+  if (base.buildSource && realBuild) {
+    const enrich = (items) => (items || []).map((it) => enrichItemWithComponents(it, ddragonItems));
+    const patchLabel = realBuild.version ? ` do patch ${realBuild.version}` : '';
+    const games = realBuild.games ? ` em ${realBuild.games.toLocaleString('pt-BR')} partidas ranqueadas` : '';
+    Object.assign(builds[0], {
+      badge: '🏆 MAIS JOGADA',
+      title: `Build 1: Mais Jogada${patchLabel} (${base.role})`,
+      winRate: realBuild.coreWinRate || builds[0].winRate,
+      pickRate: realBuild.corePickRate ? `${realBuild.corePickRate} escolhem` : builds[0].pickRate,
+      description: `Build real de ${base.name} na rota ${base.role}${games}: itens, runas, feitiços e habilidades mais usados.`,
+      spells: base.spells,
+      runes: base.runes,
+      starterPack: realBuild.starterPack || builds[0].starterPack
+    });
+    if (realBuild.altItems && realBuild.altItems.length >= 3) {
+      Object.assign(builds[1], {
+        badge: '⚡ 2ª MAIS JOGADA',
+        title: `Build 2: Segunda Mais Jogada${patchLabel} (${base.role})`,
+        winRate: realBuild.altWinRate,
+        pickRate: realBuild.altPickRate ? `${realBuild.altPickRate} escolhem` : null,
+        description: `Outra ordem de itens muito usada em ${base.name} ${base.role}, com a segunda página de runas mais jogada.`,
+        spells: base.spells,
+        runes: realBuild.altRunes || base.runes,
+        starterPack: realBuild.starterPack || builds[1].starterPack,
+        items: enrich(realBuild.altItems)
+      });
+    }
+    builds[2].starterPack = realBuild.starterPack || builds[2].starterPack;
+    if (!builds[2].spells.includes('Purificar')) builds[2].spells = base.spells;
+  }
 
   return {
     ...base,

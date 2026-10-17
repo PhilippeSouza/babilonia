@@ -584,7 +584,7 @@ function renderActiveBuildOption() {
   const perkIds = b.runes?.selectedPerkIds || [];
   const runesHtml = perkIds
     .map((pid, idx) => {
-      const label = PERK_NAMES_PT[pid] || `Runa #${pid}`;
+      const label = b.runes?.perkNames?.[pid] || PERK_NAMES_PT[pid] || `Runa #${pid}`;
       return `<div class="rune-node ${idx === 0 ? 'keystone' : ''}">${label}</div>`;
     })
     .join('');
@@ -1036,7 +1036,7 @@ function renderLiveInGameBuildPanel(data) {
       </div>` +
       perkIds
         .slice(0, 6)
-        .map((pid, idx) => `<div class="rune-node ${idx === 0 ? 'keystone' : ''}">${PERK_NAMES_PT[pid] || `Runa #${pid}`}</div>`)
+        .map((pid, idx) => `<div class="rune-node ${idx === 0 ? 'keystone' : ''}">${b.runes?.perkNames?.[pid] || PERK_NAMES_PT[pid] || `Runa #${pid}`}</div>`)
         .join('');
   }
 }
