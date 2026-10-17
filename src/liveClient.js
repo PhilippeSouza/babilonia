@@ -154,6 +154,9 @@ function formatPlayerRow(p) {
     isDead: Boolean(p.isDead),
     respawnTimer: Math.ceil(p.respawnTimer || 0),
     items: (p.items || []).map((i) => ({ itemID: i.itemID, displayName: i.displayName })),
+    spells: [p.summonerSpells?.summonerSpellOne, p.summonerSpells?.summonerSpellTwo]
+      .filter(Boolean)
+      .map((sp) => `${sp.displayName || ''} ${sp.rawDisplayName || ''}`.trim()),
     isFed: k >= 4 && k > d * 1.5,
     isVulnerable: d >= 4 && d > k
   };

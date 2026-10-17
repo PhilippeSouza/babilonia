@@ -14,6 +14,7 @@ const { fetchLiveGameData, parseLiveMatchState } = require('./src/liveClient');
 const { getChampionGuide, getTop6MetaPicks, getChampionLanes, getRankedMetaEntry } = require('./src/championsDb');
 const { hasGeminiKey, refineTipWithGemini, answerQuickQuestion } = require('./src/coachEngine');
 const { LiveTipsEngine } = require('./src/liveTipsEngine');
+const { LANES, initLaneRates, assignEnemyLanes } = require('./src/laneAssigner');
 
 const PORT = process.env.PORT || 3000;
 const CONFIG_PATH = path.join(__dirname, 'config.json');
@@ -102,6 +103,43 @@ async function initDataDragon() {
 // =========================================================================
 // DICAS PROATIVAS: observa a partida (porta 2999) e gera dicas sozinho
 // =========================================================================
+
+// Rota que o cliente deu para você na Seleção de Campeões (a porta 2999 nem sempre informa)
+let lastChampSelectRole = null;
+const LANE_TO_RIOT = { TOP: 'TOP', JUNGLE: 'JUNGLE', MID: 'MIDDLE', ADC: 'BOTTOM', SUPPORT: 'UTILITY' };
+
+function enemyChampId(e) {
+  const raw = (e.championName || '').toLowerCase();
+  return championNameMap[raw] || (e.championName || '').replace(/[^a-zA-Z]/g, '');
+}
+
+// Lê a partida e descobre a rota de cada inimigo pelo campeão, Golpear e item de suporte (nunca pela ordem)
+function readMatchState(liveRaw) {
+  const matchState = parseLiveMatchState(liveRaw, championNameMap);
+  if (!matchState) return null;
+  const enemies = matchState.enemies || [];
+  const lanes = assignEnemyLanes(
+    enemies.map((e) => ({
+      championId: enemyChampId(e),
+      spells: e.spells,
+      itemIds: (e.items || []).map((i) => i.itemID),
+      position: e.position
+    })),
+    ddragonChampions
+  );
+  enemies.forEach((e) => {
+    const laneIdx = lanes.indexOf(enemyChampId(e));
+    if (laneIdx >= 0) e.position = LANE_TO_RIOT[LANES[laneIdx]];
+  });
+  matchState.enemyLanes = lanes;
+
+  const me = (liveRaw.allPlayers || []).find((p) => p.championName === matchState.activePlayer?.championName);
+  if (lastChampSelectRole && !(me && me.position) && matchState.activePlayer) {
+    matchState.activePlayer.position = LANE_TO_RIOT[lastChampSelectRole];
+  }
+  return matchState;
+}
+
 const guideCache = new Map();
 function getLiveGuide(champId, rawEnemyIds) {
   const enemyIds = rawEnemyIds.map((id) => championNameMap[String(id).toLowerCase()] || id);
@@ -226,7 +264,7 @@ let liveTipFeed = []; // dicas prontas para o painel (já refinadas pelo Gemini 
 async function tipsLoopTick() {
   try {
     const liveRaw = await fetchLiveGameData();
-    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+    const matchState = liveRaw ? readMatchState(liveRaw) : null;
     if (!matchState) {
       tipsEngine.update(null, null);
       return;
@@ -333,20 +371,22 @@ const server = http.createServer(async (req, res) => {
       if (cs.detectedRole) {
         draftState.role = cs.detectedRole;
         draftState.autoDetectedLane = true;
+        lastChampSelectRole = cs.detectedRole;
       }
       if (Array.isArray(cs.bannedChampions) && cs.bannedChampions.length > 0) {
         draftState.bannedChampions = cs.bannedChampions;
       }
-      const liveEnemies = (cs.theirTeam || []).map((p) => p.championId).filter(Boolean);
-      if (liveEnemies.length > 0) {
-        draftState.enemyTeam = liveEnemies;
+      // O cliente não diz a rota dos inimigos: deduzimos pelo campeão, nunca pela ordem de pick
+      const pickedEnemies = (cs.theirTeam || []).filter((p) => p.championId);
+      if (pickedEnemies.length > 0) {
+        draftState.enemyTeam = assignEnemyLanes(pickedEnemies, ddragonChampions);
       }
       if (cs.myChampionId) {
         draftState.myChampionId = cs.myChampionId;
       }
     }
 
-    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+    const matchState = liveRaw ? readMatchState(liveRaw) : null;
 
     // Fora de Seleção de Campeões e de partida: limpa o draft da partida anterior
     const phase = lcuState?.phase || 'Disconnected';
@@ -365,20 +405,8 @@ const server = http.createServer(async (req, res) => {
       if (matchState.activePlayer.championId) {
         draftState.myChampionId = matchState.activePlayer.championId;
       }
-      if (Array.isArray(matchState.enemies) && matchState.enemies.length > 0) {
-        const posOrder = { TOP: 0, JUNGLE: 1, MIDDLE: 2, BOTTOM: 3, UTILITY: 4 };
-        const orderedEnemies = [...matchState.enemies].sort(
-          (a, b) => (posOrder[a.position] ?? 9) - (posOrder[b.position] ?? 9)
-        );
-        const realEnemyIds = orderedEnemies
-          .map((e) => {
-            const raw = (e.championName || '').toLowerCase();
-            return championNameMap[raw] || (e.championName || '').replace(/[^a-zA-Z]/g, '');
-          })
-          .filter(Boolean);
-        if (realEnemyIds.length > 0) {
-          draftState.enemyTeam = realEnemyIds;
-        }
+      if (Array.isArray(matchState.enemyLanes) && matchState.enemyLanes.some(Boolean)) {
+        draftState.enemyTeam = matchState.enemyLanes;
       }
     }
 
@@ -418,9 +446,6 @@ const server = http.createServer(async (req, res) => {
       }
       if (Array.isArray(body.bannedChampions)) {
         draftState.bannedChampions = body.bannedChampions.filter(Boolean);
-      }
-      if (Array.isArray(body.enemyTeam)) {
-        draftState.enemyTeam = body.enemyTeam.map((c) => c || ''); // mantém a posição de cada rota
       }
     }
 
@@ -525,7 +550,7 @@ const server = http.createServer(async (req, res) => {
   if (pathname === '/api/coach/quick' && req.method === 'POST') {
     const body = await parseJsonBody(req);
     const liveRaw = await fetchLiveGameData();
-    const matchState = liveRaw ? parseLiveMatchState(liveRaw, championNameMap) : null;
+    const matchState = liveRaw ? readMatchState(liveRaw) : null;
     const enemyIds = (matchState?.enemies || []).map(
       (e) => championNameMap[(e.championName || '').toLowerCase()] || (e.championName || '').replace(/[^a-zA-Z]/g, '')
     );
@@ -570,7 +595,7 @@ const server = http.createServer(async (req, res) => {
   serveStaticFile(req, res);
 });
 
-initDataDragon().then(() => {
+Promise.all([initDataDragon(), initLaneRates()]).then(() => {
   server.listen(PORT, () => {
     console.log('==============================================================');
     console.log(`⚡ Babilonia Buff rodando em: http://localhost:${PORT}`);

@@ -179,8 +179,7 @@ async function refreshDraftAndBuilds() {
       body: JSON.stringify({
         role: currentRole,
         myChampionId: selectedChampionId,
-        bannedChampions,
-        enemyTeam
+        bannedChampions
       })
     });
     const data = await res.json();
@@ -251,37 +250,19 @@ function renderEnemySlots() {
     .map((slotIdx) => {
       const currentEnemy = enemyTeam[slotIdx] || '';
       const isMyLaneOpponent = roleCodes[slotIdx] === currentRole;
-      const optionsHtml =
-        `<option value="" ${currentEnemy ? '' : 'selected'}>Ainda não escolheu</option>` +
-        allChampions
-          .map((c) => `<option value="${c.id}" ${c.id === currentEnemy ? 'selected' : ''}>${c.name}</option>`)
-          .join('');
+      const enemyName = currentEnemy ? allChampions.find((c) => c.id === currentEnemy)?.name || currentEnemy : 'Aguardando pick';
 
+      // Rota deduzida automaticamente pelo campeão: sem opção de escolher na mão
       return `
         <div class="enemy-slot ${isMyLaneOpponent ? 'active-lane-slot' : ''}">
           <span class="slot-role-tag">${isMyLaneOpponent ? `🎯 ${roleLabels[slotIdx]} (SEU RIVAL)` : roleLabels[slotIdx]}</span>
           <img src="${currentEnemy ? `https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${currentEnemy}.png` : 'logo.png'}" alt="${currentEnemy || 'A definir'}" />
-          <select onchange="updateEnemySlot(${slotIdx}, this.value)" title="Inimigo ${roleLabels[slotIdx]}">
-            ${optionsHtml}
-          </select>
+          <span class="enemy-slot-name" title="Rota deduzida automaticamente">${enemyName}</span>
         </div>
       `;
     })
     .join('');
 }
-
-window.updateEnemySlot = async function (slotIdx, newChampId) {
-  enemyTeam[slotIdx] = newChampId || '';
-  if (!newChampId) return refreshDraftAndBuilds();
-  await refreshDraftAndBuilds();
-  showTacticalPopup({
-    type: 'BUILD',
-    badge: '🎯 COUNTERS & BUILD 3 ATUALIZADOS',
-    title: `Inimigo Alterado para ${newChampId}`,
-    message: 'Os 3 Counters de Rota, os 3 Mais Fortes do Meta (sem repetição) e a 3ª Build foram recalculados!',
-    force: true
-  });
-};
 
 // Seletor de Rota (também atualiza qual inimigo é seu oponente direto)
 document.querySelectorAll('#draftRoleTabs .role-tab').forEach((btn) => {
@@ -804,8 +785,9 @@ async function pollStatus() {
             bannedChampions = cs.bannedChampions;
             shouldRefreshDraft = true;
           }
-          const liveEnemies = (cs.theirTeam || []).map((p) => p.championId).filter(Boolean);
-          if (liveEnemies.length > 0 && JSON.stringify(liveEnemies) !== JSON.stringify(enemyTeam)) {
+          // Rotas dos inimigos já deduzidas pelo servidor (pelo campeão, não pela ordem de pick)
+          const liveEnemies = data.draftState?.enemyTeam || [];
+          if (liveEnemies.some(Boolean) && JSON.stringify(liveEnemies) !== JSON.stringify(enemyTeam)) {
             enemyTeam = liveEnemies;
             shouldRefreshDraft = true;
           }

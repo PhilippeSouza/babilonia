@@ -1614,7 +1614,12 @@ body {
   margin-bottom: 4px;
 }
 
-.enemy-slot select {
+.enemy-slot-name {
+  display: block;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   width: 100%;
   background: var(--bb-bg);
   color: var(--bb-fg);
