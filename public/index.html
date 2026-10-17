@@ -751,10 +751,26 @@
               <p>Mostra por cima do LoL o ícone e o nome do próximo item a comprar, o custo e o seu ouro. Fica verde quando dá para comprar.</p>
               <button class="overlay-toggle">Ligado</button>
             </div>
-            <div class="overlay-card overlay-place-card">
+            <div class="overlay-card overlay-place-card" data-overlay="gameOverlay">
               <div class="overlay-art">🖥️ 📍</div>
-              <h3>Posição na tela do jogo</h3>
-              <p>Onde a janela do próximo item e da habilidade aparece. Ela não recebe cliques: o mouse passa direto para o jogo.</p>
+              <h3>Cartão por cima do jogo</h3>
+              <p>Cartão pequeno com o próximo item e a habilidade. Aparece só quando algo muda e some sozinho. Não recebe cliques: o mouse passa direto para o jogo.</p>
+              <button class="overlay-toggle">Ligado</button>
+              <label class="overlay-field">Tamanho
+                <select id="overlaySizeSelect" class="bb-select-sm">
+                  <option value="small">Pequeno</option>
+                  <option value="medium">Médio</option>
+                </select>
+              </label>
+              <label class="overlay-field">Some depois de
+                <select id="overlaySecondsSelect" class="bb-select-sm">
+                  <option value="3">3 segundos</option>
+                  <option value="5">5 segundos</option>
+                  <option value="8">8 segundos</option>
+                  <option value="0">Não some</option>
+                </select>
+              </label>
+              <label class="overlay-field">Posição</label>
               <select id="overlayCornerSelect" class="bb-select-sm">
                 <option value="right">Lado direito (meio)</option>
                 <option value="top-right">Canto superior direito</option>

@@ -11,9 +11,10 @@ using System.Windows.Forms;
 namespace BabiloniaApp
 {
     /// <summary>
-    /// Janela pequena que fica por cima do jogo durante a partida mostrando o próximo item
-    /// a comprar e a habilidade a upar. Só mostra informação: os cliques passam direto para
-    /// o jogo e ela nunca aperta teclas.
+    /// Cartão pequeno por cima do jogo com o próximo item e a habilidade a upar. Aparece só
+    /// quando algo muda (item novo, dá para comprar, ponto de habilidade para gastar) e some
+    /// sozinho depois de alguns segundos. Só mostra informação: os cliques passam direto para
+    /// o jogo e ele nunca aperta teclas.
     /// </summary>
     public class BabiloniaOverlayForm : Form
     {
@@ -24,23 +25,21 @@ namespace BabiloniaApp
         private static readonly Color Green = Color.FromArgb(80, 250, 123);
         private static readonly Color Fg = Color.FromArgb(248, 248, 242);
         private static readonly Color Muted = Color.FromArgb(148, 163, 204);
+        private static readonly Color KeyIdle = Color.FromArgb(68, 71, 90);
 
         private readonly PictureBox itemIcon;
-        private readonly Label itemTag;
         private readonly Label itemName;
         private readonly Label itemGold;
         private readonly Label skillKey;
-        private readonly Label skillTitle;
-        private readonly Label skillSub;
-        private readonly Panel itemPanel;
-        private readonly Panel skillPanel;
 
         private readonly Dictionary<string, Image> iconCache = new Dictionary<string, Image>();
         private System.Threading.Timer pollTimer;
         private DateTime lastServerOk = DateTime.Now;
+        private DateTime hideAt = DateTime.MinValue;
         private string ddragonVersion = "";
         private string currentIconId = "";
-        private string currentCorner = "";
+        private string lastSignature = "";
+        private string layoutKey = "";
         private int polling = 0;
 
         public BabiloniaOverlayForm()
@@ -51,51 +50,45 @@ namespace BabiloniaApp
             TopMost = true;
             StartPosition = FormStartPosition.Manual;
             BackColor = BgCard;
-            Opacity = 0.9;
-            Size = new Size(330, 186);
+            Opacity = 0.88;
 
-            itemPanel = new Panel { Location = new Point(0, 0), Size = new Size(330, 100), BackColor = BgCard };
-            itemIcon = new PictureBox { Location = new Point(12, 12), Size = new Size(60, 60), SizeMode = PictureBoxSizeMode.StretchImage, BackColor = Color.FromArgb(40, 42, 54) };
-            itemTag = MakeLabel("PRÓXIMA COMPRA", new Point(82, 10), 8.5f, FontStyle.Bold, Orange);
-            itemName = MakeLabel("", new Point(82, 28), 12f, FontStyle.Bold, Fg);
-            itemGold = MakeLabel("", new Point(82, 54), 9.5f, FontStyle.Regular, Muted);
-            itemName.AutoSize = false;
-            itemName.Size = new Size(240, 24);
-            itemName.AutoEllipsis = true;
-            itemGold.AutoSize = false;
-            itemGold.Size = new Size(240, 40);
-            itemPanel.Controls.AddRange(new Control[] { itemIcon, itemTag, itemName, itemGold });
+            itemIcon = new PictureBox { SizeMode = PictureBoxSizeMode.StretchImage, BackColor = Color.FromArgb(40, 42, 54) };
+            itemName = new Label { AutoSize = false, AutoEllipsis = true, ForeColor = Fg, BackColor = Color.Transparent };
+            itemGold = new Label { AutoSize = false, AutoEllipsis = true, ForeColor = Muted, BackColor = Color.Transparent };
+            skillKey = new Label { AutoSize = false, TextAlign = ContentAlignment.MiddleCenter, BackColor = KeyIdle, ForeColor = Color.FromArgb(25, 26, 33) };
 
-            skillPanel = new Panel { Location = new Point(0, 102), Size = new Size(330, 84), BackColor = BgCard };
-            skillKey = new Label
-            {
-                Location = new Point(12, 12),
-                Size = new Size(60, 60),
-                TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Segoe UI", 28f, FontStyle.Bold),
-                BackColor = Orange,
-                ForeColor = Color.FromArgb(25, 26, 33)
-            };
-            skillTitle = MakeLabel("", new Point(82, 18), 13f, FontStyle.Bold, Fg);
-            skillSub = MakeLabel("", new Point(82, 46), 9.5f, FontStyle.Regular, Muted);
-            skillPanel.Controls.AddRange(new Control[] { skillKey, skillTitle, skillSub });
-
-            Controls.Add(itemPanel);
-            Controls.Add(skillPanel);
+            Controls.AddRange(new Control[] { itemIcon, itemName, itemGold, skillKey });
+            ApplyLayout(1f, true, true);
             Visible = false;
         }
 
-        private static Label MakeLabel(string text, Point loc, float size, FontStyle style, Color color)
+        // Tamanho "small" (padrão) ou "medium": tudo escala junto
+        private void ApplyLayout(float scale, bool showItem, bool showSkill)
         {
-            return new Label
+            Func<int, int> s = v => (int)Math.Round(v * scale);
+            int pad = s(6);
+            int icon = s(36);
+            int x = pad;
+
+            itemIcon.Visible = itemName.Visible = itemGold.Visible = showItem;
+            skillKey.Visible = showSkill;
+
+            if (showItem)
             {
-                Text = text,
-                Location = loc,
-                AutoSize = true,
-                Font = new Font("Segoe UI", size, style),
-                ForeColor = color,
-                BackColor = Color.Transparent
-            };
+                itemIcon.SetBounds(x, pad, icon, icon);
+                itemName.SetBounds(x + icon + s(6), pad - s(1), s(150), s(19));
+                itemGold.SetBounds(x + icon + s(6), pad + s(18), s(150), s(17));
+                itemName.Font = new Font("Segoe UI", 9.5f * scale, FontStyle.Bold);
+                itemGold.Font = new Font("Segoe UI", 8f * scale, FontStyle.Regular);
+                x += icon + s(6) + s(150) + s(4);
+            }
+            if (showSkill)
+            {
+                skillKey.SetBounds(x, pad, icon, icon);
+                skillKey.Font = new Font("Segoe UI", 17f * scale, FontStyle.Bold);
+                x += icon;
+            }
+            Size = new Size(x + pad, icon + pad * 2);
         }
 
         // Clique atravessa a janela, ela não rouba o foco do jogo e não aparece no Alt+Tab
@@ -148,13 +141,9 @@ namespace BabiloniaApp
             {
                 // Servidor fechado há mais de 10 minutos: o app foi encerrado, então a janela também fecha
                 if ((DateTime.Now - lastServerOk).TotalMinutes > 10)
-                {
                     BeginInvoke((MethodInvoker)delegate { Application.Exit(); });
-                }
                 else
-                {
                     BeginInvoke((MethodInvoker)delegate { if (Visible) Hide(); });
-                }
             }
             finally
             {
@@ -216,8 +205,26 @@ namespace BabiloniaApp
             bool showSkill = Get(d, "showSkill") == "1" && Get(d, "skill") != "";
             if (!active || (!showItem && !showSkill))
             {
+                lastSignature = "";
                 if (Visible) Hide();
                 return;
+            }
+
+            int cost, gold, pending, seconds;
+            int.TryParse(Get(d, "itemCost"), out cost);
+            int.TryParse(Get(d, "gold"), out gold);
+            int.TryParse(Get(d, "skillPending"), out pending);
+            if (!int.TryParse(Get(d, "seconds"), out seconds)) seconds = 5;
+            bool canBuy = cost > 0 && gold >= cost;
+            string key = Get(d, "skill");
+
+            float scale = Get(d, "size") == "medium" ? 1.35f : 1f;
+            string newLayout = scale + "|" + showItem + "|" + showSkill + "|" + Get(d, "corner");
+            if (newLayout != layoutKey)
+            {
+                layoutKey = newLayout;
+                ApplyLayout(scale, showItem, showSkill);
+                PlaceAt(Get(d, "corner"));
             }
 
             if (showItem)
@@ -227,59 +234,36 @@ namespace BabiloniaApp
                     itemIcon.Image = icon;
                     currentIconId = itemId;
                 }
-                int cost, gold;
-                int.TryParse(Get(d, "itemCost"), out cost);
-                int.TryParse(Get(d, "gold"), out gold);
                 itemName.Text = Get(d, "itemName");
-                string big = Get(d, "bigItemName");
-                bool canBuy = cost > 0 && gold >= cost;
-                itemTag.Text = canBuy ? "PODE COMPRAR AGORA" : "PRÓXIMA COMPRA";
-                itemTag.ForeColor = canBuy ? Green : Orange;
-                itemGold.Text = (cost > 0 ? cost + "g" : "") + "  •  você tem " + gold + "g" +
-                    (big != "" && big != itemName.Text ? "\npara " + big : "");
+                itemGold.Text = canBuy ? "Pode comprar (" + cost + "g)" : cost + "g • você tem " + gold + "g";
                 itemGold.ForeColor = canBuy ? Green : Muted;
             }
-
             if (showSkill)
             {
-                string key = Get(d, "skill");
-                int pending, level;
-                int.TryParse(Get(d, "skillPending"), out pending);
-                int.TryParse(Get(d, "level"), out level);
                 skillKey.Text = key;
-                if (pending > 0)
-                {
-                    skillKey.BackColor = Orange;
-                    skillTitle.Text = "UPE " + key + " AGORA";
-                    skillTitle.ForeColor = Orange;
-                    skillSub.Text = "Nível " + level + (pending > 1 ? " • " + pending + " pontos sobrando" : "");
-                }
-                else
-                {
-                    skillKey.BackColor = Color.FromArgb(68, 71, 90);
-                    skillTitle.Text = "Próximo nível: " + key;
-                    skillTitle.ForeColor = Fg;
-                    skillSub.Text = "Você está no nível " + level;
-                }
+                skillKey.BackColor = pending > 0 ? Orange : KeyIdle;
+                skillKey.ForeColor = pending > 0 ? Color.FromArgb(25, 26, 33) : Fg;
             }
 
-            itemPanel.Visible = showItem;
-            skillPanel.Visible = showSkill;
-            skillPanel.Top = showItem ? 102 : 0;
-            Height = (showItem ? 100 : 0) + (showSkill ? 84 : 0) + (showItem && showSkill ? 2 : 0);
+            // Só aparece quando algo muda e some sozinho depois de alguns segundos (0 = fica sempre)
+            string signature = (showItem ? itemId + "|" + canBuy : "") + "|" + (showSkill ? key + "|" + (pending > 0) : "");
+            if (signature != lastSignature)
+            {
+                lastSignature = signature;
+                hideAt = seconds <= 0 ? DateTime.MaxValue : DateTime.Now.AddSeconds(seconds);
+            }
 
-            string corner = Get(d, "corner");
-            if (corner != currentCorner || !Visible) PlaceAt(corner);
-            if (!Visible) Show();
+            bool shouldShow = DateTime.Now < hideAt;
+            if (shouldShow && !Visible) Show();
+            else if (!shouldShow && Visible) Hide();
         }
 
         private void PlaceAt(string corner)
         {
-            currentCorner = corner;
             Rectangle area = Screen.PrimaryScreen.Bounds;
-            int margin = 16;
+            int margin = 12;
             int x = corner.EndsWith("left") ? area.Left + margin : area.Right - Width - margin;
-            int y = corner.StartsWith("top") ? area.Top + 90 : area.Top + (int)(area.Height * 0.32);
+            int y = corner.StartsWith("top") ? area.Top + 70 : area.Top + (int)(area.Height * 0.36);
             Location = new Point(x, y);
         }
 
@@ -294,9 +278,8 @@ namespace BabiloniaApp
         {
             try
             {
-                bool exists;
-                using (var m = Mutex.OpenExisting("BabiloniaBuffOverlayMutex")) { exists = true; }
-                if (exists) return;
+                using (Mutex.OpenExisting("BabiloniaBuffOverlayMutex")) { }
+                return; // já está aberta
             }
             catch (WaitHandleCannotBeOpenedException) { }
             catch { return; }

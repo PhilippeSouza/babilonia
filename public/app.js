@@ -1594,6 +1594,10 @@ async function loadOverlays() {
 function renderOverlayPlacement(data) {
   const select = document.getElementById('overlayCornerSelect');
   if (select && data.overlayCorner) select.value = data.overlayCorner;
+  const sizeSel = document.getElementById('overlaySizeSelect');
+  if (sizeSel && data.overlaySize) sizeSel.value = data.overlaySize;
+  const secSel = document.getElementById('overlaySecondsSelect');
+  if (secSel && data.overlaySeconds != null) secSel.value = String(data.overlaySeconds);
   const note = document.getElementById('overlayWindowModeNote');
   if (!note) return;
   if (data.windowMode === 0) {
@@ -1607,13 +1611,19 @@ function renderOverlayPlacement(data) {
   }
 }
 
-document.getElementById('overlayCornerSelect')?.addEventListener('change', async (ev) => {
-  const res = await fetch('/api/overlays', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ overlayCorner: ev.target.value })
+[
+  ['overlayCornerSelect', 'overlayCorner'],
+  ['overlaySizeSelect', 'overlaySize'],
+  ['overlaySecondsSelect', 'overlaySeconds']
+].forEach(([id, field]) => {
+  document.getElementById(id)?.addEventListener('change', async (ev) => {
+    const res = await fetch('/api/overlays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ [field]: ev.target.value })
+    });
+    renderOverlayPlacement(await res.json());
   });
-  renderOverlayPlacement(await res.json());
 });
 
 function renderOverlayToggles(state) {

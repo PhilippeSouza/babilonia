@@ -149,7 +149,8 @@ function itemInfo(id, ddragonItems) {
 
 /** Completa a ordem de habilidades até o nível 18 (Q/W/E no máximo 5 pontos, R no máximo 3). */
 function completeSkillOrder(order = []) {
-  const out = order.slice(0, 18);
+  // Campeões com evolução (Kha'Zix) vêm como "R-Q": o ponto é na R
+  const out = order.slice(0, 18).map((s) => String(s).charAt(0).toUpperCase()).filter((s) => 'QWER'.includes(s));
   const count = (k) => out.filter((s) => s === k).length;
   const priority = ['R', ...['Q', 'W', 'E'].sort((a, b) => count(b) - count(a))];
   while (out.length < 18) {

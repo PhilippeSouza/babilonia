@@ -31,13 +31,18 @@ const DEFAULT_OVERLAYS = {
   skillOrder: true, // Ordem de habilidades recomendada
   trinket: true, // Lembrete de sentinela
   itemValue: true, // Diferença de valor de itens
-  nextItem: true // Próximo item por cima do jogo
+  nextItem: true, // Próximo item por cima do jogo
+  gameOverlay: true // Cartão por cima do jogo (liga/desliga tudo)
 };
 // Onde a janela por cima do jogo fica: right, top-right, left, top-left
 const OVERLAY_CORNERS = ['right', 'top-right', 'left', 'top-left'];
+const OVERLAY_SIZES = ['small', 'medium'];
+const OVERLAY_SECONDS = [3, 5, 8, 0]; // 0 = fica sempre na tela
 
 let appConfig = {
   overlayCorner: 'right',
+  overlaySize: 'small',
+  overlaySeconds: 5,
   geminiApiKey: '',
   overlays: { ...DEFAULT_OVERLAYS }
 };
@@ -199,8 +204,10 @@ function buildOverlayData() {
   const out = {
     active: 0,
     corner: appConfig.overlayCorner || 'right',
-    showItem: appConfig.overlays.nextItem !== false ? 1 : 0,
-    showSkill: appConfig.overlays.skillOrder !== false ? 1 : 0
+    size: appConfig.overlaySize || 'small',
+    seconds: appConfig.overlaySeconds ?? 5,
+    showItem: appConfig.overlays.gameOverlay !== false && appConfig.overlays.nextItem !== false ? 1 : 0,
+    showSkill: appConfig.overlays.gameOverlay !== false && appConfig.overlays.skillOrder !== false ? 1 : 0
   };
   const m = Date.now() - lastLive.at < 6000 ? lastLive.matchState : null;
   const p = m?.activePlayer;
@@ -687,9 +694,17 @@ const server = http.createServer(async (req, res) => {
         if (typeof body[k] === 'boolean') appConfig.overlays[k] = body[k];
       });
       if (OVERLAY_CORNERS.includes(body.overlayCorner)) appConfig.overlayCorner = body.overlayCorner;
+      if (OVERLAY_SIZES.includes(body.overlaySize)) appConfig.overlaySize = body.overlaySize;
+      if (OVERLAY_SECONDS.includes(Number(body.overlaySeconds))) appConfig.overlaySeconds = Number(body.overlaySeconds);
       saveConfig();
     }
-    return sendJson(res, 200, { overlays: appConfig.overlays, overlayCorner: appConfig.overlayCorner, windowMode: readLolWindowMode() });
+    return sendJson(res, 200, {
+      overlays: appConfig.overlays,
+      overlayCorner: appConfig.overlayCorner,
+      overlaySize: appConfig.overlaySize,
+      overlaySeconds: appConfig.overlaySeconds,
+      windowMode: readLolWindowMode()
+    });
   }
 
   // 8b. Janela por cima do jogo (launcher): próximo item e habilidade a upar, em texto simples chave=valor

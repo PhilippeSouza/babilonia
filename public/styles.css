@@ -2833,3 +2833,16 @@ body {
   line-height: 1.4;
   color: var(--bb-fg);
 }
+
+.overlay-field {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--bb-comment);
+}
+
+.overlay-field select {
+  display: block;
+  width: 100%;
+  margin-top: 3px;
+}
