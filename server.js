@@ -17,6 +17,8 @@ const { LiveTipsEngine } = require('./src/liveTipsEngine');
 const { LANES, initLaneRates, assignEnemyLanes } = require('./src/laneAssigner');
 
 const PORT = process.env.PORT || 3000;
+// Muda a cada vez que o servidor sobe: a tela recarrega sozinha quando o app é atualizado
+const SERVER_BUILD = String(Date.now());
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
 // Overlays que o jogador liga/desliga na tela Overlays (salvos no config.json)
@@ -132,6 +134,9 @@ function readMatchState(liveRaw) {
     if (laneIdx >= 0) e.position = LANE_TO_RIOT[LANES[laneIdx]];
   });
   matchState.enemyLanes = lanes;
+  // Lista dos inimigos na ordem das rotas (Top, Selva, Meio, Atirador, Suporte)
+  const laneOrder = { TOP: 0, JUNGLE: 1, MIDDLE: 2, BOTTOM: 3, UTILITY: 4 };
+  matchState.enemies = [...enemies].sort((a, b) => (laneOrder[a.position] ?? 9) - (laneOrder[b.position] ?? 9));
 
   const me = (liveRaw.allPlayers || []).find((p) => p.championName === matchState.activePlayer?.championName);
   if (lastChampSelectRole && !(me && me.position) && matchState.activePlayer) {
@@ -334,7 +339,8 @@ function serveStaticFile(req, res) {
       '.png': 'image/png',
       '.svg': 'image/svg+xml'
     };
-    res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream' });
+    // Sem cache: a janela do app sempre pega a versão nova da tela depois de uma atualização
+    res.writeHead(200, { 'Content-Type': mimeTypes[ext] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     res.end(content);
   });
 }
@@ -422,6 +428,7 @@ const server = http.createServer(async (req, res) => {
 
     return sendJson(res, 200, {
       timestamp: Date.now(),
+      serverBuild: SERVER_BUILD,
       ddragonVersion,
       hasGeminiKey: hasGeminiKey(appConfig.geminiApiKey),
       lcu: lcuState,

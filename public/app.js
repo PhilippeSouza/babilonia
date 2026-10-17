@@ -765,6 +765,15 @@ async function pollStatus() {
   try {
     const res = await fetch('/api/status');
     const data = await res.json();
+
+    // Servidor reiniciado com versão nova: recarrega a tela para não ficar com a versão antiga na memória
+    if (data.serverBuild) {
+      if (window.loadedServerBuild && window.loadedServerBuild !== data.serverBuild) {
+        location.reload();
+        return;
+      }
+      window.loadedServerBuild = data.serverBuild;
+    }
     window.latestLiveStatusData = data;
 
     const aiModeLabel = document.getElementById('aiModeLabel');
@@ -1113,9 +1122,12 @@ function renderTeamTable(containerId, players, isEnemy) {
         tagHtml = `<span class="threat-tag vuln">🎯 ALVO FÁCIL</span>`;
       }
 
+      const laneLabel = { TOP: 'TOP', JUNGLE: 'JG', MIDDLE: 'MID', BOTTOM: 'ADC', UTILITY: 'SUP' }[p.position] || '';
+
       return `
         <div class="player-row">
           <div class="player-row-left">
+            ${laneLabel ? `<span class="slot-role-tag">${laneLabel}</span>` : ''}
             <img class="player-row-avatar" src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/${cleanChamp}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/champion/Renekton.png'" alt="${p.championName}" />
             <div>
               <div class="player-row-name">${p.championName} <small>Nv.${p.level}</small></div>
