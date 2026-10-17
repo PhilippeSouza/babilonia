@@ -375,7 +375,7 @@
                   </div>
                   <span id="guideSkillPriority" class="badge-bb cyan">Q &gt; E &gt; W</span>
                 </div>
-                <div id="blitzSkillMatrix" class="skill-matrix"></div>
+                <div id="blitzSkillMatrix" class="qv-skill-box"></div>
               </div>
 
               <!-- Counters Diretos -->
@@ -406,6 +406,10 @@
                   </div>
                   <span id="activeBuildWinrateBadge" class="badge-bb green">--</span>
                 </div>
+
+                <!-- VISÃO RÁPIDA: os 6 itens grandes na ordem de compra -->
+                <div class="build-stage-label">⭐ ORDEM DE COMPRA (VISÃO RÁPIDA)</div>
+                <div id="guideQuickItems" class="qv-items-box mb-18"></div>
 
                 <!-- SEÇÃO 1: ITENS INICIAIS (SAÍDA DA BASE - 500G) -->
                 <div class="build-stage-label">🏁 1. ITENS INICIAIS (SAÍDA DA BASE — 500 OURO NÍVEL 1)</div>
@@ -570,6 +574,18 @@
               </div>
             </div>
 
+            <!-- Visão rápida: itens na ordem de compra e qual habilidade upar agora -->
+            <div class="qv-live-grid mb-18">
+              <div>
+                <div class="build-stage-label">🛒 ORDEM DE COMPRA DOS ITENS</div>
+                <div id="liveQuickItems" class="qv-items-box"></div>
+              </div>
+              <div>
+                <div class="build-stage-label">📈 QUAL HABILIDADE UPAR (<span id="liveSkillPriorityText">Q &gt; E &gt; W</span>)</div>
+                <div id="liveSkillMatrix" class="qv-skill-box"></div>
+              </div>
+            </div>
+
             <!-- Destaque: O que comprar agora na próxima volta à base -->
             <div id="liveNextBuyBanner" class="live-next-buy-banner"></div>
 
@@ -578,9 +594,6 @@
               <div class="live-build-left">
                 <div class="build-stage-label">🏁 ITENS INICIAIS (SAÍDA DA BASE — 500 OURO)</div>
                 <div id="liveStarterPackBox" class="starter-pack-box mb-18"></div>
-
-                <div class="build-stage-label">📈 QUAL HABILIDADE UPAR EM CADA NÍVEL (<span id="liveSkillPriorityText">Q &gt; E &gt; W</span>)</div>
-                <div id="liveSkillMatrix" class="skill-matrix mb-18"></div>
 
                 <div class="build-stage-label">🔮 RUNAS &amp; FEITIÇOS ATIVOS</div>
                 <div id="liveRunesCompactBox" class="rune-tree-box"></div>

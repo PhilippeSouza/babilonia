@@ -2620,3 +2620,203 @@ body {
   .match-card { flex-wrap: wrap; }
   .match-teams { width: 100%; }
 }
+
+/* ==========================================================================
+   VISÃO RÁPIDA: ITENS NA ORDEM DE COMPRA + GRADE DE HABILIDADES (ESTILO BLITZ)
+   ========================================================================== */
+
+.qv-live-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .qv-live-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.qv-items-box,
+.qv-skill-box {
+  background: var(--bb-bg);
+  border: 1px solid var(--bb-line);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.qv-items-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.qv-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 66px;
+  text-align: center;
+}
+
+.qv-item img {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: 2px solid var(--bb-line);
+}
+
+.qv-item-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--bb-comment);
+}
+
+.qv-item-name {
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: var(--bb-fg);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.qv-item.next img {
+  border-color: var(--bb-orange);
+  box-shadow: 0 0 14px rgba(255, 184, 108, 0.75);
+  transform: scale(1.08);
+}
+
+.qv-item.next .qv-item-tag {
+  color: var(--bb-orange);
+}
+
+.qv-item.owned img {
+  border-color: var(--bb-green);
+  opacity: 0.55;
+}
+
+.qv-item.owned .qv-item-tag {
+  color: var(--bb-green);
+}
+
+.qv-arrow {
+  color: var(--bb-comment);
+  font-size: 22px;
+  margin-top: -18px;
+}
+
+.qv-skill-now {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.qv-skill-now strong {
+  display: block;
+  font-size: 15px;
+  color: var(--bb-fg);
+}
+
+.qv-skill-now small {
+  font-size: 11.5px;
+  color: var(--bb-comment);
+}
+
+.qv-skill-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.qv-skill-key.big {
+  width: 44px;
+  height: 44px;
+  font-size: 22px;
+  background: var(--bb-orange);
+  color: #191a21;
+  box-shadow: 0 0 14px rgba(255, 184, 108, 0.6);
+}
+
+.qv-skill-grid {
+  display: grid;
+  gap: 3px;
+  align-items: center;
+}
+
+.qv-lvl {
+  font-size: 10px;
+  text-align: center;
+  color: var(--bb-comment);
+}
+
+.qv-lvl.now {
+  color: var(--bb-orange);
+  font-weight: 800;
+}
+
+.qv-row-key {
+  font-weight: 800;
+  font-size: 13px;
+  text-align: center;
+}
+
+.qv-row-key.Q,
+.qv-cell.on.Q {
+  --qv-key: var(--bb-cyan);
+}
+
+.qv-row-key.W,
+.qv-cell.on.W {
+  --qv-key: var(--bb-green);
+}
+
+.qv-row-key.E,
+.qv-cell.on.E {
+  --qv-key: var(--bb-purple);
+}
+
+.qv-row-key.R,
+.qv-cell.on.R {
+  --qv-key: var(--bb-pink);
+}
+
+.qv-row-key {
+  color: var(--qv-key);
+}
+
+.qv-cell {
+  height: 22px;
+  border-radius: 4px;
+  background: var(--bb-card);
+  font-size: 10.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qv-cell.now-col {
+  background: rgba(255, 184, 108, 0.12);
+}
+
+.qv-cell.on {
+  background: var(--qv-key);
+  color: #191a21;
+}
+
+.qv-cell.on.done {
+  opacity: 0.4;
+}
+
+.qv-cell.on.now {
+  background: var(--bb-orange);
+  outline: 2px solid var(--bb-fg);
+  transform: scale(1.12);
+}

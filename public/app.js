@@ -361,16 +361,7 @@ function renderChampionAndThreeBuilds(g) {
 
   // Ordem de Habilidades 1-18
   document.getElementById('guideSkillPriority').textContent = g.skillPriority || 'Q > E > W';
-  document.getElementById('blitzSkillMatrix').innerHTML = (g.skillOrder || [])
-    .map(
-      (sk, idx) => `
-      <div class="skill-cell ${sk}">
-        <span class="lvl-num">${idx + 1}</span>
-        <span class="key-letter">${sk}</span>
-      </div>
-    `
-    )
-    .join('');
+  document.getElementById('blitzSkillMatrix').innerHTML = renderSkillGridHtml(g.skillOrder, null, g.skillPriority);
 
   // Fases do Jogo
   document.getElementById('guideTipEarly').textContent = g.coachTips?.early || '';
@@ -422,6 +413,78 @@ function renderStarterPackHtml(starterPack, ownedItemIds = new Set()) {
     </div>
     <p class="starter-pack-desc">${starterPack.summary}</p>
     <div class="starter-items-row">${itemsHtml}</div>
+  `;
+}
+
+// Visão rápida: os 6 itens grandes em ícones grandes, na ordem de compra, com o próximo em destaque
+function renderQuickItemsHtml(items, ownedItemIds = new Set()) {
+  const list = items || [];
+  if (list.length === 0) return '';
+  const nextIdx = list.findIndex((it) => !ownedItemIds.has(String(it.id)));
+  return `
+    <div class="qv-items-row">
+      ${list
+        .map((it, idx) => {
+          const owned = ownedItemIds.has(String(it.id));
+          const isNext = idx === nextIdx;
+          const tag = owned ? '✅ Feito' : isNext ? '👉 PRÓXIMO' : `${idx + 1}º`;
+          return `
+            <div class="qv-item ${owned ? 'owned' : ''} ${isNext ? 'next' : ''}" title="${it.name}">
+              <span class="qv-item-tag">${tag}</span>
+              <img src="https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/${it.id}.png" onerror="this.src='https://ddragon.leagueoflegends.com/cdn/${ddragonVersion}/img/item/1036.png'" alt="${it.name}" />
+              <span class="qv-item-name">${it.name}</span>
+            </div>
+          `;
+        })
+        .join('<span class="qv-arrow">›</span>')}
+    </div>
+  `;
+}
+
+// Grade de habilidades no estilo do Blitz: linhas Q/W/E/R e colunas do nível 1 ao 18
+function renderSkillGridHtml(skillOrder, currentLevel = null, priorityText = '') {
+  const order = (skillOrder || []).slice(0, 18);
+  if (order.length === 0) return '';
+  const keys = ['Q', 'W', 'E', 'R'];
+  const live = Number.isFinite(currentLevel) && currentLevel >= 1;
+  const nowSkill = live ? order[Math.min(currentLevel, order.length) - 1] : order[0];
+  const nextSkill = live && currentLevel < order.length ? order[currentLevel] : null;
+
+  const header = `
+    <div class="qv-skill-now">
+      <span class="qv-skill-key big ${nowSkill}">${nowSkill}</span>
+      <div>
+        <strong>${live ? `Nível ${currentLevel}: upe ${nowSkill}` : `Comece upando ${nowSkill}`}</strong>
+        <small>${nextSkill ? `Depois, no nível ${currentLevel + 1}: ${nextSkill}` : ''}${priorityText ? `${nextSkill ? ' • ' : ''}Prioridade ${priorityText}` : ''}</small>
+      </div>
+    </div>
+  `;
+
+  const levelsRow = order
+    .map((_, i) => `<span class="qv-lvl ${live && i + 1 === currentLevel ? 'now' : ''}">${i + 1}</span>`)
+    .join('');
+  const rows = keys
+    .map(
+      (k) => `
+      <span class="qv-row-key ${k}">${k}</span>
+      ${order
+        .map((sk, i) => {
+          const lvl = i + 1;
+          if (sk !== k) return `<span class="qv-cell ${live && lvl === currentLevel ? 'now-col' : ''}"></span>`;
+          const state = live ? (lvl < currentLevel ? 'done' : lvl === currentLevel ? 'now' : '') : '';
+          return `<span class="qv-cell on ${k} ${state}">${lvl}</span>`;
+        })
+        .join('')}
+    `
+    )
+    .join('');
+
+  return `
+    ${header}
+    <div class="qv-skill-grid" style="grid-template-columns: 28px repeat(${order.length}, minmax(0, 1fr));">
+      <span></span>${levelsRow}
+      ${rows}
+    </div>
   `;
 }
 
@@ -542,6 +605,8 @@ function renderActiveBuildOption() {
   }
 
   document.getElementById('guideCoreItems').innerHTML = renderCoreItemsWithComponentsHtml(b.items);
+  const guideQuick = document.getElementById('guideQuickItems');
+  if (guideQuick) guideQuick.innerHTML = renderQuickItemsHtml(b.items);
 
   // Também atualiza o painel da aba Partida Ao Vivo se estiver visível
   if (window.latestLiveStatusData) {
@@ -940,21 +1005,12 @@ function renderLiveInGameBuildPanel(data) {
   const skillPrioEl = document.getElementById('liveSkillPriorityText');
   if (skillPrioEl) skillPrioEl.textContent = guideToUse.skillPriority || 'Q > E > W';
 
+  // Visão rápida no topo: itens grandes na ordem de compra + grade de habilidades com o nível atual
+  const liveQuickItems = document.getElementById('liveQuickItems');
+  if (liveQuickItems) liveQuickItems.innerHTML = renderQuickItemsHtml(b.items, ownedIds);
   const liveSkillMatrix = document.getElementById('liveSkillMatrix');
   if (liveSkillMatrix) {
-    liveSkillMatrix.innerHTML = (guideToUse.skillOrder || [])
-      .map((sk, idx) => {
-        const lvl = idx + 1;
-        const isCurrentLvl = m && lvl === currentLevel;
-        const isPastLvl = m && lvl < currentLevel;
-        return `
-          <div class="skill-cell ${sk} ${isCurrentLvl ? 'current-live-lvl' : ''} ${isPastLvl ? 'past-live-lvl' : ''}" title="Nível ${lvl}: Upar ${sk}">
-            <span class="lvl-num">${isCurrentLvl ? `Nv.${lvl} AGORA` : lvl}</span>
-            <span class="key-letter">${sk}</span>
-          </div>
-        `;
-      })
-      .join('');
+    liveSkillMatrix.innerHTML = renderSkillGridHtml(guideToUse.skillOrder, m ? currentLevel : null, guideToUse.skillPriority);
   }
 
   // Runas & Feitiços compactos
