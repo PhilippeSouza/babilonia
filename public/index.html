@@ -741,9 +741,27 @@
             </div>
             <div class="overlay-card" data-overlay="skillOrder">
               <div class="overlay-art">⬆️ Q W E</div>
-              <h3>Ordem de habilidades recomendada</h3>
-              <p>A cada nível, mostra qual habilidade subir segundo a build do seu campeão.</p>
+              <h3>Ordem de habilidades (por cima do jogo)</h3>
+              <p>Mostra por cima do LoL, em letra grande, qual habilidade upar. Fica laranja com "UPE AGORA" quando você tem ponto sobrando.</p>
               <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card" data-overlay="nextItem">
+              <div class="overlay-art">🛒 ➜</div>
+              <h3>Próximo item (por cima do jogo)</h3>
+              <p>Mostra por cima do LoL o ícone e o nome do próximo item a comprar, o custo e o seu ouro. Fica verde quando dá para comprar.</p>
+              <button class="overlay-toggle">Ligado</button>
+            </div>
+            <div class="overlay-card overlay-place-card">
+              <div class="overlay-art">🖥️ 📍</div>
+              <h3>Posição na tela do jogo</h3>
+              <p>Onde a janela do próximo item e da habilidade aparece. Ela não recebe cliques: o mouse passa direto para o jogo.</p>
+              <select id="overlayCornerSelect" class="bb-select-sm">
+                <option value="right">Lado direito (meio)</option>
+                <option value="top-right">Canto superior direito</option>
+                <option value="left">Lado esquerdo (meio)</option>
+                <option value="top-left">Canto superior esquerdo</option>
+              </select>
+              <p id="overlayWindowModeNote" class="overlay-mode-note hidden"></p>
             </div>
             <div class="overlay-card" data-overlay="trinket">
               <div class="overlay-art">👁️</div>
@@ -767,12 +785,6 @@
               <div class="overlay-art">⚡ R</div>
               <h3>Timers de ultimate</h3>
               <p>O jogo não informa a recarga da ultimate dos outros jogadores, então ainda não dá para mostrar isso.</p>
-              <span class="soon-badge">Em breve</span>
-            </div>
-            <div class="overlay-card soon">
-              <div class="overlay-art">🖥️</div>
-              <h3>Desenho por cima do jogo</h3>
-              <p>Hoje as dicas aparecem na janela do Babilônia Buff (e na Mini Overlay). Mostrar por cima da tela do LoL precisa de uma janela especial no launcher.</p>
               <span class="soon-badge">Em breve</span>
             </div>
           </div>

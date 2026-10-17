@@ -59,6 +59,7 @@
 - `Babilônia Buff.exe` — Executável nativo Windows com ícone na Barra de Tarefas e Bandeja do Sistema.
 - `Babilônia Buff-icone.ico` — Ícone multi-resolução (`16x16` a `256x256`) da arte realista traçada.
 - `src/BabiloniaLauncher.cs` — Código-fonte C# do executável `Babilônia Buff.exe`.
+- `src/BabiloniaOverlay.cs` — Janela por cima do jogo (próximo item e habilidade a upar), aberta pelo launcher com `--overlay`.
 - `server.js` — Servidor HTTP Node.js (porta `3000`, zero dependências externas no `package.json`).
 - `src/lcu.js` — Conector automático LCU (`lockfile` + processo `LeagueClientUx.exe`), leitura de perfil/elo, champ select, bans, lane automática e exportação de runas (`/lol-perks/v1/pages`).
 - `src/liveClient.js` — Leitor da partida ao vivo na porta `2999`.

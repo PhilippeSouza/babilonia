@@ -1586,8 +1586,35 @@ async function loadOverlays() {
     const res = await fetch('/api/overlays');
     const data = await res.json();
     renderOverlayToggles(data.overlays || {});
+    renderOverlayPlacement(data);
   } catch (_) {}
 }
+
+// Posição da janela por cima do jogo e aviso de tela cheia (tela cheia esconde janelas por cima do LoL)
+function renderOverlayPlacement(data) {
+  const select = document.getElementById('overlayCornerSelect');
+  if (select && data.overlayCorner) select.value = data.overlayCorner;
+  const note = document.getElementById('overlayWindowModeNote');
+  if (!note) return;
+  if (data.windowMode === 0) {
+    note.textContent = '⚠️ Seu LoL está em Tela Cheia, e nada consegue aparecer por cima dele. No jogo, vá em Configurações > Vídeo > Modo da janela e escolha "Sem bordas".';
+    note.classList.remove('hidden');
+  } else if (data.windowMode === 1 || data.windowMode === 2) {
+    note.textContent = `✅ Seu LoL está em modo ${data.windowMode === 2 ? 'sem bordas' : 'janela'}: a janela aparece por cima do jogo.`;
+    note.classList.remove('hidden');
+  } else {
+    note.classList.add('hidden');
+  }
+}
+
+document.getElementById('overlayCornerSelect')?.addEventListener('change', async (ev) => {
+  const res = await fetch('/api/overlays', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ overlayCorner: ev.target.value })
+  });
+  renderOverlayPlacement(await res.json());
+});
 
 function renderOverlayToggles(state) {
   document.querySelectorAll('.overlay-card[data-overlay]').forEach((card) => {

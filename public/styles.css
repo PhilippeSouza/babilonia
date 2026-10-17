@@ -2820,3 +2820,16 @@ body {
   outline: 2px solid var(--bb-fg);
   transform: scale(1.12);
 }
+
+/* Posição da janela por cima do jogo (tela Overlays) */
+.overlay-place-card select {
+  margin-top: 8px;
+  width: 100%;
+}
+
+.overlay-mode-note {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--bb-fg);
+}

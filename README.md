@@ -41,7 +41,7 @@ Assistente em tempo real para **League of Legends** inspirado no **Blitz.gg**, c
    - O launcher abre o app e fecha sozinho. O servidor continua em segundo plano e encerra sozinho 5 minutos depois que você fecha a janela do app.
 4. Para recompilar o executável depois de mudar `src/BabiloniaLauncher.cs`, dê dois cliques em **`Recompilar-Launcher.bat`**, ou rode:
    ```powershell
-   & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:winexe /win32icon:"Babilônia Buff-icone.ico" /out:"Babilônia Buff.exe" /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll src\BabiloniaLauncher.cs
+   & "C:\Windows\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /codepage:65001 /target:winexe /win32icon:"Babilônia Buff-icone.ico" /out:"Babilônia Buff.exe" /r:System.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll src\BabiloniaLauncher.cs src\BabiloniaOverlay.cs
    ```
 
 ---

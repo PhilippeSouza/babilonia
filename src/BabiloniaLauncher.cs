@@ -424,6 +424,8 @@ namespace BabiloniaApp
         // Fecha o launcher depois de abrir o app, deixando o servidor rodando em segundo plano
         private void CloseLauncherKeepServer()
         {
+            // A janela por cima do jogo (próximo item e habilidade) roda num processo próprio
+            BabiloniaOverlayForm.StartDetached();
             statusTimer.Stop();
             if (trayIcon != null)
             {
@@ -562,8 +564,14 @@ namespace BabiloniaApp
         }
 
         [STAThread]
-        public static void Main()
+        public static void Main(string[] args)
         {
+            if (Array.IndexOf(args, "--overlay") >= 0)
+            {
+                BabiloniaOverlayForm.RunOverlay();
+                return;
+            }
+
             bool createdNew;
             using (Mutex mutex = new Mutex(true, "BabiloniaLoLCompanionMutex", out createdNew))
             {
